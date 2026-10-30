@@ -1,0 +1,31 @@
+{
+  "status": "OK",
+  "request_id": "fixture",
+  "parameters": {"query": "junior developer Costa Rica", "page": 1, "num_pages": 1, "country": "cr"},
+  "data": [
+    {
+      "job_id": "abc123==",
+      "employer_name": "Empresa Ficticia S.A.",
+      "job_title": "Junior Backend Developer",
+      "job_apply_link": "https://example.com/jobs/abc123",
+      "job_description": "Buscamos desarrollador junior con Java y Spring Boot.",
+      "job_is_remote": false,
+      "job_posted_at_timestamp": 1792000000,
+      "job_city": "Heredia",
+      "job_state": "Heredia Province",
+      "job_country": "CR"
+    },
+    {
+      "job_id": "def456==",
+      "employer_name": "Otra Empresa",
+      "job_title": "Practicante de Datos",
+      "job_apply_link": "https://example.com/jobs/def456",
+      "job_description": "Práctica profesional en ingeniería de datos.",
+      "job_is_remote": true,
+      "job_posted_at_timestamp": 1792100000,
+      "job_city": "San José",
+      "job_state": null,
+      "job_country": "CR"
+    }
+  ]
+}
