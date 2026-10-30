@@ -4,7 +4,7 @@ from datetime import datetime, timedelta
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
-from moneyplease.db.models import IngestRun, Job, Source
+from moneyplease.db.models import IngestRun, Job, MatchRun, Source
 
 
 @dataclass
@@ -47,7 +47,20 @@ def collect(session: Session, now: datetime) -> list[SourceStats]:
     return rows
 
 
-def render(rows: list[SourceStats]) -> str:
+@dataclass
+class MatchStatus:
+    last: MatchRun | None
+    sin_embedding: int
+
+
+def match_status(session: Session) -> MatchStatus:
+    last = session.scalars(select(MatchRun).order_by(MatchRun.iniciado_en.desc()).limit(1)).first()
+    pending = session.scalar(select(func.count()).select_from(Job)
+                             .where(Job.estado == "active", Job.embedding.is_(None)))
+    return MatchStatus(last, pending or 0)
+
+
+def render(rows: list[SourceStats], match: MatchStatus | None = None) -> str:
     header = f"{'fuente':<28}{'activas':>9}{'nuevas24h':>11}{'en CR':>7}  última corrida (UTC)"
     lines = [header, "-" * len(header)]
     for r in rows:
@@ -64,4 +77,14 @@ def render(rows: list[SourceStats]) -> str:
     if zero:
         lines.append("")
         lines.append("Fuentes con 0 ofertas en sus 2 últimas corridas: " + ", ".join(zero))
+    if match is not None:
+        lines.append("")
+        if match.last is None:
+            lines.append("Matching: nunca ha corrido")
+        else:
+            r = match.last
+            lines.append(f"Matching {r.iniciado_en:%Y-%m-%d %H:%M} (UTC): candidatas={r.candidatas} "
+                         f"evaluadas={r.evaluadas} fallidas={r.fallidas}"
+                         + (" · cuota agotada" if r.cuota_agotada else ""))
+        lines.append(f"Ofertas activas sin embedding: {match.sin_embedding}")
     return "\n".join(lines)
