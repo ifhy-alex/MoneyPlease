@@ -15,7 +15,9 @@ CIUDADES = {
     "Alajuela": ["Coyol", "El Coyol", "Grecia"],
     "Cartago": ["Tres Ríos", "La Unión", "Paraíso"],
 }
-HIBRIDO = ["hybrid", "hibrido"]
+INEQUIVOCOS = {"Alajuela", "Heredia", "Guanacaste", "Puntarenas", "Escazú", "Curridabat", "Tibás",
+               "Montes de Oca", "Rohrmoser", "Ultrapark", "Coyol", "El Coyol", "Tres Ríos", "Belén", "Lagunilla"}
+HIBRIDO =["hybrid", "hibrido"]
 REMOTO = ["remote", "remoto", "teletrabajo", "work from home"]
 PRESENCIAL = ["on site", "onsite", "presencial", "in office"]
 WORKPLACE = {"remote": "remoto", "hybrid": "hibrido", "onsite": "presencial", "on-site": "presencial"}
@@ -63,9 +65,12 @@ def detect_modalidad(job: RawJob) -> str:
 
 def detect_ubicacion(text: str) -> tuple[str | None, str | None]:
     t = canonical(text)
+    # Nombres como "San José", "Santa Ana" o "Grecia" existen fuera de CR: solo cuentan con contexto de CR.
+    contexto_cr = _has(t, ["costa rica", "cr", *INEQUIVOCOS])
     for prov in PROVINCIAS:
-        if _has(t, [prov, *CIUDADES.get(prov, [])]):
-            return prov, "CR"
+        for name in [prov, *CIUDADES.get(prov, [])]:
+            if _has(t, [name]) and (contexto_cr or name in INEQUIVOCOS):
+                return prov, "CR"
     if _has(t, ["costa rica"]):
         return None, "CR"
     return None, None

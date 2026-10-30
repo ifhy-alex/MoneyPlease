@@ -150,12 +150,37 @@ def test_quota_exhausted_sets_until(session, ingest):
 
 
 def test_seen_by_second_source_resets(session, ingest):
+    gh = Fake("greenhouse:x", True, [[job("A"), job("B")], [job("B")]])
+    ingest(greenhouse__x=gh)
+    ingest(greenhouse__x=gh)
+    assert jobs(session)["A"].corridas_ausente == 1
     ingest(jsearch=Fake("jsearch", False, [[job("A")]]))
-    js_id = jobs(session)["A"].source_id
-    ingest(greenhouse__x=Fake("greenhouse:x", True, [[job("A")]]))
     a = jobs(session)["A"]
-    assert len(jobs(session)) == 1
-    assert a.source_id == js_id and a.corridas_ausente == 0
+    assert len(jobs(session)) == 2
+    assert a.source_id == source(session, "greenhouse:x").id and a.corridas_ausente == 0
+
+
+def test_complete_listing_takes_over_job(session, ingest):
+    ingest(jsearch=Fake("jsearch", False, [[job("A")]]))
+    gh = Fake("greenhouse:x", True, [[job("A")], [], []])
+    for _ in range(3):
+        ingest(greenhouse__x=gh)
+    a = jobs(session)["A"]
+    assert a.source_id == source(session, "greenhouse:x").id
+    assert a.estado == "expired"
+
+
+def test_connector_build_error_isolated(session, session_factory, settings):
+    def factory(src, *_):
+        if src.key == "greenhouse:x":
+            raise RuntimeError("token vencido")
+        return Fake("lever:y", True, [[job("C")]]) if src.key == "lever:y" else None
+
+    runs = run_ingest(session_factory, settings, connector_factory=factory, now=Clock())
+    assert set(jobs(session)) == {"C"}
+    failed = [r for r in runs if not r.ok]
+    assert len(failed) == 1 and "token vencido" in failed[0].error
+    assert failed[0].source_id == source(session, "greenhouse:x").id
 
 
 def test_config_updates_merged(session, ingest):
@@ -196,3 +221,13 @@ def test_build_connector_ats():
     src = Source(key="lever:y", nombre="Y", tipo="ats", config_json={"slug": "y"})
     c = build_connector(src, s, PoliteClient(), date.today())
     assert c.key == "lever:y" and c.company == "Y"
+
+
+def test_upsert_refreshes_derived_fields(session, ingest):
+    f = Fake("greenhouse:x", True, [[job("A", location="Heredia, Costa Rica")]] * 2)
+    ingest(greenhouse__x=f)
+    session.execute(Job.__table__.update().values(pais=None, provincia=None, modalidad="x"))
+    session.commit()
+    ingest(greenhouse__x=f)
+    a = jobs(session)["A"]
+    assert (a.pais, a.provincia, a.modalidad) == ("CR", "Heredia", "desconocida")

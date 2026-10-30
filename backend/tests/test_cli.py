@@ -23,3 +23,8 @@ def test_cli_ingest_calls_run(monkeypatch):
     monkeypatch.setattr(cli, "run_ingest", lambda factory, settings, only=None: calls.append((factory, only)) or [])
     cli.main(["ingest", "--source", "lever:x"])
     assert calls == [("factory", "lever:x")]
+
+
+def test_scheduler_runs_jobs_one_at_a_time():
+    sched = build_scheduler(Settings(_env_file=None))
+    assert sched._executors["default"]._pool._max_workers == 1

@@ -1,3 +1,4 @@
+from apscheduler.executors.pool import ThreadPoolExecutor
 from apscheduler.schedulers.blocking import BlockingScheduler
 from apscheduler.triggers.cron import CronTrigger
 
@@ -11,7 +12,8 @@ def ingest_job(**kwargs) -> None:
 
 
 def build_scheduler(settings: Settings) -> BlockingScheduler:
-    sched = BlockingScheduler(timezone=settings.timezone)
+    # Un solo hilo: las corridas (ingesta y jsearch) nunca se solapan.
+    sched = BlockingScheduler(timezone=settings.timezone, executors={"default": ThreadPoolExecutor(1)})
     common = {"coalesce": True, "max_instances": 1, "misfire_grace_time": 3600}
     sched.add_job(ingest_job, CronTrigger(hour="6,18", minute=0, timezone=settings.timezone),
                   id="ingesta", kwargs={"exclude": {"jsearch"}}, **common)

@@ -41,7 +41,12 @@ def _store(session: Session, source: Source, conn: Connector, jobs: list, ts: da
         stmt = stmt.on_conflict_do_update(
             index_elements=["hash"],
             set_={"ultima_vez_visto": ts, "raw_json": stmt.excluded.raw_json,
-                  "descripcion": stmt.excluded.descripcion, "corridas_ausente": 0, "estado": "active"},
+                  "descripcion": stmt.excluded.descripcion, "corridas_ausente": 0, "estado": "active",
+                  # Campos derivados: así una mejora del normalizador llega también a las ofertas ya guardadas.
+                  "modalidad": stmt.excluded.modalidad, "provincia": stmt.excluded.provincia,
+                  "pais": stmt.excluded.pais,
+                  # Una fuente de listado completo adopta la oferta para poder expirarla cuando desaparezca.
+                  **({"source_id": source.id} if conn.is_complete_listing else {})},
         ).returning(literal_column("xmax = 0"))
         if session.execute(stmt).scalar():
             nuevas += 1
@@ -55,6 +60,18 @@ def _store(session: Session, source: Source, conn: Connector, jobs: list, ts: da
     return nuevas
 
 
+def _failed_run(session_factory: sessionmaker, source_id: int, started: datetime, exc: Exception,
+                now: Callable[[], datetime]) -> IngestRun:
+    with session_factory() as s:
+        source = s.get(Source, source_id)
+        run = IngestRun(source_id=source_id, iniciado_en=started, ofertas_traidas=0, ofertas_nuevas=0)
+        _record_failure(s, source, run, exc)
+        run.terminado_en = now()
+        s.add(run)
+        s.commit()
+        return run
+
+
 def _run_source(session_factory: sessionmaker, source_id: int, conn: Connector,
                 now: Callable[[], datetime]) -> IngestRun:
     started = now()
@@ -63,14 +80,7 @@ def _run_source(session_factory: sessionmaker, source_id: int, conn: Connector,
         result = conn.fetch()
     except Exception as exc:  # un conector roto nunca detiene a los demás
         log.warning("Fuente %s: falló el fetch: %s", conn.key, exc)
-        with session_factory() as s:
-            source = s.get(Source, source_id)
-            run = IngestRun(source_id=source_id, iniciado_en=started, ofertas_traidas=0, ofertas_nuevas=0)
-            _record_failure(s, source, run, exc)
-            run.terminado_en = now()
-            s.add(run)
-            s.commit()
-            return run
+        return _failed_run(session_factory, source_id, started, exc, now)
     with session_factory() as s:
         source = s.get(Source, source_id)
         run = IngestRun(source_id=source_id, iniciado_en=started, ofertas_traidas=len(result.jobs))
@@ -82,7 +92,6 @@ def _run_source(session_factory: sessionmaker, source_id: int, conn: Connector,
         except Exception as exc:
             log.exception("Fuente %s: falló al guardar", conn.key)
             s.rollback()
-            source = s.get(Source, source_id)
             run.ok, run.ofertas_nuevas, run.error = False, 0, f"{type(exc).__name__}: {exc}"
         run.terminado_en = now()
         s.add(run)
@@ -103,7 +112,12 @@ def run_ingest(session_factory: sessionmaker, settings: Settings, *, only: str |
     for source in sources:
         if (only and source.key != only) or (exclude and source.key in exclude):
             continue
-        conn = connector_factory(source, settings, client, today)
+        try:
+            conn = connector_factory(source, settings, client, today)
+        except Exception as exc:  # p. ej. token de Gmail vencido
+            log.warning("Fuente %s: no se pudo crear el conector: %s", source.key, exc)
+            runs.append(_failed_run(session_factory, source.id, now(), exc, now))
+            continue
         if conn is None:
             continue
         runs.append(_run_source(session_factory, source.id, conn, now))

@@ -64,3 +64,19 @@ def test_normalize_naive_date_is_utc():
     j = raw()
     j.published_at = datetime(2026, 1, 1, 12)
     assert normalize(j)["publicado_en"] == datetime(2026, 1, 1, 12, tzinfo=UTC)
+
+
+@pytest.mark.parametrize("text", [
+    "San Jose, CA",
+    "Santa Ana, California",
+    "Santo Domingo, Dominican Republic",
+    "Atenas, Grecia",
+    "San Pedro Garza Garcia, Mexico",
+])
+def test_ambiguous_places_outside_cr(text):
+    assert detect_ubicacion(text) == (None, None)
+
+
+def test_ambiguous_place_with_cr_context():
+    assert detect_ubicacion("San Pedro, Costa Rica") == ("San José", "CR")
+    assert detect_ubicacion("Santo Domingo, Heredia") == ("Heredia", "CR")
