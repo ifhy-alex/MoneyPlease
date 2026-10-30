@@ -16,7 +16,7 @@ def reply(text):
 
 
 def provider():
-    return GeminiProvider("KEY", "gemini-3.5-flash-lite")
+    return GeminiProvider("KEY", "gemini-3.5-flash-lite", sleep=lambda s: None)
 
 
 @respx.mock
@@ -75,3 +75,59 @@ def test_fake_embedder_similarity():
     a, b, c = e.embed(["java spring boot", "spring boot backend", "ventas retail"])
     assert cosine(a, b) > cosine(a, c)
     assert len(a) == 384
+
+
+RETRY_INFO = {"error": {"code": 429, "details": [
+    {"@type": "type.googleapis.com/google.rpc.RetryInfo", "retryDelay": "30s"}]}}
+
+
+def paced(sleeps, rpm=10):
+    return GeminiProvider("KEY", "gemini-3.5-flash-lite", rpm=rpm, sleep=sleeps.append, clock=lambda: 100.0)
+
+
+@respx.mock
+def test_paces_requests():
+    respx.post(URL).respond(200, json=reply('{"score": 1}'))
+    sleeps = []
+    p = paced(sleeps)
+    p.generate_json("s", "u", SCHEMA)
+    p.generate_json("s", "u", SCHEMA)
+    assert sleeps == [6.0]
+
+
+@respx.mock
+def test_429_with_retry_delay_then_ok():
+    respx.post(URL).mock(side_effect=[httpx.Response(429, json=RETRY_INFO), httpx.Response(200, json=reply('{"a": 1}'))])
+    sleeps = []
+    assert paced(sleeps).generate_json("s", "u", SCHEMA) == {"a": 1}
+    assert 30.0 in sleeps
+
+
+@respx.mock
+def test_429_twice_is_quota():
+    route = respx.post(URL).respond(429, json=RETRY_INFO)
+    with pytest.raises(QuotaExceeded):
+        paced([]).generate_json("s", "u", SCHEMA)
+    assert route.call_count == 2
+
+
+@respx.mock
+def test_429_without_delay_is_quota_immediately():
+    route = respx.post(URL).respond(429, json={"error": {"code": 429}})
+    with pytest.raises(QuotaExceeded):
+        paced([]).generate_json("s", "u", SCHEMA)
+    assert route.call_count == 1
+
+
+@respx.mock
+def test_503_then_ok():
+    respx.post(URL).mock(side_effect=[httpx.Response(503), httpx.Response(200, json=reply('{"a": 1}'))])
+    assert paced([]).generate_json("s", "u", SCHEMA) == {"a": 1}
+
+
+@respx.mock
+def test_network_errors_exhausted():
+    route = respx.post(URL).mock(side_effect=httpx.ConnectError("caída"))
+    with pytest.raises(httpx.ConnectError):
+        paced([]).generate_json("s", "u", SCHEMA)
+    assert route.call_count == 3

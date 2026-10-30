@@ -2,8 +2,8 @@ import logging
 from collections.abc import Callable
 from datetime import UTC, datetime
 
-from sqlalchemy import exists, or_, select
-from sqlalchemy.orm import defer
+from sqlalchemy import exists, or_, select, text
+from sqlalchemy.orm import Session, defer
 from sqlalchemy.orm import sessionmaker
 
 from moneyplease.db.models import Job, Match, MatchRun
@@ -17,6 +17,7 @@ from moneyplease.profile.schema import Profile
 log = logging.getLogger(__name__)
 BATCH = 64
 PRESELECT = 2000
+MAX_CONSECUTIVE_ERRORS = 3
 
 
 def utcnow() -> datetime:
@@ -37,6 +38,19 @@ def _embed_missing(session_factory: sessionmaker, embedder: Embedder) -> int:
             total += len(batch)
 
 
+def _preselect(session: Session, profile_id: int, vector, remoto_abierto: bool) -> list[Job]:
+    # Con el índice HNSW, pgvector filtra después del escaneo y ef_search corta las filas: con filtros
+    # puede devolver muy pocas. Un escaneo exacto de unas miles de ofertas cuesta milisegundos.
+    session.execute(text("SET LOCAL enable_indexscan = off"))
+    already = exists().where(Match.profile_id == profile_id, Match.job_id == Job.id)
+    # Filtro barato en SQL antes de ordenar: si no, las ofertas parecidas pero de otros países
+    # llenan la ventana de preselección y tapan a las que sí aplican.
+    place = or_(Job.pais == "CR", Job.modalidad == "remoto") if remoto_abierto else Job.pais == "CR"
+    return list(session.scalars(select(Job).options(defer(Job.raw_json))
+                                .where(Job.estado == "active", Job.embedding.is_not(None), ~already, place)
+                                .order_by(Job.embedding.cosine_distance(vector)).limit(PRESELECT)).all())
+
+
 def run_match(session_factory: sessionmaker, embedder: Embedder, llm: LLMProvider, *, top_k: int = 40,
               max_evals: int = 50, now: Callable[[], datetime] = utcnow) -> MatchRun | None:
     with session_factory() as s:
@@ -52,17 +66,12 @@ def run_match(session_factory: sessionmaker, embedder: Embedder, llm: LLMProvide
     run.embebidas = _embed_missing(session_factory, embedder)
 
     with session_factory() as s:
-        already = exists().where(Match.profile_id == profile_id, Match.job_id == Job.id)
-        # Filtro barato en SQL antes de ordenar: si no, las ofertas parecidas pero de otros países
-        # llenan la ventana de preselección y tapan a las que sí aplican.
-        place = or_(Job.pais == "CR", Job.modalidad == "remoto") if profile.preferences.remoto_abierto             else Job.pais == "CR"
-        pre = s.scalars(select(Job).options(defer(Job.raw_json))
-                        .where(Job.estado == "active", Job.embedding.is_not(None), ~already, place)
-                        .order_by(Job.embedding.cosine_distance(vector)).limit(PRESELECT)).all()
+        pre = _preselect(s, profile_id, vector, profile.preferences.remoto_abierto)
         candidates = [j for j in pre if passes(j, profile.preferences)]
         run.candidatas = len(candidates)
         s.expunge_all()
 
+    consecutive_errors = 0
     for job in candidates[:top_k][:max_evals]:
         try:
             result = evaluate(llm, profile, job)
@@ -74,10 +83,16 @@ def run_match(session_factory: sessionmaker, embedder: Embedder, llm: LLMProvide
             log.warning("Oferta %s: %s", job.id, exc)
             run.fallidas += 1
             continue
-        except Exception:
+        except Exception as exc:
             log.exception("Oferta %s: error inesperado al evaluar", job.id)
             run.fallidas += 1
+            consecutive_errors += 1
+            if consecutive_errors >= MAX_CONSECUTIVE_ERRORS:
+                # Probablemente la red o el proveedor están caídos: no bloquear el worker con más timeouts.
+                run.error = f"corrida cortada tras {consecutive_errors} errores seguidos (red o proveedor): {exc}"
+                break
             continue
+        consecutive_errors = 0
         with session_factory() as s:
             s.add(to_row(profile_id, job.id, result, llm.model, now()))
             s.commit()

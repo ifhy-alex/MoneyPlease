@@ -21,6 +21,7 @@ class Settings(BaseSettings):
     private_dir: Path = Path("private")
     match_top_k: int = 40
     match_max_evals: int = 50
+    gemini_rpm: int = 10
 
 
 @lru_cache

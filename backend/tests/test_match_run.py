@@ -118,3 +118,39 @@ def test_no_candidates(session, session_factory, jobs, saved_profile):
     fake = FakeLLMProvider([])
     result = run(session_factory, fake)
     assert (result.candidatas, result.evaluadas) == (0, 0) and fake.calls == []
+
+
+def test_preselect_not_truncated_by_hnsw(session, saved_profile):
+    # Con el índice HNSW, pgvector filtra DESPUÉS del escaneo y ef_search limita las filas:
+    # forzamos ese plan y comprobamos que la preselección igual devuelve todas las que aplican.
+    from sqlalchemy import text
+
+    from moneyplease.matching.run import _preselect
+
+    src = Source(key="greenhouse:z", nombre="Z", tipo="ats", config_json={})
+    session.add(src)
+    session.flush()
+    emb = FakeEmbedder()
+    for i in range(60):
+        cr = i % 6 == 0
+        session.add(Job(source_id=src.id, titulo=f"Dev {i}", empresa="E", ubicacion="X", url=f"z{i}",
+                        hash=f"z{i}", raw_json={}, modalidad="hibrido" if cr else "presencial",
+                        pais="CR" if cr else None, embedding=emb.embed([f"dev {i}"])[0]))
+    session.commit()
+    session.execute(text("SET enable_seqscan = off"))
+    session.execute(text("SET hnsw.ef_search = 1"))
+    session.execute(text("SET enable_sort = off"))
+    rows = _preselect(session, saved_profile.id, saved_profile.embedding, remoto_abierto=True)
+    session.execute(text("RESET enable_seqscan"))
+    session.execute(text("RESET hnsw.ef_search"))
+    session.execute(text("RESET enable_sort"))
+    assert len(rows) == 10
+
+
+def test_aborts_after_consecutive_network_errors(session, session_factory, jobs, saved_profile):
+    import httpx
+
+    fake = FakeLLMProvider([httpx.ConnectError("caída")] * 5)
+    result = run(session_factory, fake)
+    assert result.fallidas == 3 and len(fake.calls) == 3
+    assert "red" in result.error

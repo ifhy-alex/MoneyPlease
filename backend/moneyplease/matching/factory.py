@@ -14,4 +14,4 @@ def build_embedder() -> E5Embedder:
 def build_llm(settings: Settings) -> GeminiProvider:
     if not settings.gemini_api_key:
         raise RuntimeError("Falta GEMINI_API_KEY en .env")
-    return GeminiProvider(settings.gemini_api_key, settings.gemini_model)
+    return GeminiProvider(settings.gemini_api_key, settings.gemini_model, rpm=settings.gemini_rpm)
