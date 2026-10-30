@@ -1,0 +1,29 @@
+From: LinkedIn Job Alerts <jobalerts-noreply@linkedin.com>
+To: alertas@example.com
+Subject: "junior developer": Empresa Uno - Desarrollador Junior y más
+Date: Thu, 29 Oct 2026 07:00:00 -0600
+MIME-Version: 1.0
+Content-Type: text/html; charset="utf-8"
+
+<html><body>
+<table role="presentation" width="100%"><tr><td>
+  <table role="presentation"><tr><td>
+    <a href="https://www.linkedin.com/comm/jobs/view/4100000001/?trackingId=abc%3D%3D&amp;refId=xyz&amp;lipi=urn"><img alt="Empresa Uno" src="https://media.licdn.com/logo1.png"></a>
+  </td><td>
+    <a href="https://www.linkedin.com/comm/jobs/view/4100000001/?trackingId=abc%3D%3D&amp;refId=xyz">Desarrollador Junior</a>
+    <p>Empresa Uno · Heredia, Heredia, Costa Rica</p>
+    <p>Postulación sencilla</p>
+  </td></tr></table>
+  <table role="presentation"><tr><td>
+    <a href="https://www.linkedin.com/comm/jobs/view/4100000002/?trackingId=def&amp;refId=uvw"><img alt="Empresa Dos" src="https://media.licdn.com/logo2.png"></a>
+  </td><td>
+    <a href="https://www.linkedin.com/comm/jobs/view/4100000002/?trackingId=def&amp;refId=uvw">Data Engineer Intern</a>
+    <p>Empresa Dos · San José, Costa Rica (Híbrido)</p>
+  </td></tr></table>
+  <table role="presentation"><tr><td>
+    <a href="https://www.linkedin.com/comm/jobs/view/4100000003/?trackingId=ghi">Backend Developer (Remote)</a>
+    <p>Empresa Tres · Costa Rica (Remoto)</p>
+  </td></tr></table>
+  <p><a href="https://www.linkedin.com/comm/jobs/search?keywords=junior">Ver todos los empleos</a></p>
+</td></tr></table>
+</body></html>

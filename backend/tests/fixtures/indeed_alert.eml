@@ -1,0 +1,25 @@
+From: Indeed <alert@indeed.com>
+To: alertas@example.com
+Subject: 2 nuevos empleos de practicante en Costa Rica
+Date: Thu, 29 Oct 2026 08:00:00 -0600
+MIME-Version: 1.0
+Content-Type: text/html; charset="utf-8"
+
+<html><body>
+<table width="100%"><tr><td>
+  <table><tr><td>
+    <a href="https://cr.indeed.com/rc/clk/dl?jk=1a2b3c4d5e6f7a8b&amp;from=ja&amp;qd=xyz&amp;rd=abc&amp;tk=tok">
+      <b>Practicante de Desarrollo de Software</b></a>
+  </td></tr>
+  <tr><td>Empresa Cuatro</td></tr>
+  <tr><td>Cartago, Cartago</td></tr>
+  <tr><td>Práctica profesional para estudiantes de informática...</td></tr></table>
+  <table><tr><td>
+    <a href="https://cr.indeed.com/rc/clk/dl?jk=9f8e7d6c5b4a3f2e&amp;from=ja&amp;tk=tok2">
+      <b>Analista de Datos Junior</b></a>
+  </td></tr>
+  <tr><td>Empresa Cinco</td></tr>
+  <tr><td>Escazú, San José</td></tr></table>
+  <p><a href="https://cr.indeed.com/jobs?q=practicante">Ver más empleos</a></p>
+</td></tr></table>
+</body></html>
