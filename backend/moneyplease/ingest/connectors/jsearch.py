@@ -7,9 +7,11 @@ from moneyplease.ingest.http import PoliteClient
 
 HOST = "jsearch.p.rapidapi.com"
 DEFAULT_QUERIES = [
-    "practica profesional informatica Costa Rica",
-    "junior developer Costa Rica",
-    "intern software developer remote",
+    "developer Costa Rica",
+    "practicante Costa Rica",
+    "desarrollador junior Costa Rica",
+    "software engineer Costa Rica",
+    "data analyst Costa Rica",
 ]
 
 
