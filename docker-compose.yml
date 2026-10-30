@@ -24,7 +24,7 @@ services:
     environment:
       DATABASE_URL: postgresql+psycopg://moneyplease:moneyplease@db:5432/moneyplease
     volumes:
-      - ./secrets:/app/secrets:ro
+      - ./backend/secrets:/app/secrets:ro
     depends_on:
       db:
         condition: service_healthy

@@ -1,0 +1,72 @@
+# Empresas cuyas ofertas se leen de su ATS público (Greenhouse o Lever).
+# Cada slug se verificó con un GET real al endpoint el 2026-10-30.
+# Para agregar una: confirmar que https://boards-api.greenhouse.io/v1/boards/<slug>/jobs
+# o https://api.lever.co/v0/postings/<slug>?mode=json responde 200.
+
+# Con ofertas ubicadas en Costa Rica al momento de verificar
+- nombre: Konrad Group
+  ats: greenhouse
+  slug: konradgroup
+  careers_url: https://www.konrad.com/careers
+  activa: true
+- nombre: Smartsheet
+  ats: greenhouse
+  slug: smartsheet
+  careers_url: https://www.smartsheet.com/careers
+  activa: true
+- nombre: Databricks
+  ats: greenhouse
+  slug: databricks
+  careers_url: https://www.databricks.com/company/careers
+  activa: true
+- nombre: Elastic
+  ats: greenhouse
+  slug: elastic
+  careers_url: https://jobs.elastic.co
+  activa: true
+- nombre: Toast
+  ats: greenhouse
+  slug: toast
+  careers_url: https://careers.toasttab.com
+  activa: true
+
+# Remoto o con presencia en Latinoamérica (sin ofertas en CR al verificar)
+- nombre: Wizeline
+  ats: greenhouse
+  slug: wizeline
+  careers_url: https://www.wizeline.com/careers
+  activa: true
+- nombre: Thoughtworks
+  ats: greenhouse
+  slug: thoughtworks
+  careers_url: https://www.thoughtworks.com/careers
+  activa: true
+- nombre: Santex
+  ats: greenhouse
+  slug: santex
+  careers_url: https://santexgroup.com/careers
+  activa: true
+- nombre: Teravision Technologies
+  ats: greenhouse
+  slug: teravision
+  careers_url: https://teravisiontech.com/careers
+  activa: true
+- nombre: Turing
+  ats: greenhouse
+  slug: turing
+  careers_url: https://www.turing.com/jobs
+  activa: true
+- nombre: GitLab
+  ats: greenhouse
+  slug: gitlab
+  careers_url: https://about.gitlab.com/jobs
+  activa: true
+- nombre: Toptal
+  ats: lever
+  slug: toptal
+  careers_url: https://www.toptal.com/careers
+  activa: true
+
+# Pendiente (ATS no soportado todavía: Workday, SmartRecruiters, BambooHR, Workable, etc.):
+# Intel, HP, HPE, Equifax, Akamai, ServiceNow, Synopsys, Experian, Fiserv, Western Union,
+# Gorilla Logic, Growth Acceleration Partners, Encora (Avantica), Pernix, Isthmus, Hulipractice, Akurey
