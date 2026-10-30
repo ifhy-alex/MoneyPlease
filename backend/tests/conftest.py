@@ -40,6 +40,6 @@ def session(session_factory):
     s = session_factory()
     yield s
     s.rollback()
-    s.execute(text("TRUNCATE ingest_runs, jobs, sources RESTART IDENTITY CASCADE"))
+    s.execute(text("TRUNCATE job_labels, matches, match_runs, profiles, ingest_runs, jobs, sources RESTART IDENTITY CASCADE"))
     s.commit()
     s.close()

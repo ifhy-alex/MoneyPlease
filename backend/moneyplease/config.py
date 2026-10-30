@@ -16,6 +16,11 @@ class Settings(BaseSettings):
     gmail_label: str = "Empleo/Alertas"
     companies_path: Path = Path("companies.yaml")
     timezone: str = "America/Costa_Rica"
+    gemini_api_key: str | None = None
+    gemini_model: str = "gemini-3.5-flash-lite"
+    private_dir: Path = Path("private")
+    match_top_k: int = 40
+    match_max_evals: int = 50
 
 
 @lru_cache

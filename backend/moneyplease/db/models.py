@@ -57,3 +57,51 @@ class IngestRun(Base):
     ofertas_traidas: Mapped[int] = mapped_column(Integer, default=0)
     ofertas_nuevas: Mapped[int] = mapped_column(Integer, default=0)
     error: Mapped[str | None] = mapped_column(Text)
+
+
+class Profile(Base):
+    __tablename__ = "profiles"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    version: Mapped[int] = mapped_column(Integer, unique=True)
+    cv_texto: Mapped[str] = mapped_column(Text, default="")
+    perfil_json: Mapped[dict] = mapped_column(JSONB)
+    embedding = mapped_column(Vector(384))
+    creado_en: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class Match(Base):
+    __tablename__ = "matches"
+
+    profile_id: Mapped[int] = mapped_column(ForeignKey("profiles.id"), primary_key=True)
+    job_id: Mapped[int] = mapped_column(ForeignKey("jobs.id"), primary_key=True)
+    score: Mapped[int] = mapped_column(Integer)
+    fit: Mapped[str] = mapped_column(Text)
+    fortalezas: Mapped[list] = mapped_column(JSONB)
+    brechas: Mapped[list] = mapped_column(JSONB)
+    resumen: Mapped[str] = mapped_column(Text)
+    modelo: Mapped[str] = mapped_column(Text)
+    evaluado_en: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+
+
+class MatchRun(Base):
+    __tablename__ = "match_runs"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    profile_id: Mapped[int] = mapped_column(ForeignKey("profiles.id"))
+    iniciado_en: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    terminado_en: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    embebidas: Mapped[int] = mapped_column(Integer, default=0)
+    candidatas: Mapped[int] = mapped_column(Integer, default=0)
+    evaluadas: Mapped[int] = mapped_column(Integer, default=0)
+    fallidas: Mapped[int] = mapped_column(Integer, default=0)
+    cuota_agotada: Mapped[bool] = mapped_column(Boolean, default=False)
+    error: Mapped[str | None] = mapped_column(Text)
+
+
+class JobLabel(Base):
+    __tablename__ = "job_labels"
+
+    job_id: Mapped[int] = mapped_column(ForeignKey("jobs.id"), primary_key=True)
+    etiqueta: Mapped[str] = mapped_column(Text)
+    creado_en: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
