@@ -95,6 +95,24 @@ def test_llm_error_counts_failed(session, session_factory, jobs, saved_profile):
     assert (result.fallidas, result.evaluadas) == (1, 4)
 
 
+def test_candidates_beyond_preselect_window(session, session_factory, saved_profile):
+    # Muchas ofertas fuera de CR, muy parecidas al perfil, no deben tapar a la que sí aplica.
+    src = Source(key="greenhouse:y", nombre="Y", tipo="ats", config_json={})
+    session.add(src)
+    session.flush()
+    similar = "Backend Developer Spring Boot Java Developer"
+    for i in range(450):
+        session.add(Job(source_id=src.id, titulo=similar, empresa="US Corp", ubicacion="New York, NY",
+                        modalidad="presencial", pais=None, url=f"us{i}", hash=f"us{i}", raw_json={},
+                        descripcion=similar))
+    session.add(Job(source_id=src.id, titulo="Analista QA", empresa="Tica", ubicacion="Heredia, Costa Rica",
+                    modalidad="hibrido", provincia="Heredia", pais="CR", url="cr", hash="cr", raw_json={},
+                    descripcion="pruebas manuales"))
+    session.commit()
+    result = run(session_factory, FakeLLMProvider([OK]))
+    assert (result.candidatas, result.evaluadas) == (1, 1)
+
+
 def test_no_candidates(session, session_factory, jobs, saved_profile):
     run(session_factory, FakeLLMProvider([OK] * 5))
     fake = FakeLLMProvider([])

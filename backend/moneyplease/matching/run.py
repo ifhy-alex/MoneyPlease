@@ -2,7 +2,8 @@ import logging
 from collections.abc import Callable
 from datetime import UTC, datetime
 
-from sqlalchemy import exists, select
+from sqlalchemy import exists, or_, select
+from sqlalchemy.orm import defer
 from sqlalchemy.orm import sessionmaker
 
 from moneyplease.db.models import Job, Match, MatchRun
@@ -15,7 +16,7 @@ from moneyplease.profile.schema import Profile
 
 log = logging.getLogger(__name__)
 BATCH = 64
-PRESELECT = 400
+PRESELECT = 2000
 
 
 def utcnow() -> datetime:
@@ -52,7 +53,11 @@ def run_match(session_factory: sessionmaker, embedder: Embedder, llm: LLMProvide
 
     with session_factory() as s:
         already = exists().where(Match.profile_id == profile_id, Match.job_id == Job.id)
-        pre = s.scalars(select(Job).where(Job.estado == "active", Job.embedding.is_not(None), ~already)
+        # Filtro barato en SQL antes de ordenar: si no, las ofertas parecidas pero de otros países
+        # llenan la ventana de preselección y tapan a las que sí aplican.
+        place = or_(Job.pais == "CR", Job.modalidad == "remoto") if profile.preferences.remoto_abierto             else Job.pais == "CR"
+        pre = s.scalars(select(Job).options(defer(Job.raw_json))
+                        .where(Job.estado == "active", Job.embedding.is_not(None), ~already, place)
                         .order_by(Job.embedding.cosine_distance(vector)).limit(PRESELECT)).all()
         candidates = [j for j in pre if passes(j, profile.preferences)]
         run.candidatas = len(candidates)

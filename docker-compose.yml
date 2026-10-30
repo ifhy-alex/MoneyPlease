@@ -25,6 +25,8 @@ services:
       DATABASE_URL: postgresql+psycopg://moneyplease:moneyplease@db:5432/moneyplease
     volumes:
       - ./backend/secrets:/app/secrets:ro
+      - ./backend/private:/app/private
+      - hf_cache:/root/.cache/huggingface
     depends_on:
       db:
         condition: service_healthy
@@ -33,3 +35,4 @@ services:
 
 volumes:
   pgdata:
+  hf_cache:

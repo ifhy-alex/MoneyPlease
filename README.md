@@ -2,7 +2,7 @@
 
 Buscador personal de prácticas y empleo. Recolecta ofertas de fuentes legales (páginas de carreras en Greenhouse y Lever, la API de JSearch y las alertas de LinkedIn e Indeed que llegan por correo), las normaliza y las guarda en PostgreSQL.
 
-Esta es la **Fase 1: ingesta y base de datos**. El perfil, el matching, el dashboard y el correo diario llegan en fases posteriores. El diseño está en [docs/superpowers/specs](docs/superpowers/specs).
+Incluye la **Fase 1** (ingesta y base de datos) y la **Fase 2** (perfil desde el CV y matching con Gemini). El dashboard y el correo diario llegan en la Fase 3. El diseño está en [docs/superpowers/specs](docs/superpowers/specs).
 
 ## Requisitos
 
@@ -66,3 +66,34 @@ uv run pytest
 ```
 
 Los tests de base de datos levantan un Postgres con pgvector usando testcontainers (requiere Docker). Para usar una base existente, definir `TEST_DATABASE_URL`. Ningún test usa la red.
+
+## Fase 2: perfil y matching
+
+Necesita `GEMINI_API_KEY` en `.env` (AI Studio, en un proyecto **sin facturación** para quedarse en el nivel gratuito). El CV y el perfil viven en `backend/private/`, que está en `.gitignore`.
+
+1. Copiar el CV a `backend/private/cv.pdf`.
+2. Generar el borrador del perfil. El texto del CV se redacta antes de enviarlo: sin nombre, correos, teléfonos ni enlaces. Lo que se envió queda en `backend/private/cv.txt`.
+   ```bash
+   docker compose exec worker python -m moneyplease profile from-cv private/cv.pdf
+   ```
+3. Revisar y editar `backend/private/profile.yaml`: skills, roles y sobre todo `preferences` (modalidad, provincias, palabras a excluir).
+4. Guardar una versión nueva. Cada versión se evalúa desde cero.
+   ```bash
+   docker compose exec worker python -m moneyplease profile save
+   ```
+5. El worker corre el matching después de cada ingesta (6:00 y 18:00), con hasta 50 evaluaciones por corrida. A mano:
+   ```bash
+   docker compose exec worker python -m moneyplease match --limit 10
+   docker compose exec worker python -m moneyplease top
+   ```
+
+### Punto de control
+
+```bash
+docker compose exec worker python -m moneyplease label <job_id> buena|regular|mala
+docker compose exec worker python -m moneyplease eval
+```
+
+`eval` dice cuántas del top 10 marcaste como buenas o regulares. La meta es al menos 5.
+
+La primera corrida calcula los embeddings de todas las ofertas en CPU y puede tardar bastante. Después solo procesa las nuevas. El modelo (`intfloat/multilingual-e5-small`) se descarga una sola vez en el volumen `hf_cache`.
