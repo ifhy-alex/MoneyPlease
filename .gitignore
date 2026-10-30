@@ -1,0 +1,7 @@
+.env
+secrets/
+token*.json
+__pycache__/
+.venv/
+.pytest_cache/
+.superpowers/

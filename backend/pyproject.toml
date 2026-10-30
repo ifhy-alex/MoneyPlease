@@ -1,0 +1,35 @@
+[project]
+name = "moneyplease"
+version = "0.1.0"
+description = "Buscador personal de prácticas y empleo"
+requires-python = ">=3.12"
+dependencies = [
+    "alembic>=1.20.1",
+    "apscheduler>=3,<4",
+    "beautifulsoup4>=4.15.0",
+    "google-api-python-client>=2.201.0",
+    "google-auth-oauthlib>=1.5.0",
+    "httpx>=0.28.1",
+    "pgvector>=0.5.1",
+    "psycopg[binary]>=3.3.6",
+    "pydantic-settings>=2.16.2",
+    "pyyaml>=6.0.3",
+    "sqlalchemy>=2.1.6",
+]
+
+[build-system]
+requires = ["uv_build>=0.13.0,<0.14.0"]
+build-backend = "uv_build"
+
+[tool.uv.build-backend]
+module-root = ""
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[dependency-groups]
+dev = [
+    "pytest>=9.2.0",
+    "respx>=0.23.1",
+    "testcontainers[postgres]>=4.15.0",
+]
