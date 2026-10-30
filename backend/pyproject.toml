@@ -15,7 +15,9 @@ dependencies = [
     "psycopg[binary]>=3.3.6",
     "pydantic-settings>=2.16.2",
     "pyyaml>=6.0.3",
+    "sentence-transformers>=6.2.0",
     "sqlalchemy>=2.1.6",
+    "torch>=2.15.0",
 ]
 
 [build-system]
@@ -27,6 +29,8 @@ module-root = ""
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+markers = ["slow: carga modelos reales"]
+addopts = "-m 'not slow'"
 
 [dependency-groups]
 dev = [
@@ -34,3 +38,11 @@ dev = [
     "respx>=0.23.1",
     "testcontainers[postgres]>=4.15.0",
 ]
+
+[[tool.uv.index]]
+name = "pytorch-cpu"
+url = "https://download.pytorch.org/whl/cpu"
+explicit = true
+
+[tool.uv.sources]
+torch = { index = "pytorch-cpu" }
