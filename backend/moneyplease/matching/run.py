@@ -7,7 +7,9 @@ from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.orm import Session, defer, sessionmaker
 
 from moneyplease.db.models import Job, Match, MatchFailure, MatchRun
+from moneyplease.eval import top_matches
 from moneyplease.matching.embed import Embedder, job_text
+from moneyplease.matching.examples import Ejemplo, select_examples
 from moneyplease.matching.filters import passes
 from moneyplease.matching.llm import LLMError, LLMProvider, QuotaExceeded
 from moneyplease.matching.score import evaluate, to_row
@@ -19,6 +21,7 @@ BATCH = 64
 PRESELECT = 2000
 MAX_CONSECUTIVE_ERRORS = 3
 MAX_FAILURES_PER_JOB = 3
+MAX_REEVALUATIONS = 10
 
 
 def utcnow() -> datetime:
@@ -75,15 +78,18 @@ def _record_failure(session_factory: sessionmaker, profile_id: int, job_id: int,
 
 
 def _evaluate_candidates(session_factory: sessionmaker, llm: LLMProvider, profile: Profile, profile_id: int,
-                         candidates: list[Job], run: MatchRun, now: Callable[[], datetime]) -> None:
+                         candidates: list[Job], run: MatchRun, now: Callable[[], datetime],
+                         ejemplos: list[Ejemplo] | None = None, ejemplos_hash: str | None = None,
+                         reevaluation: bool = False) -> bool:
+    """Evalúa en orden; devuelve False si la corrida debe cortarse (cuota o errores seguidos)."""
     consecutive_errors = 0
     for job in candidates:
         try:
-            result = evaluate(llm, profile, job)
+            result = evaluate(llm, profile, job, ejemplos)
         except QuotaExceeded:
             log.warning("Cuota del LLM agotada; lo pendiente se evalúa en la próxima corrida")
             run.cuota_agotada = True
-            return
+            return False
         except LLMError as exc:
             # El proveedor respondió (aunque mal): no cuenta como caída de red.
             log.warning("Oferta %s: %s", job.id, exc)
@@ -99,13 +105,28 @@ def _evaluate_candidates(session_factory: sessionmaker, llm: LLMProvider, profil
             if consecutive_errors >= MAX_CONSECUTIVE_ERRORS:
                 # Probablemente la red o el proveedor están caídos: no bloquear el worker con más timeouts.
                 run.error = f"corrida cortada tras {consecutive_errors} errores seguidos (red o proveedor): {exc}"
-                return
+                return False
             continue
         consecutive_errors = 0
         with session_factory() as s:
-            s.add(to_row(profile_id, job.id, result, llm.model, now()))
+            s.merge(to_row(profile_id, job.id, result, llm.model, now(), ejemplos_hash))
             s.commit()
-        run.evaluadas += 1
+        if reevaluation:
+            run.reevaluadas += 1
+        else:
+            run.evaluadas += 1
+    return True
+
+
+def _stale_top(session_factory: sessionmaker, profile_id: int, ejemplos: list[Ejemplo],
+               ejemplos_hash: str | None) -> list[Job]:
+    """Ofertas del top evaluadas con otro conjunto de ejemplos (sin contar las que son ejemplo)."""
+    example_ids = {e.job_id for e in ejemplos}
+    with session_factory() as s:
+        stale = [job for match, job in top_matches(s, profile_id, 10)
+                 if match.ejemplos_hash != ejemplos_hash and job.id not in example_ids]
+        s.expunge_all()
+    return stale[:MAX_REEVALUATIONS]
 
 
 def run_match(session_factory: sessionmaker, embedder: Embedder, llm: LLMProvider, *, top_k: int = 40,
@@ -120,6 +141,7 @@ def run_match(session_factory: sessionmaker, embedder: Embedder, llm: LLMProvide
 
     run = MatchRun(profile_id=profile_id, iniciado_en=now(), embebidas=0, candidatas=0, evaluadas=0,
                    fallidas=0, cuota_agotada=False)
+    run.reevaluadas = 0  # solo para el log y quien llama; no tiene columna
     try:
         run.embebidas = _embed_missing(session_factory, embedder)
         with session_factory() as s:
@@ -128,7 +150,15 @@ def run_match(session_factory: sessionmaker, embedder: Embedder, llm: LLMProvide
             s.expunge_all()
         # Un --limit mayor que top_k amplía la ventana en lugar de quedar topeado en silencio.
         window = max(top_k, max_evals)
-        _evaluate_candidates(session_factory, llm, profile, profile_id, candidates[:window][:max_evals], run, now)
+        with session_factory() as s:
+            ejemplos, ejemplos_hash = select_examples(s, profile_id)
+        ok = _evaluate_candidates(session_factory, llm, profile, profile_id, candidates[:window][:max_evals], run,
+                                  now, ejemplos, ejemplos_hash)
+        if ok:
+            # Si cambiaron las etiquetas, el top se vuelve a evaluar con los ejemplos nuevos.
+            stale = _stale_top(session_factory, profile_id, ejemplos, ejemplos_hash)
+            _evaluate_candidates(session_factory, llm, profile, profile_id, stale, run, now, ejemplos,
+                                 ejemplos_hash, reevaluation=True)
     except Exception as exc:  # la corrida siempre queda registrada, aunque falle a medio camino
         log.exception("Matching: la corrida falló")
         run.error = f"{type(exc).__name__}: {exc}"
@@ -137,6 +167,6 @@ def run_match(session_factory: sessionmaker, embedder: Embedder, llm: LLMProvide
         with session_factory() as s:
             s.add(run)
             s.commit()
-    log.info("Matching: embebidas=%d candidatas=%d evaluadas=%d fallidas=%d cuota_agotada=%s",
-             run.embebidas, run.candidatas, run.evaluadas, run.fallidas, run.cuota_agotada)
+    log.info("Matching: embebidas=%d candidatas=%d evaluadas=%d reevaluadas=%d fallidas=%d cuota_agotada=%s",
+             run.embebidas, run.candidatas, run.evaluadas, run.reevaluadas, run.fallidas, run.cuota_agotada)
     return run

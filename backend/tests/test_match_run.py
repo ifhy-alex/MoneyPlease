@@ -215,3 +215,60 @@ def test_new_profile_retries_failed_jobs(session, session_factory, jobs, saved_p
         run(session_factory, llm)
     store.save(session, profile(), "cv", FakeEmbedder())
     assert run(session_factory, SelectiveLLM("nada")).evaluadas == 5
+
+
+@pytest.fixture
+def ten_jobs(session):
+    src = Source(key="greenhouse:t", nombre="T", tipo="ats", config_json={})
+    session.add(src)
+    session.flush()
+    for i in range(10):
+        session.add(Job(source_id=src.id, titulo=f"Developer {i}", empresa="ACME", ubicacion="Heredia, Costa Rica",
+                        modalidad="hibrido", provincia="Heredia", pais="CR", url=f"t{i}", hash=f"t{i}", raw_json={},
+                        descripcion="Java"))
+    session.commit()
+    return src
+
+
+def label_first_six(session):
+    from moneyplease.db.models import JobLabel
+
+    ids = session.scalars(select(Job.id).where(Job.titulo.like("Developer %")).order_by(Job.id)).all()[:6]
+    for i, job_id in enumerate(ids):
+        session.add(JobLabel(job_id=job_id, etiqueta="buena" if i % 2 == 0 else "mala"))
+    session.commit()
+    return set(ids)
+
+
+def test_reevaluates_top_when_hash_changes(session, session_factory, ten_jobs, saved_profile):
+    run(session_factory, FakeLLMProvider([OK] * 10))
+    examples = label_first_six(session)
+    fake = FakeLLMProvider([OK] * 10)
+    result = run(session_factory, fake)
+    assert result.reevaluadas == 4 and len(fake.calls) == 4
+    assert all("<preferencias_del_usuario>" in user for _, user, _ in fake.calls)
+    session.expire_all()
+    hashes = {m.job_id: m.ejemplos_hash for m in session.scalars(select(Match))}
+    assert all(hashes[i] is None for i in examples)
+    assert len({h for i, h in hashes.items() if i not in examples}) == 1 and None not in {
+        h for i, h in hashes.items() if i not in examples}
+
+
+def test_no_reevaluation_same_hash(session, session_factory, ten_jobs, saved_profile):
+    run(session_factory, FakeLLMProvider([OK] * 10))
+    label_first_six(session)
+    run(session_factory, FakeLLMProvider([OK] * 10))
+    fake = FakeLLMProvider([])
+    assert run(session_factory, fake).reevaluadas == 0 and fake.calls == []
+
+
+def test_new_offers_use_examples(session, session_factory, ten_jobs, saved_profile):
+    run(session_factory, FakeLLMProvider([OK] * 10))
+    label_first_six(session)
+    session.add(Job(source_id=ten_jobs.id, titulo="Nueva", empresa="ACME", ubicacion="Heredia, Costa Rica",
+                    modalidad="hibrido", provincia="Heredia", pais="CR", url="n", hash="n", raw_json={}, descripcion="Java"))
+    session.commit()
+    fake = FakeLLMProvider([OK] * 10)
+    run(session_factory, fake)
+    nueva = [user for _, user, _ in fake.calls if "Nueva" in user]
+    assert nueva and "<preferencias_del_usuario>" in nueva[0]
