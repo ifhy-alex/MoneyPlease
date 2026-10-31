@@ -231,3 +231,11 @@ def test_upsert_refreshes_derived_fields(session, ingest):
     ingest(greenhouse__x=f)
     a = jobs(session)["A"]
     assert (a.pais, a.provincia, a.modalidad) == ("CR", "Heredia", "desconocida")
+
+
+def test_build_connector_workday():
+    s = Settings(_env_file=None)
+    src = Source(key="workday:transunion", nombre="TransUnion", tipo="ats",
+                 config_json={"slug": "transunion", "wd": "wd5", "site": "TransUnion"})
+    c = build_connector(src, s, PoliteClient(), date.today())
+    assert c.key == "workday:transunion" and c.api.endswith("/wday/cxs/transunion/TransUnion")

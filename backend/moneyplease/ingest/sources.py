@@ -37,6 +37,8 @@ def sync(session: Session, settings: Settings) -> None:
             session.add(src)
         src.nombre = c["nombre"]
         src.config_json = {**(src.config_json or {}), "slug": c["slug"], "careers_url": c.get("careers_url")}
+        if c["ats"] == "workday":  # Workday además necesita el servidor (wd1, wd5…) y el nombre del sitio
+            src.config_json = {**src.config_json, "wd": c["wd"], "site": c["site"]}
         _set_active(src, c.get("activa", True), DISABLED)
     for src in existing.values():
         if src.tipo == "ats" and src.key not in wanted:

@@ -7,6 +7,7 @@ from moneyplease.ingest.connectors.gmail_alerts import GmailAlertsConnector, bui
 from moneyplease.ingest.connectors.greenhouse import GreenhouseConnector
 from moneyplease.ingest.connectors.jsearch import JSearchConnector
 from moneyplease.ingest.connectors.lever import LeverConnector
+from moneyplease.ingest.connectors.workday import WorkdayConnector
 from moneyplease.ingest.http import PoliteClient
 
 ATS = {"greenhouse": GreenhouseConnector, "lever": LeverConnector}
@@ -19,6 +20,8 @@ def build_connector(source: Source, settings: Settings, client: PoliteClient, to
     if until and date.fromisoformat(until) > today:
         return None
     ats = source.key.partition(":")[0]
+    if ats == "workday":
+        return WorkdayConnector(config["slug"], config["wd"], config["site"], source.nombre, client)
     if ats in ATS:
         return ATS[ats](config["slug"], source.nombre, client)
     if source.key == "jsearch":

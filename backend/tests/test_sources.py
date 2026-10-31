@@ -78,3 +78,19 @@ def test_sync_reactivates_after_yaml_toggle(session, tmp_path):
     sync(session, settings(tmp_path))
     uno = by_key(session)["greenhouse:uno"]
     assert uno.activa is True and uno.desactivada_motivo is None
+
+
+def test_sync_workday_keeps_wd_and_site(session, tmp_path):
+    yaml_text = YAML + """
+- nombre: TransUnion
+  ats: workday
+  slug: transunion
+  wd: wd5
+  site: TransUnion
+  careers_url: https://transunion.wd5.myworkdayjobs.com/TransUnion
+  activa: true
+"""
+    sync(session, settings(tmp_path, yaml_text))
+    src = by_key(session)["workday:transunion"]
+    assert src.tipo == "ats"
+    assert src.config_json["wd"] == "wd5" and src.config_json["site"] == "TransUnion"
