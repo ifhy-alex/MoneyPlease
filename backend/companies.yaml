@@ -67,6 +67,73 @@
   careers_url: https://www.toptal.com/careers
   activa: true
 
-# Pendiente (ATS no soportado todavía: Workday, SmartRecruiters, BambooHR, Workable, etc.):
-# Intel, HP, HPE, Equifax, Akamai, ServiceNow, Synopsys, Experian, Fiserv, Western Union,
+# Workday: sitio público de empleo, solo ofertas en Costa Rica. robots.txt verificado el 2026-10-30.
+# Excluidas porque su robots.txt prohíbe el sitio de empleo: Equifax, Citi, Thermo Fisher.
+- nombre: HPE
+  ats: workday
+  slug: hpe
+  wd: wd5
+  site: "Jobsathpe"
+  careers_url: https://hpe.wd5.myworkdayjobs.com/Jobsathpe
+  activa: true
+- nombre: Abbott
+  ats: workday
+  slug: abbott
+  wd: wd5
+  site: "abbottcareers"
+  careers_url: https://abbott.wd5.myworkdayjobs.com/abbottcareers
+  activa: true
+- nombre: TransUnion
+  ats: workday
+  slug: transunion
+  wd: wd5
+  site: "TransUnion"
+  careers_url: https://transunion.wd5.myworkdayjobs.com/TransUnion
+  activa: true
+- nombre: Medtronic
+  ats: workday
+  slug: medtronic
+  wd: wd1
+  site: "MedtronicCareers"
+  careers_url: https://medtronic.wd1.myworkdayjobs.com/MedtronicCareers
+  activa: true
+- nombre: Pfizer
+  ats: workday
+  slug: pfizer
+  wd: wd1
+  site: "PfizerCareers"
+  careers_url: https://pfizer.wd1.myworkdayjobs.com/PfizerCareers
+  activa: true
+- nombre: Baxter
+  ats: workday
+  slug: baxter
+  wd: wd1
+  site: "baxter"
+  careers_url: https://baxter.wd1.myworkdayjobs.com/baxter
+  activa: true
+- nombre: HP
+  ats: workday
+  slug: hp
+  wd: wd5
+  site: "ExternalCareerSite"
+  careers_url: https://hp.wd5.myworkdayjobs.com/ExternalCareerSite
+  activa: true
+- nombre: Philips
+  ats: workday
+  slug: philips
+  wd: wd3
+  site: "jobs-and-careers"
+  careers_url: https://philips.wd3.myworkdayjobs.com/jobs-and-careers
+  activa: true
+- nombre: Procter & Gamble
+  ats: workday
+  slug: pg
+  wd: wd5
+  site: "1000"
+  careers_url: https://pg.wd5.myworkdayjobs.com/1000
+  activa: true
+
+# Workday sin ofertas en Costa Rica al verificar (agregar si cambian): Intel, Fiserv, Trimble, Broadcom, Gartner.
+# Pendiente (ATS no soportado todavía: SmartRecruiters, BambooHR, Workable, etc.):
+# Akamai, ServiceNow, Synopsys, Experian, Western Union,
 # Gorilla Logic, Growth Acceleration Partners, Encora (Avantica), Pernix, Isthmus, Hulipractice, Akurey
