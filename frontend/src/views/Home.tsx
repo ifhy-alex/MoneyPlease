@@ -1,5 +1,5 @@
 import { AnimatePresence } from 'framer-motion'
-import { useCallback, useState } from 'react'
+import { lazy, Suspense, useCallback, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { ApiError, errorMessage } from '../api/client'
 import { useCreateApplication, useFeedback, useInsights, useTop, useUpdateApplication, type FeedbackValue } from '../api/hooks'
@@ -8,6 +8,7 @@ import { StatusStrip } from '../components/StatusStrip'
 import { Toast, type ToastState } from '../components/Toast'
 
 const DAY = 24 * 3600 * 1000
+const Constellation = lazy(() => import('../art/Constellation'))
 
 export default function Home() {
   const top = useTop()
@@ -80,6 +81,7 @@ export default function Home() {
         <aside className="flex flex-col gap-4">
           <section className="rounded-[var(--radius-card)] border border-line bg-surface p-4">
             <h2 className="text-lg">Brechas de la semana</h2>
+            <Suspense fallback={null}><Constellation compact /></Suspense>
             {insights.data?.brechas_semana.length ? (
               <ol className="mt-2 flex flex-col gap-1 text-sm">
                 {insights.data.brechas_semana.map((g) => (
