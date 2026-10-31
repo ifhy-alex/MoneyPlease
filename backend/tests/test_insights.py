@@ -87,3 +87,10 @@ def test_flow_groups_by_connector(session, world):
     assert len(rows) == 12 * 2
     this_week = max(r["semana"] for r in rows)
     assert sum(r["nuevas"] for r in rows if r["semana"] == this_week and r["fuente"] == "workday") == 2
+
+
+def test_gaps_week_keeps_original_label_for_free_text(session, world):
+    prof, job, match = world
+    match(job("a"), brechas=["Exige 3 años de experiencia"])
+    match(job("b"), brechas=["Exige 3 años de experiencia"])
+    assert insights.gaps_week(session, prof.id, NOW) == [("Exige 3 años de experiencia", 2)]

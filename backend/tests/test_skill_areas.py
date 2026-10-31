@@ -28,3 +28,8 @@ def test_find_skill_longest_match():
 def test_find_skill_none():
     assert find_skill("") is None
     assert find_skill("Experiencia en ventas") is None
+
+
+def test_single_letter_skills_not_matched():
+    assert find_skill("Conocimiento de C++ y C") is None
+    assert "c" not in SKILL_AREA

@@ -1,0 +1,12 @@
+.git
+.superpowers
+.env
+**/__pycache__
+**/.pytest_cache
+backend/.venv
+backend/private
+backend/secrets
+backend/tests
+frontend/node_modules
+frontend/dist
+docs

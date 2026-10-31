@@ -22,12 +22,16 @@ def gaps_week(session: Session, profile_id: int, now: datetime, top: int = 8) ->
     rows = session.scalars(select(Match.brechas).where(Match.profile_id == profile_id,
                                                        Match.evaluado_en >= now - timedelta(days=7))).all()
     counts: Counter[str] = Counter()
+    originals: dict[str, Counter[str]] = defaultdict(Counter)
     for brechas in rows:
         for phrase in brechas or []:
             key = _skill_key(phrase)
             if key:
                 counts[key] += 1
-    return counts.most_common(top)
+                originals[key][phrase.strip()] += 1
+    # Las skills conocidas se muestran por su nombre; las frases libres, con su texto original más frecuente.
+    return [(key if find_skill(key) == key else originals[key].most_common(1)[0][0], n)
+            for key, n in counts.most_common(top)]
 
 
 def skills(session: Session, profile: Profile, profile_id: int, limit: int = 60) -> list[dict]:

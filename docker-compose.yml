@@ -17,7 +17,9 @@ services:
     restart: unless-stopped
 
   worker:
-    build: ./backend
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
     env_file:
       - path: .env
         required: false
@@ -32,6 +34,28 @@ services:
         condition: service_healthy
     restart: unless-stopped
     command: sh -c "alembic upgrade head && python -m moneyplease worker"
+
+  web:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      DATABASE_URL: postgresql+psycopg://moneyplease:moneyplease@db:5432/moneyplease
+      DEMO_DATABASE_URL: postgresql+psycopg://moneyplease:moneyplease@db:5432/moneyplease_demo
+      DEMO_MODE: ${DEMO_MODE:-false}
+    ports:
+      - "127.0.0.1:8000:8000"
+    volumes:
+      - ./backend/private:/app/private
+      - hf_cache:/root/.cache/huggingface
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+    command: sh -c "alembic upgrade head && uvicorn moneyplease.api.app:app --host 0.0.0.0 --port 8000"
 
 volumes:
   pgdata:

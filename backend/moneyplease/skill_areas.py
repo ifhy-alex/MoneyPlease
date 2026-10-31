@@ -7,7 +7,7 @@ AREAS = ("backend", "frontend", "datos", "cloud", "testing", "idiomas")
 
 _BY_AREA = {
     "backend": ["java", "spring", "spring boot", "spring cloud", "python", "django", "flask", "fastapi", "node",
-                "node.js", "express", ".net", "c#", "go", "golang", "php", "laravel", "ruby", "rails", "kotlin",
+                "node.js", "express", ".net", "go", "golang", "php", "laravel", "ruby", "rails", "kotlin",
                 "rest", "restful apis", "graphql", "microservices", "microservicios", "api", "apis", "hibernate",
                 "jpa", "kafka", "rabbitmq"],
     "frontend": ["react", "react native", "angular", "vue", "svelte", "next.js", "javascript", "typescript",
@@ -24,7 +24,9 @@ _BY_AREA = {
     "idiomas": ["ingles", "english", "espanol", "spanish", "frances", "portugues", "aleman"],
 }
 
-SKILL_AREA: dict[str, str] = {canonical(skill): area for area, skills in _BY_AREA.items() for skill in skills}
+# Nombres de una sola letra (por ejemplo "c#" → "c") coincidirían con cualquier letra suelta: se descartan.
+SKILL_AREA: dict[str, str] = {canonical(skill): area for area, skills in _BY_AREA.items() for skill in skills
+                              if len(canonical(skill)) >= 2}
 # Las más largas primero, para que "spring boot" gane sobre "spring".
 _BY_LENGTH = sorted((k for k in SKILL_AREA if k), key=len, reverse=True)
 
