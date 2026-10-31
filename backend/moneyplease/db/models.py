@@ -105,3 +105,13 @@ class JobLabel(Base):
     job_id: Mapped[int] = mapped_column(ForeignKey("jobs.id"), primary_key=True)
     etiqueta: Mapped[str] = mapped_column(Text)
     creado_en: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class MatchFailure(Base):
+    __tablename__ = "match_failures"
+
+    profile_id: Mapped[int] = mapped_column(ForeignKey("profiles.id"), primary_key=True)
+    job_id: Mapped[int] = mapped_column(ForeignKey("jobs.id"), primary_key=True)
+    intentos: Mapped[int] = mapped_column(Integer, default=0)
+    ultimo_error: Mapped[str | None] = mapped_column(Text)
+    actualizado_en: Mapped[datetime] = mapped_column(DateTime(timezone=True))

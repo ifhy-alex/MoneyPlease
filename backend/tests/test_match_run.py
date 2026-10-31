@@ -154,3 +154,64 @@ def test_aborts_after_consecutive_network_errors(session, session_factory, jobs,
     result = run(session_factory, fake)
     assert result.fallidas == 3 and len(fake.calls) == 3
     assert "red" in result.error
+
+
+class FailingEmbedder:
+    def embed(self, texts):
+        raise RuntimeError("descarga del modelo falló")
+
+
+class SelectiveLLM:
+    """Responde OK salvo para las ofertas cuyo título contiene `bad`."""
+
+    model = "fake"
+
+    def __init__(self, bad):
+        self.bad, self.calls = bad, 0
+
+    def generate_json(self, system, user, schema):
+        self.calls += 1
+        if self.bad in user:
+            raise LLMError("respuesta rota")
+        return OK
+
+
+def test_error_always_recorded(session, session_factory, jobs, saved_profile):
+    from moneyplease.db.models import MatchRun
+
+    result = run_match(session_factory, FailingEmbedder(), FakeLLMProvider([]), now=lambda: NOW)
+    assert "descarga del modelo" in result.error
+    session.expire_all()
+    assert session.scalars(select(MatchRun)).one().error == result.error
+
+
+def test_limit_above_top_k(session, session_factory, jobs, saved_profile):
+    assert run(session_factory, FakeLLMProvider([OK] * 5), top_k=2, max_evals=5).evaluadas == 5
+
+
+def test_llm_error_resets_network_counter(session, session_factory, jobs, saved_profile):
+    import httpx
+
+    net = httpx.ConnectError("caída")
+    fake = FakeLLMProvider([net, net, LLMError("a"), LLMError("b"), net, OK])
+    result = run(session_factory, fake)
+    assert result.error is None and result.evaluadas == 1 and result.fallidas == 4
+
+
+def test_repeated_failures_skipped_after_three(session, session_factory, jobs, saved_profile):
+    llm = SelectiveLLM("QA Engineer")
+    first = run(session_factory, llm)
+    assert (first.evaluadas, first.fallidas) == (4, 1)
+    for _ in range(2):
+        assert run(session_factory, llm).fallidas == 1
+    calls_before = llm.calls
+    fourth = run(session_factory, llm)
+    assert fourth.candidatas == 0 and llm.calls == calls_before
+
+
+def test_new_profile_retries_failed_jobs(session, session_factory, jobs, saved_profile):
+    llm = SelectiveLLM("QA Engineer")
+    for _ in range(3):
+        run(session_factory, llm)
+    store.save(session, profile(), "cv", FakeEmbedder())
+    assert run(session_factory, SelectiveLLM("nada")).evaluadas == 5
