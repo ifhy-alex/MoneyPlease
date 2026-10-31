@@ -65,7 +65,7 @@ export default function Profile() {
         <label className="cursor-pointer rounded-lg border border-line px-3 py-2 text-sm hover:bg-surface">
           {draft.isPending ? 'Generando borrador…' : '⇪ Subir CV (PDF)'}
           <input type="file" accept="application/pdf" aria-label="Subir CV" className="sr-only"
-                 disabled={draft.isPending} onChange={(e) => upload(e.target.files?.[0])} />
+                 disabled={draft.isPending} onChange={(e) => { upload(e.target.files?.[0]); e.target.value = '' }} />
         </label>
       </header>
 

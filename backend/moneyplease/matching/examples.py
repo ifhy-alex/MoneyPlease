@@ -35,5 +35,6 @@ def select_examples(session: Session, profile_id: int) -> tuple[list[Ejemplo], s
     chosen = buenas[:MAX_EACH] + malas[:MAX_EACH]
     ejemplos = [Ejemplo(r.titulo, r.empresa, (r.resumen or "")[:120], r.etiqueta == "buena", r.job_id)
                 for r in chosen]
-    key = ",".join(str(i) for i in sorted(r.job_id for r in chosen))
+    # El hash incluye la etiqueta: si cambias de opinión sobre una oferta, cambian los ejemplos.
+    key = ",".join(sorted(f"{r.job_id}:{r.etiqueta}" for r in chosen))
     return ejemplos, hashlib.sha256(key.encode()).hexdigest()[:16]

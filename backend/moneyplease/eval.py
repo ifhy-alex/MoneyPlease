@@ -1,6 +1,6 @@
 from dataclasses import dataclass, field
 
-from sqlalchemy import select
+from sqlalchemy import or_, select
 from sqlalchemy.orm import Session
 
 from moneyplease.db.models import Job, JobLabel, Match
@@ -9,9 +9,12 @@ ETIQUETAS = ("buena", "regular", "mala")
 
 
 def top_matches(session: Session, profile_id: int, n: int, fit: str | None = None,
-                min_score: int | None = None) -> list[tuple[Match, Job]]:
+                min_score: int | None = None, hide_rejected: bool = False) -> list[tuple[Match, Job]]:
     query = (select(Match, Job).join(Job, Job.id == Match.job_id)
              .where(Match.profile_id == profile_id, Job.estado == "active"))
+    if hide_rejected:  # lo mismo que muestra /api/top: sin las marcadas "no me interesa"
+        query = query.outerjoin(JobLabel, JobLabel.job_id == Job.id).where(
+            or_(JobLabel.etiqueta.is_(None), JobLabel.etiqueta != "mala"))
     query = query.where(Match.fit == fit) if fit else query.where(Match.fit != "no_aplica")
     if min_score is not None:
         query = query.where(Match.score >= min_score)

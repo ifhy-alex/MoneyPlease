@@ -44,3 +44,15 @@ def test_demo_api_flags(session, session_factory, tmp_path):
     resp = client.post("/api/profile/from-cv", files={"archivo": ("cv.pdf", b"%PDF-1.4", "application/pdf")})
     assert resp.status_code == 503
     assert not (tmp_path / "p").exists()
+
+
+def test_ensure_demo_refuses_real_database():
+    import pytest
+
+    from moneyplease.demo import check_demo_url
+    real = "postgresql+psycopg://u:p@127.0.0.1:5432/moneyplease"
+    with pytest.raises(ValueError):
+        check_demo_url(real, real)
+    with pytest.raises(ValueError):
+        check_demo_url("postgresql+psycopg://u:p@127.0.0.1:5432/otra", real)
+    check_demo_url("postgresql+psycopg://u:p@127.0.0.1:5432/moneyplease_demo", real)

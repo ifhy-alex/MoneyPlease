@@ -106,3 +106,23 @@ describe('Perfil', () => {
     expect(await screen.findByText(/todavía no tienes perfil/i)).toBeInTheDocument()
   })
 })
+
+describe('Perfil: reintentar el mismo CV', () => {
+  it('subir el mismo archivo dos veces envía dos peticiones', async () => {
+    withProfile()
+    let posts = 0
+    server.use(http.post('/api/profile/from-cv', () => {
+      posts += 1
+      return HttpResponse.json({ detail: 'Gemini respondió que se agotó la cuota gratuita' }, { status: 429 })
+    }))
+    renderWithProviders(<Profile />)
+    await screen.findByLabelText(/nivel de java/i)
+    const file = new File(['%PDF-1.4'], 'cv.pdf', { type: 'application/pdf' })
+    const input = screen.getByLabelText(/subir cv/i) as HTMLInputElement
+    await userEvent.upload(input, file)
+    await waitFor(() => expect(posts).toBe(1))
+    expect(input.value).toBe('')
+    await userEvent.upload(input, file)
+    await waitFor(() => expect(posts).toBe(2))
+  })
+})

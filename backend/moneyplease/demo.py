@@ -114,6 +114,15 @@ def seed(session_factory: sessionmaker, now: datetime, rng_seed: int = 42) -> di
     return counts
 
 
+def check_demo_url(demo_url: str, real_url: str) -> None:
+    """seed vacía la base entera: nunca debe apuntar a la base real."""
+    demo, real = make_url(demo_url), make_url(real_url)
+    same = (demo.host, demo.port, demo.database) == (real.host, real.port, real.database)
+    if same or not (demo.database or "").endswith("_demo"):
+        raise ValueError(f"DEMO_DATABASE_URL debe apuntar a una base distinta cuyo nombre termine en _demo "
+                         f"(recibido: {demo.database!r})")
+
+
 def ensure_database(url: str) -> None:
     """Crea la base demo si no existe y le aplica las migraciones."""
     from alembic import command

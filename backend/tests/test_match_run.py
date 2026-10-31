@@ -272,3 +272,20 @@ def test_new_offers_use_examples(session, session_factory, ten_jobs, saved_profi
     run(session_factory, fake)
     nueva = [user for _, user, _ in fake.calls if "Nueva" in user]
     assert nueva and "<preferencias_del_usuario>" in nueva[0]
+
+
+def test_reevaluation_skips_hidden_bad_labels(session, session_factory, ten_jobs, saved_profile):
+    from moneyplease.db.models import JobLabel
+
+    run(session_factory, FakeLLMProvider([OK] * 10))
+    ids = session.scalars(select(Job.id).where(Job.titulo.like("Developer %")).order_by(Job.id)).all()
+    # 2 buenas y 6 malas: solo 4 malas son ejemplos; las otras 2 están ocultas del top y no deben re-evaluarse.
+    for i, job_id in enumerate(ids[:8]):
+        session.add(JobLabel(job_id=job_id, etiqueta="buena" if i < 2 else "mala"))
+    session.commit()
+    fake = FakeLLMProvider([OK] * 10)
+    run(session_factory, fake)
+    evaluated = [user for _, user, _ in fake.calls]
+    hidden = {f"Developer {i}" for i in range(2, 8)}
+    assert not any(f"Título: {t}\n" in u for t in hidden for u in evaluated)
+    assert len(fake.calls) == 2  # Developer 8 y 9: lo que de verdad se ve en el top

@@ -72,8 +72,13 @@ def main(argv: list[str] | None = None) -> None:
             logging.info("Job %s programado: %s", job.id, job.trigger)
         sched.start()
     elif args.cmd == "demo":
-        from moneyplease.demo import ensure_database, seed
+        from moneyplease.demo import check_demo_url, ensure_database, seed
 
+        try:
+            check_demo_url(settings.demo_database_url, settings.database_url)
+        except ValueError as exc:
+            print(exc)
+            sys.exit(2)
         ensure_database(settings.demo_database_url)
         counts = seed(make_session(settings.demo_database_url), datetime.now(UTC))
         print("Base demo lista: " + ", ".join(f"{k}={v}" for k, v in counts.items()))

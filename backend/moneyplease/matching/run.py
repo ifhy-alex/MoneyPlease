@@ -123,7 +123,7 @@ def _stale_top(session_factory: sessionmaker, profile_id: int, ejemplos: list[Ej
     """Ofertas del top evaluadas con otro conjunto de ejemplos (sin contar las que son ejemplo)."""
     example_ids = {e.job_id for e in ejemplos}
     with session_factory() as s:
-        stale = [job for match, job in top_matches(s, profile_id, 10)
+        stale = [job for match, job in top_matches(s, profile_id, 10, hide_rejected=True)
                  if match.ejemplos_hash != ejemplos_hash and job.id not in example_ids]
         s.expunge_all()
     return stale[:MAX_REEVALUATIONS]

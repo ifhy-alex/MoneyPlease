@@ -62,3 +62,27 @@ def test_prompt_examples_section():
 def test_prompt_without_examples_unchanged():
     assert build_user_prompt(profile(), job(), []) == build_user_prompt(profile(), job())
     assert "<preferencias_del_usuario>" not in build_user_prompt(profile(), job())
+
+
+def test_hash_changes_when_a_label_flips(session, labeled):
+    prof, add = labeled
+    add(3, 3)
+    _, before = select_examples(session, prof.id)
+    label = session.query(JobLabel).filter_by(etiqueta="buena").first()
+    label.etiqueta = "mala"
+    session.commit()
+    add(1, 0)  # sigue habiendo al menos 2 de cada una
+    _, after = select_examples(session, prof.id)
+    assert before != after
+
+
+def test_hash_differs_for_same_ids_different_labels(session, labeled):
+    prof, add = labeled
+    add(3, 3)
+    ejemplos, before = select_examples(session, prof.id)
+    ids = {e.job_id for e in ejemplos}
+    for label in session.query(JobLabel).filter(JobLabel.job_id.in_(ids)).all():
+        label.etiqueta = "mala" if label.etiqueta == "buena" else "buena"
+    session.commit()
+    _, after = select_examples(session, prof.id)
+    assert before != after
