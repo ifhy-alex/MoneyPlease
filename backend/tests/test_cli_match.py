@@ -145,3 +145,28 @@ def test_stats_pending_without_profile(session):
     status = match_status(session)
     assert status.pendientes is None
     assert "pendientes" not in render(collect(session, NOW), status)
+
+
+@pytest.mark.parametrize("error,text", [
+    ("quota", "cuota"),
+    ("llm", "respuesta"),
+    ("net", "conectar"),
+])
+def test_from_cv_friendly_errors(monkeypatch, capsys, error, text):
+    import httpx
+
+    from moneyplease.matching.llm import LLMError, QuotaExceeded
+    from moneyplease.profile import store as store_mod
+
+    exc = {"quota": QuotaExceeded("429"), "llm": LLMError("basura"), "net": httpx.ConnectError("caída")}[error]
+
+    def boom(*a, **k):
+        raise exc
+
+    monkeypatch.setattr(cli, "get_settings", lambda: Settings(_env_file=None, gemini_api_key="k"))
+    monkeypatch.setattr(store_mod, "from_cv", boom)
+    with pytest.raises(SystemExit) as info:
+        cli.main(["profile", "from-cv", "x.pdf"])
+    assert info.value.code == 1
+    out = capsys.readouterr().out.lower()
+    assert text in out and "traceback" not in out

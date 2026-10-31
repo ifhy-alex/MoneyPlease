@@ -107,10 +107,23 @@ def _matching_command(args, settings) -> None:
                   f"fallidas={run.fallidas}" + (" · cuota agotada" if run.cuota_agotada else ""))
         return
     if args.cmd == "profile" and args.action == "from-cv":
+        import httpx
+
+        from moneyplease.matching.llm import LLMError, QuotaExceeded
+
         try:
             out = store.from_cv(Path(args.path), private, _require_llm(settings), args.force)
         except FileExistsError as exc:
             print(exc)
+            sys.exit(1)
+        except QuotaExceeded:
+            print("Gemini respondió que se agotó la cuota gratuita. Intenta de nuevo más tarde.")
+            sys.exit(1)
+        except LLMError as exc:
+            print(f"Gemini devolvió una respuesta que no se pudo usar como perfil: {exc}")
+            sys.exit(1)
+        except httpx.HTTPError as exc:
+            print(f"No se pudo conectar con Gemini ({type(exc).__name__}). Revisa la conexión y la key.")
             sys.exit(1)
         print(f"Borrador escrito en {out}. Revísalo y luego corre `profile save`.")
         return
