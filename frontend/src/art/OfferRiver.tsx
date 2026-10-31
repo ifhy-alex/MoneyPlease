@@ -12,9 +12,9 @@ export default function OfferRiver() {
   const series = useMemo(() => toSeries(flow.data ?? []), [flow.data])
   const layers = useMemo(() => {
     if (series.semanas.length < 2 || series.fuentes.length === 0) return []
-    const rows = series.matrix.map((r) => Object.fromEntries(r.map((v, i) => [i, v])))
-    const stacked = stack<Record<number, number>>()
-      .keys(series.fuentes.map((_, i) => i))
+    const rows = series.matrix.map((r) => Object.fromEntries(r.map((v, i) => [series.fuentes[i], v])))
+    const stacked = stack<Record<string, number>>()
+      .keys(series.fuentes)
       .offset(stackOffsetWiggle)
       .order(stackOrderInsideOut)(rows)
     const lo = Math.min(...stacked.flatMap((l) => l.map((d) => d[0])))
