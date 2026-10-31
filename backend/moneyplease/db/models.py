@@ -1,7 +1,7 @@
-from datetime import datetime
+from datetime import date, datetime
 
 from pgvector.sqlalchemy import Vector
-from sqlalchemy import Boolean, DateTime, ForeignKey, Integer, Text, func
+from sqlalchemy import Boolean, Date, DateTime, ForeignKey, Integer, Text, func
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
@@ -81,6 +81,7 @@ class Match(Base):
     brechas: Mapped[list] = mapped_column(JSONB)
     resumen: Mapped[str] = mapped_column(Text)
     modelo: Mapped[str] = mapped_column(Text)
+    ejemplos_hash: Mapped[str | None] = mapped_column(Text)
     evaluado_en: Mapped[datetime] = mapped_column(DateTime(timezone=True))
 
 
@@ -114,4 +115,19 @@ class MatchFailure(Base):
     job_id: Mapped[int] = mapped_column(ForeignKey("jobs.id"), primary_key=True)
     intentos: Mapped[int] = mapped_column(Integer, default=0)
     ultimo_error: Mapped[str | None] = mapped_column(Text)
+    actualizado_en: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+
+
+class Application(Base):
+    __tablename__ = "applications"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    job_id: Mapped[int] = mapped_column(ForeignKey("jobs.id"), unique=True)
+    estado: Mapped[str] = mapped_column(Text)
+    notas: Mapped[str] = mapped_column(Text, default="")
+    fecha_aplicacion: Mapped[date | None] = mapped_column(Date)
+    siguiente_paso: Mapped[str] = mapped_column(Text, default="")
+    estado_desde: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    recordatorio_hasta: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    creado_en: Mapped[datetime] = mapped_column(DateTime(timezone=True))
     actualizado_en: Mapped[datetime] = mapped_column(DateTime(timezone=True))

@@ -21,6 +21,9 @@ class Settings(BaseSettings):
     private_dir: Path = Path("private")
     match_top_k: int = 40
     match_max_evals: int = 50
+    followup_days: int = 10
+    demo_mode: bool = False
+    demo_database_url: str = "postgresql+psycopg://moneyplease:moneyplease@localhost:5432/moneyplease_demo"
     gemini_rpm: int = 10
 
 
