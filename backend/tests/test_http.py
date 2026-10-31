@@ -87,3 +87,32 @@ def test_robots_404_allows(client):
     no_robots(respx)
     respx.get("https://a.com/jobs/1").respond(200)
     assert client.get("https://a.com/jobs/1").status_code == 200
+
+
+@respx.mock
+def test_post_sends_json_and_user_agent(client):
+    route = respx.post("https://a.com/api").respond(200, json={"ok": True})
+    resp = client.post("https://a.com/api", json={"q": 1}, check_robots=False)
+    req = route.calls[0].request
+    assert resp.json() == {"ok": True}
+    assert req.headers["User-Agent"].startswith("MoneyPlease/0.1")
+    assert req.content == b'{"q":1}'
+
+
+@respx.mock
+def test_post_shares_rate_limit_with_get(client, waits):
+    respx.get("https://a.com/x").respond(200)
+    respx.post("https://a.com/api").respond(200)
+    client.get("https://a.com/x", check_robots=False)
+    client.post("https://a.com/api", json={}, check_robots=False)
+    assert len(waits) == 1
+
+
+@respx.mock
+def test_post_retries_5xx_and_404_is_source_gone(waits):
+    client = PoliteClient(sleep=waits.append, min_interval=0)
+    respx.post("https://a.com/api").mock(side_effect=[httpx.Response(503), httpx.Response(200, json={})])
+    assert client.post("https://a.com/api", json={}, check_robots=False).status_code == 200
+    respx.post("https://a.com/gone").respond(404)
+    with pytest.raises(SourceGone):
+        client.post("https://a.com/gone", json={}, check_robots=False)

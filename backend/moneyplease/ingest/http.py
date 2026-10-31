@@ -50,13 +50,25 @@ class PoliteClient:
 
     def get(self, url: str, *, params: dict | None = None, headers: dict | None = None,
             check_robots: bool = True) -> httpx.Response:
+        return self._request("GET", url, params=params, headers=headers, check_robots=check_robots)
+
+    def post(self, url: str, *, json: dict, headers: dict | None = None,
+             check_robots: bool = True) -> httpx.Response:
+        return self._request("POST", url, json=json, headers=headers, check_robots=check_robots)
+
+    def allowed(self, url: str) -> bool:
+        """Si robots.txt permite la URL (para chequear rutas que no se van a pedir directamente)."""
+        return self._allowed(url)
+
+    def _request(self, method: str, url: str, *, params: dict | None = None, json: dict | None = None,
+                 headers: dict | None = None, check_robots: bool = True) -> httpx.Response:
         if check_robots and not self._allowed(url):
             raise SourceGone(f"robots.txt prohíbe {url}")
         domain = urlsplit(url).netloc
         for attempt in range(self.retries + 1):
             self._throttle(domain)
             try:
-                resp = self._client.get(url, params=params, headers=headers)
+                resp = self._client.request(method, url, params=params, json=json, headers=headers)
             except (httpx.TimeoutException, httpx.NetworkError):
                 if attempt == self.retries:
                     raise
