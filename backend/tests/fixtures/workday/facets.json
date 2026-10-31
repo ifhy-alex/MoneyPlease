@@ -1,0 +1,587 @@
+{
+ "total": 247,
+ "jobPostings": [
+  {
+   "title": "Director, Global Indirect Tax",
+   "externalPath": "/job/Chicago-Illinois/Director--Global-Indirect-Tax_19042264",
+   "locationsText": "Chicago, Illinois",
+   "postedOn": "Posted 2 Days Ago",
+   "bulletFields": [
+    "19042264"
+   ]
+  }
+ ],
+ "facets": [
+  {
+   "facetParameter": "jobFamilyGroup",
+   "descriptor": "Job Category",
+   "values": [
+    {
+     "descriptor": "Information Technology Family Group",
+     "id": "d5a7b169652e015f9c4fb0be2b4bc1b7",
+     "count": 40
+    },
+    {
+     "descriptor": "Sales - Account Development Family Group",
+     "id": "8ea54f386b2001303e92908bea017911",
+     "count": 34
+    },
+    {
+     "descriptor": "Product Management & Development Family Group",
+     "id": "d5a7b169652e01d56c9af3be2b4bd1b7",
+     "count": 27
+    },
+    {
+     "descriptor": "Strategy and Planning Family Group",
+     "id": "d5a7b169652e01621e7fe3be2b4bcdb7",
+     "count": 20
+    },
+    {
+     "descriptor": "Analytics Family Group",
+     "id": "d5a7b169652e01849a1a85be2b4bb7b7",
+     "count": 19
+    },
+    {
+     "descriptor": "Accounting and Finance Family Group",
+     "id": "d5a7b169652e013605c673be2b4bb3b7",
+     "count": 18
+    },
+    {
+     "descriptor": "Client Operations Family Group",
+     "id": "8ea54f386b2001b8447f2670ea012511",
+     "count": 17
+    },
+    {
+     "descriptor": "Data Management Family Group",
+     "id": "8ea54f386b200139dee11483ea014d11",
+     "count": 12
+    },
+    {
+     "descriptor": "Legal and Regulatory Family Group",
+     "id": "d5a7b169652e01c395b6b8be2b4bc3b7",
+     "count": 12
+    },
+    {
+     "descriptor": "Sales Operations Family Group",
+     "id": "d5a7b169652e015b0cbddabe2b4bcbb7",
+     "count": 11
+    },
+    {
+     "descriptor": "Sales - Account Management Family Group",
+     "id": "8ea54f386b200150400fe8bcea01b611",
+     "count": 8
+    },
+    {
+     "descriptor": "Marketing Communications Family Group",
+     "id": "d5a7b169652e01e75b77c1be2b4bc5b7",
+     "count": 8
+    },
+    {
+     "descriptor": "Information Security Family Group",
+     "id": "d5a7b169652e015c49161dbf2b4bdbb7",
+     "count": 5
+    },
+    {
+     "descriptor": "Administrative Family Group",
+     "id": "d5a7b169652e01a07f8d7cbe2b4bb5b7",
+     "count": 5
+    },
+    {
+     "descriptor": "Project Management Family Group",
+     "id": "d5a7b169652e01bac419cabe2b4bc7b7",
+     "count": 4
+    },
+    {
+     "descriptor": "Technical Sales Family Group",
+     "id": "8ea54f386b2001e1f8910ee8ea01be11",
+     "count": 2
+    },
+    {
+     "descriptor": "Consumer Operations Family Group",
+     "id": "bf0158fd568d01c94446ad64d10b8b24",
+     "count": 1
+    },
+    {
+     "descriptor": "Sales - Sales Leadership Family Group",
+     "id": "8ea54f386b2001c3e21240d6ea01ba11",
+     "count": 1
+    },
+    {
+     "descriptor": "Sales - Market Development Family Group",
+     "id": "8ea54f386b20012d131451c9ea01b811",
+     "count": 1
+    },
+    {
+     "descriptor": "Human Resources Family Group",
+     "id": "d5a7b169652e013a1bbda7be2b4bbfb7",
+     "count": 1
+    },
+    {
+     "descriptor": "Facilities Family Group",
+     "id": "d5a7b169652e0106280b9fbe2b4bbdb7",
+     "count": 1
+    }
+   ]
+  },
+  {
+   "facetParameter": "workerSubType",
+   "descriptor": "Job Type",
+   "values": [
+    {
+     "descriptor": "Regular",
+     "id": "d5a7b169652e01d19307f5a09d4a5d0a",
+     "count": 238
+    },
+    {
+     "descriptor": "Fixed Term (Fixed Term)",
+     "id": "d5a7b169652e0169e4ba13a19d4a5f0a",
+     "count": 7
+    },
+    {
+     "descriptor": "Apprentice (Trainee)",
+     "id": "83846b2926f7015e327f5e8c62c17cc3",
+     "count": 1
+    },
+    {
+     "descriptor": "Temporary",
+     "id": "d5a7b169652e016d237b0aa19d4a5e0a",
+     "count": 1
+    }
+   ]
+  },
+  {
+   "facetParameter": "timeType",
+   "descriptor": "Time Type",
+   "values": [
+    {
+     "descriptor": "Full time",
+     "id": "6269e200d39c016fc4592e37bb486100",
+     "count": 245
+    },
+    {
+     "descriptor": "Part time",
+     "id": "6269e200d39c01547f482e37bb486000",
+     "count": 2
+    }
+   ]
+  },
+  {
+   "facetParameter": "locationMainGroup",
+   "values": [
+    {
+     "facetParameter": "locationCountry",
+     "descriptor": "Location Country",
+     "values": [
+      {
+       "descriptor": "Austria",
+       "id": "d004c0d1a6c84511ab048669fcdf9fd7",
+       "count": 1
+      },
+      {
+       "descriptor": "Brazil",
+       "id": "1a29bb1357b240ab99a2fa755cc87c0e",
+       "count": 5
+      },
+      {
+       "descriptor": "Canada",
+       "id": "a30a87ed25634629aa6c3958aa2b91ea",
+       "count": 15
+      },
+      {
+       "descriptor": "Colombia",
+       "id": "e8106cd6a3534f2dba6fdee2d41db89d",
+       "count": 22
+      },
+      {
+       "descriptor": "Costa Rica",
+       "id": "99abe7e6bb3f4c108aebebf01a369ec5",
+       "count": 12
+      },
+      {
+       "descriptor": "Dominican Republic",
+       "id": "cec6aab2cee74a53a21629cd61000ea5",
+       "count": 2
+      },
+      {
+       "descriptor": "Guatemala",
+       "id": "db3b4b80df0f4287b262e5564c10edfa",
+       "count": 1
+      },
+      {
+       "descriptor": "Honduras",
+       "id": "95d28f232bd24d82994625af5f82def9",
+       "count": 1
+      },
+      {
+       "descriptor": "Hong Kong",
+       "id": "d4afdeb461d446e4babd204bd102dba8",
+       "count": 7
+      },
+      {
+       "descriptor": "India",
+       "id": "c4f78be1a8f14da0ab49ce1162348a5e",
+       "count": 37
+      },
+      {
+       "descriptor": "Mexico",
+       "id": "e2adff9272454660ac4fdb56fc70bb51",
+       "count": 36
+      },
+      {
+       "descriptor": "Philippines",
+       "id": "e56f1daf83e04bacae794ba5c5593560",
+       "count": 7
+      },
+      {
+       "descriptor": "South Africa",
+       "id": "4db3c26940b944919b83612cc1193eed",
+       "count": 6
+      },
+      {
+       "descriptor": "Spain",
+       "id": "bd34c524a6a04ae6915f5d96fa086199",
+       "count": 1
+      },
+      {
+       "descriptor": "United Kingdom",
+       "id": "29247e57dbaf46fb855b224e03170bc7",
+       "count": 17
+      },
+      {
+       "descriptor": "United States of America",
+       "id": "bc33aa3152ec42d4995f4791a106ed09",
+       "count": 77
+      }
+     ]
+    },
+    {
+     "facetParameter": "locations",
+     "descriptor": "City",
+     "values": [
+      {
+       "descriptor": "Alpharetta, Georgia",
+       "id": "ba708e7451c41001066dcf8b72860000",
+       "count": 1
+      },
+      {
+       "descriptor": "Bengaluru",
+       "id": "bb2c621089ef017aad55996c0202cac7",
+       "count": 14
+      },
+      {
+       "descriptor": "Boca Raton, Florida",
+       "id": "ea613a0f5d8f01e0212fac8f93006fa6",
+       "count": 23
+      },
+      {
+       "descriptor": "Bogota",
+       "id": "d5a7b169652e01e13ed40748d34af928",
+       "count": 22
+      },
+      {
+       "descriptor": "Burlington, Canada",
+       "id": "a1e022d5d4750114e46b60bcd42e5432",
+       "count": 13
+      },
+      {
+       "descriptor": "Chennai",
+       "id": "d5a7b169652e010486756048d34a1729",
+       "count": 13
+      },
+      {
+       "descriptor": "Chicago, Illinois",
+       "id": "a1e022d5d47501856939aca8d42e4f32",
+       "count": 69
+      },
+      {
+       "descriptor": "Chicago - 555 West Adams St",
+       "id": "d5a7b169652e01c898c2ee46d34a9a28",
+       "count": 2
+      },
+      {
+       "descriptor": "Contractual Remote – UK",
+       "id": "b122acccbfcb01f7d028e9f79101bee3",
+       "count": 4
+      },
+      {
+       "descriptor": "Crum Lynne, Pennsylvania",
+       "id": "ea613a0f5d8f01a34f54f7b89300d4a6",
+       "count": 28
+      },
+      {
+       "descriptor": "D.F. Del. Miguel Hidalgo",
+       "id": "d5a7b169652e01950e94a145d34a2c28",
+       "count": 1
+      },
+      {
+       "descriptor": "GreenWood Village, Colorado",
+       "id": "ea613a0f5d8f0148fb8406e7930056a7",
+       "count": 2
+      },
+      {
+       "descriptor": "Guatemala",
+       "id": "d5a7b169652e017f63950846d34a4f28",
+       "count": 1
+      },
+      {
+       "descriptor": "Hong Kong",
+       "id": "d5a7b169652e01b90841ba48d34a3529",
+       "count": 7
+      },
+      {
+       "descriptor": "Hyderabad",
+       "id": "5a03d1a81e78014a47e5f452f3001594",
+       "count": 8
+      },
+      {
+       "descriptor": "Johannesburg",
+       "id": "d5a7b169652e01bf498a3645d34a0928",
+       "count": 6
+      },
+      {
+       "descriptor": "Lagunilla de Heredia",
+       "id": "c3420eacfa1b1001bb1cf79da4a70000",
+       "count": 12
+      },
+      {
+       "descriptor": "Leeds, United Kingdom",
+       "id": "28ff63a878e00162cdd8b67eb100aca4",
+       "count": 9
+      },
+      {
+       "descriptor": "London, United Kingdom",
+       "id": "22eb14ac872801011c42426397200000",
+       "count": 3
+      },
+      {
+       "descriptor": "London - 280 High Holborn",
+       "id": "47a60d481c4c01c984141e8b16bdb1c7",
+       "count": 2
+      },
+      {
+       "descriptor": "Madrid",
+       "id": "7b33ee03819e01b55bd627f10e01f2d6",
+       "count": 1
+      },
+      {
+       "descriptor": "Makati City",
+       "id": "d5a7b169652e01d6ff8cab48d34a3029",
+       "count": 7
+      },
+      {
+       "descriptor": "Mexico City, Mexico",
+       "id": "cf358f56984c10019ac1e8775e490000",
+       "count": 1
+      },
+      {
+       "descriptor": "Montreal",
+       "id": "ca92fbb714b001b1506817d3293a1799",
+       "count": 1
+      },
+      {
+       "descriptor": "Mumbai - INDAS",
+       "id": "26fa52ca26871000be78230eb5560000",
+       "count": 2
+      },
+      {
+       "descriptor": "Mumbai - One World Center",
+       "id": "d5a7b169652e01718dab6f48d34a1c29",
+       "count": 7
+      },
+      {
+       "descriptor": "New York, New York",
+       "id": "ea613a0f5d8f015b9213be129400d6a7",
+       "count": 8
+      },
+      {
+       "descriptor": "New York - 1155 Avenue",
+       "id": "294dd9274cd41000c1cfe26d75a60000",
+       "count": 1
+      },
+      {
+       "descriptor": "Pune",
+       "id": "4823a7cc4c44017387065b97bf000c63",
+       "count": 14
+      },
+      {
+       "descriptor": "Remote, United Kingdom",
+       "id": "ecddb8eb8cfd01011cf49664c7ef0000",
+       "count": 1
+      },
+      {
+       "descriptor": "Remote - Arizona",
+       "id": "8f016cc269b2018d7e5fbb7a3b0131a6",
+       "count": 2
+      },
+      {
+       "descriptor": "Remote - California",
+       "id": "8f016cc269b201ad5b45cf7a3b013ba6",
+       "count": 2
+      },
+      {
+       "descriptor": "Remote - Colorado",
+       "id": "8f016cc269b201815520d87a3b0140a6",
+       "count": 2
+      },
+      {
+       "descriptor": "Remote - Costa Rica",
+       "id": "8f016cc269b2019b11bab77c3b0149a7",
+       "count": 5
+      },
+      {
+       "descriptor": "Remote - Florida",
+       "id": "8f016cc269b201b74facfd7a3b0154a6",
+       "count": 1
+      },
+      {
+       "descriptor": "Remote - Illinois",
+       "id": "8f016cc269b201cd4a1e277b3b0168a6",
+       "count": 4
+      },
+      {
+       "descriptor": "Remote - Indiana",
+       "id": "8f016cc269b201a3ebd72f7b3b016da6",
+       "count": 2
+      },
+      {
+       "descriptor": "Remote - Iowa",
+       "id": "8f016cc269b201a59633397b3b0172a6",
+       "count": 1
+      },
+      {
+       "descriptor": "Remote - Kansas",
+       "id": "8f016cc269b201977ea0417b3b0177a6",
+       "count": 1
+      },
+      {
+       "descriptor": "Remote - Kentucky",
+       "id": "8f016cc269b201490cf8497b3b017ca6",
+       "count": 1
+      },
+      {
+       "descriptor": "Remote - Michigan",
+       "id": "8f016cc269b201fe1127757b3b0195a6",
+       "count": 2
+      },
+      {
+       "descriptor": "Remote - Missouri",
+       "id": "8f016cc269b2011277e0917b3b01a4a6",
+       "count": 1
+      },
+      {
+       "descriptor": "Remote - Nevada",
+       "id": "8f016cc269b201b06029ac7b3b01b3a6",
+       "count": 2
+      },
+      {
+       "descriptor": "Remote - New Mexico",
+       "id": "8f016cc269b2015646c0c77b3b01c2a6",
+       "count": 1
+      },
+      {
+       "descriptor": "Remote - New York",
+       "id": "8f016cc269b20134382fd17b3b01c7a6",
+       "count": 2
+      },
+      {
+       "descriptor": "Remote - North Carolina",
+       "id": "8f016cc269b2013ee0e6d97b3b01cca6",
+       "count": 1
+      },
+      {
+       "descriptor": "Remote - Ohio",
+       "id": "8f016cc269b2014eed8deb7b3b01d6a6",
+       "count": 1
+      },
+      {
+       "descriptor": "Remote - Ontario",
+       "id": "54c9c18980111001efb45e8d86250000",
+       "count": 1
+      },
+      {
+       "descriptor": "Remote - South Carolina",
+       "id": "8f016cc269b2012d91dd2c7c3b01f4a6",
+       "count": 1
+      },
+      {
+       "descriptor": "Remote - Tennessee",
+       "id": "8f016cc269b2014d19153e7c3b01fea6",
+       "count": 1
+      },
+      {
+       "descriptor": "Remote - US",
+       "id": "0adbba924d590107b2000e9c4f31a211",
+       "count": 3
+      },
+      {
+       "descriptor": "Remote - Utah",
+       "id": "8f016cc269b201aa09b94c7c3b0108a7",
+       "count": 1
+      },
+      {
+       "descriptor": "Remote - Virginia",
+       "id": "8f016cc269b2011c53765c7c3b0112a7",
+       "count": 1
+      },
+      {
+       "descriptor": "Remote - Washington",
+       "id": "8f016cc269b20192647c647c3b0117a7",
+       "count": 1
+      },
+      {
+       "descriptor": "Remote - Wisconsin",
+       "id": "8f016cc269b20174c982757c3b0121a7",
+       "count": 2
+      },
+      {
+       "descriptor": "Reston, Virginia",
+       "id": "cfa1aac8cf1701014ed69e59f00c0000",
+       "count": 35
+      },
+      {
+       "descriptor": "Salzburg",
+       "id": "e81542b3a21b10015a0a7a62bf6c0000",
+       "count": 1
+      },
+      {
+       "descriptor": "Santo Domingo",
+       "id": "d5a7b169652e011917e4db45d34a4028",
+       "count": 2
+      },
+      {
+       "descriptor": "São Paulo",
+       "id": "d5a7b169652e01b078629d48d34a2b29",
+       "count": 5
+      },
+      {
+       "descriptor": "Tegucigalpa",
+       "id": "d5a7b169652e01eaf23acc47d34ae528",
+       "count": 1
+      },
+      {
+       "descriptor": "Toronto",
+       "id": "d5a7b169652e01ab12dabc47d34ae028",
+       "count": 3
+      },
+      {
+       "descriptor": "TUM - D.F. Del. Miguel Hidalgo",
+       "id": "2fadb3c83c241001619db4676bc00000",
+       "count": 34
+      },
+      {
+       "descriptor": "White Plains",
+       "id": "7705c1f49be70101f0dc9e391b950000",
+       "count": 1
+      },
+      {
+       "descriptor": "White Plains, New York",
+       "id": "3bd728134ee40101f9816015afd80000",
+       "count": 9
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "userAuthenticated": false
+}

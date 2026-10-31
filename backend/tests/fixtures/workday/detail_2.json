@@ -1,0 +1,35 @@
+{
+ "jobPostingInfo": {
+  "id": "b49196f8a7381001abf8a80550fe0000",
+  "title": "Sr. FullStack Engineer",
+  "jobDescription": "<p><a href=\"https://www.transunion.com/privacy/global-job-applicant\" target=\"_blank\">TransUnion&#39;s Job Applicant Privacy Notice</a></p><p></p><p style=\"text-align:left !important\"><b>Team Overview</b></p>The Digital Business Profile team develops and enhances business identity and listing solutions that help deliver accurate, trusted, and actionable business information across digital ecosystems. The team partners closely with Product, Quality Assurance (QA), Operations, and Engineering teams to deliver scalable solutions that support customer decision-making and business growth. This role reports directly to the Sr. Manager, Software Development&amp;#xa;&amp;#xa;This is a remote position which may require occasional in-person attendance at work-related events at the discretion of management.<br /><p style=\"text-align:left !important\"><b>Role Overview And Core Responsibilities</b></p><div><p></p></div><div><div><p>The Sr. Full Stack Engineer designs, develops, and delivers scalable software solutions that support TransUnion&#39;s Digital Business Profile products and business data platforms. This role contributes to customer experience, operational excellence, platform reliability, and long-term product growth by partnering with cross-functional teams throughout the software development lifecycle.</p><ul><li><p>Design, develop, and maintain full-stack software solutions that support business data products and digital platform capabilities.</p></li><li><p>Partner with Produ",
+  "location": "Lagunilla de Heredia",
+  "additionalLocations": [
+   "Remote - Costa Rica"
+  ],
+  "postedOn": "Posted 15 Days Ago",
+  "startDate": "2026-10-15",
+  "timeType": "Full time",
+  "jobReqId": "19040972",
+  "jobPostingId": "Sr-FullStack-Engineer_19040972",
+  "jobPostingSiteId": "TransUnion",
+  "country": {
+   "descriptor": "Costa Rica",
+   "id": "99abe7e6bb3f4c108aebebf01a369ec5"
+  },
+  "canApply": true,
+  "posted": true,
+  "includeResumeParsing": true,
+  "jobRequisitionLocation": {
+   "descriptor": "Lagunilla de Heredia",
+   "country": {
+    "descriptor": "Costa Rica",
+    "id": "99abe7e6bb3f4c108aebebf01a369ec5",
+    "alpha2Code": "CR"
+   }
+  },
+  "externalUrl": "https://transunion.wd5.myworkdayjobs.com/TransUnion/job/Lagunilla-de-Heredia/Sr-FullStack-Engineer_19040972",
+  "questionnaireId": "62431f3e93341001193dd35e90990000"
+ },
+ "userAuthenticated": false
+}

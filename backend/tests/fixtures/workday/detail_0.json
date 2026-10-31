@@ -1,0 +1,33 @@
+{
+ "jobPostingInfo": {
+  "id": "35bfd735d8b01001fd7e5c5543e30000",
+  "title": "Sr Analyst, Data Performance",
+  "jobDescription": "<p><a href=\"https://www.transunion.com/privacy/global-job-applicant\" target=\"_blank\">TransUnion&#39;s Job Applicant Privacy Notice</a></p><p></p><p style=\"text-align:left !important\"><b>Team Overview</b></p>The Data Performance team is part of TransUnion’s Data Strategy Business Unit and focuses on continuously improving the company’s credit database and helping internal teams and external customers maximize the value of credit data. The team monitors, measures, and reports data quality throughout the data lifecycle, publishing trends and insights through data quality dashboards. It also provides data analysis, data-processing and rule-design solutions, data matching and linking analyses, and product consulting and engineering support for new and enhanced offerings. This role reports to the Manager II, Data Design and Analysis.&amp;#xa;&amp;#xa;This is a remote position which may require occasional in-person attendance at work-related events at the discretion of management.<br /><p style=\"text-align:left !important\"><b>Role Overview And Core Responsibilities</b></p><ul><li>Analyze complex datasets, interpret results using statistical techniques, and produce ongoing reports that provide clear and actionable insights.</li><li>Develop and implement databases, data-collection systems, analytical approaches, and other solutions that improve statistical efficiency and data quality.</li><li>Conduct detailed data-shift and score analyses for major data events that may affect consumer",
+  "location": "Lagunilla de Heredia",
+  "postedOn": "Posted 14 Days Ago",
+  "startDate": "2026-10-16",
+  "timeType": "Full time",
+  "jobReqId": "19042752",
+  "jobPostingId": "Sr-Analyst--Data-Performance_19042752",
+  "jobPostingSiteId": "TransUnion",
+  "country": {
+   "descriptor": "Costa Rica",
+   "id": "99abe7e6bb3f4c108aebebf01a369ec5"
+  },
+  "canApply": true,
+  "posted": true,
+  "includeResumeParsing": true,
+  "jobRequisitionLocation": {
+   "descriptor": "Lagunilla de Heredia",
+   "country": {
+    "descriptor": "Costa Rica",
+    "id": "99abe7e6bb3f4c108aebebf01a369ec5",
+    "alpha2Code": "CR"
+   }
+  },
+  "externalUrl": "https://transunion.wd5.myworkdayjobs.com/TransUnion/job/Lagunilla-de-Heredia/Sr-Analyst--Data-Performance_19042752",
+  "questionnaireId": "fdd816de3104100203d9cdf7d5d50000",
+  "secondaryQuestionnaireId": "fdd816de3104100203d9c625ade90000"
+ },
+ "userAuthenticated": false
+}

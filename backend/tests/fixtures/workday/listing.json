@@ -1,0 +1,34 @@
+{
+ "total": 3,
+ "jobPostings": [
+  {
+   "title": "Sr Analyst, Data Performance",
+   "externalPath": "/job/Lagunilla-de-Heredia/Sr-Analyst--Data-Performance_19042752",
+   "locationsText": "Lagunilla de Heredia",
+   "postedOn": "Posted 14 Days Ago",
+   "bulletFields": [
+    "19042752"
+   ]
+  },
+  {
+   "title": "Data Privacy Consultant",
+   "externalPath": "/job/Lagunilla-de-Heredia/Data-Privacy-Consultant_19042619",
+   "locationsText": "Lagunilla de Heredia",
+   "postedOn": "Posted 15 Days Ago",
+   "bulletFields": [
+    "19042619"
+   ]
+  },
+  {
+   "title": "Sr. FullStack Engineer",
+   "externalPath": "/job/Lagunilla-de-Heredia/Sr-FullStack-Engineer_19040972",
+   "locationsText": "2 Locations",
+   "postedOn": "Posted 15 Days Ago",
+   "bulletFields": [
+    "19040972"
+   ]
+  }
+ ],
+ "facets": [],
+ "userAuthenticated": false
+}
