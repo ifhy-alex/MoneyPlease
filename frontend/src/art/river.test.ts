@@ -16,3 +16,15 @@ describe('río de ofertas', () => {
     expect(toSeries([])).toEqual({ semanas: [], fuentes: [], matrix: [] })
   })
 })
+
+describe('río de ofertas con historia corta', () => {
+  it('recorta las semanas vacías del principio', () => {
+    const s = toSeries([
+      { semana: '2026-10-12', fuente: 'workday', nuevas: 0 },
+      { semana: '2026-10-19', fuente: 'workday', nuevas: 0 },
+      { semana: '2026-10-26', fuente: 'workday', nuevas: 9 },
+    ])
+    expect(s.semanas).toEqual(['2026-10-26'])
+    expect(s.matrix).toEqual([[9]])
+  })
+})
