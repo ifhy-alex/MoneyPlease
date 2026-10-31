@@ -5,7 +5,7 @@ from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from sqlalchemy.orm import Session, sessionmaker
 
-from moneyplease.api.routes import applications, jobs, profile, top
+from moneyplease.api.routes import applications, insights, jobs, profile, top
 from moneyplease.config import Settings, get_settings
 from moneyplease.db.session import make_session
 
@@ -19,7 +19,7 @@ def create_app(settings: Settings | None = None, session_factory: sessionmaker[S
     app.state.settings = settings
     app.state.session_factory = session_factory or make_session(
         settings.demo_database_url if settings.demo_mode else settings.database_url)
-    for module in (top, jobs, profile, applications):
+    for module in (top, jobs, profile, applications, insights):
         app.include_router(module.router, prefix="/api")
 
     @app.api_route("/api/{rest:path}", methods=["GET", "POST", "PUT", "PATCH", "DELETE"], include_in_schema=False)

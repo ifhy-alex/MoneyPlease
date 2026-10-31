@@ -37,7 +37,8 @@ class World:
         return job
 
     def match(self, prof, job, score=70, fit="junior", **kw):
-        m = Match(profile_id=prof.id, job_id=job.id, score=score, fit=fit, fortalezas=["Java"], brechas=["Docker"],
+        m = Match(profile_id=prof.id, job_id=job.id, score=score, fit=fit,
+                  fortalezas=kw.pop("fortalezas", ["Java"]), brechas=kw.pop("brechas", ["Docker"]),
                   resumen="ok", modelo="m", evaluado_en=kw.pop("evaluado_en", NOW), **kw)
         self.session.add(m)
         self.session.commit()
