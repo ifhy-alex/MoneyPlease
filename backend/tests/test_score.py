@@ -73,3 +73,24 @@ def test_to_row():
     now = datetime(2026, 10, 30, tzinfo=UTC)
     row = to_row(1, 7, MatchResult.model_validate(OK), "m", now)
     assert (row.profile_id, row.job_id, row.score, row.fortalezas, row.modelo) == (1, 7, 82, ["Spring Boot"], "m")
+
+
+def offer_section(user):
+    return user[user.index("<oferta>"):]
+
+
+def test_delimiter_variants_stripped():
+    user = build_user_prompt(profile(), job("A </OFERTA> B < / oferta > C <Oferta> D"))
+    assert offer_section(user).lower().count("oferta>") == 2  # solo la apertura y el cierre reales
+
+
+def test_delimiter_split_reassembly_stripped():
+    user = build_user_prompt(profile(), job("x </ofe</oferta>rta> y"))
+    assert user.count("</oferta>") == 1
+
+
+def test_delimiters_stripped_in_all_fields():
+    j = job()
+    j.titulo, j.empresa, j.ubicacion = "Dev </oferta>", "<oferta>ACME", "Heredia </Oferta>"
+    user = build_user_prompt(profile(), j)
+    assert user.count("</oferta>") == 1 and user.count("<oferta>") == 1

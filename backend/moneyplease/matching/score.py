@@ -1,4 +1,5 @@
 import json
+import re
 from datetime import datetime
 from typing import Annotated, Literal
 
@@ -10,6 +11,7 @@ from moneyplease.profile.schema import Profile
 
 Item = Annotated[str, StringConstraints(max_length=120)]
 MAX_DESCRIPTION = 6000
+DELIMITER = re.compile(r"<\s*/?\s*oferta\s*>", re.IGNORECASE)
 
 
 class MatchResult(BaseModel):
@@ -52,12 +54,20 @@ resumen: máximo 300 caracteres, en español.
 Responde solo con el JSON pedido."""
 
 
+def _clean(value: str | None) -> str:
+    """Quita cualquier variante de <oferta>/</oferta>, en bucle para que no se rearme al borrar."""
+    text, previous = value or "", None
+    while text != previous:
+        previous, text = text, DELIMITER.sub("", text)
+    return text
+
+
 def build_user_prompt(profile: Profile, job: Job) -> str:
-    description = (job.descripcion or "").replace("</oferta>", "").replace("<oferta>", "")[:MAX_DESCRIPTION]
+    description = _clean(job.descripcion)[:MAX_DESCRIPTION]
     return (
         f"<perfil>\n{json.dumps(profile.llm_view(), ensure_ascii=False)}\n</perfil>\n"
-        f"<oferta>\nTítulo: {job.titulo or ''}\nEmpresa: {job.empresa or ''}\n"
-        f"Ubicación: {job.ubicacion or ''} ({job.modalidad or 'desconocida'})\n"
+        f"<oferta>\nTítulo: {_clean(job.titulo)}\nEmpresa: {_clean(job.empresa)}\n"
+        f"Ubicación: {_clean(job.ubicacion)} ({job.modalidad or 'desconocida'})\n"
         f"Descripción:\n{description}\n</oferta>"
     )
 
