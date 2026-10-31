@@ -9,7 +9,7 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=REPO_ROOT / ".env", extra="ignore")
 
-    database_url: str = "postgresql+psycopg://moneyplease:moneyplease@localhost:5432/moneyplease"
+    database_url: str = "postgresql+psycopg://moneyplease:moneyplease@127.0.0.1:5432/moneyplease"
     jsearch_api_key: str | None = None
     gmail_credentials_path: Path = Path("secrets/gmail_credentials.json")
     gmail_token_path: Path = Path("secrets/gmail_token.json")
@@ -23,7 +23,7 @@ class Settings(BaseSettings):
     match_max_evals: int = 50
     followup_days: int = 10
     demo_mode: bool = False
-    demo_database_url: str = "postgresql+psycopg://moneyplease:moneyplease@localhost:5432/moneyplease_demo"
+    demo_database_url: str = "postgresql+psycopg://moneyplease:moneyplease@127.0.0.1:5432/moneyplease_demo"
     gemini_rpm: int = 10
 
 
