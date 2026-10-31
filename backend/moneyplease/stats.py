@@ -51,13 +51,24 @@ def collect(session: Session, now: datetime) -> list[SourceStats]:
 class MatchStatus:
     last: MatchRun | None
     sin_embedding: int
+    pendientes: int | None = None  # None: no hay perfil guardado
 
 
 def match_status(session: Session) -> MatchStatus:
+    from moneyplease.matching.run import pending_candidates
+    from moneyplease.profile import store
+    from moneyplease.profile.schema import Profile
+
     last = session.scalars(select(MatchRun).order_by(MatchRun.iniciado_en.desc()).limit(1)).first()
-    pending = session.scalar(select(func.count()).select_from(Job)
-                             .where(Job.estado == "active", Job.embedding.is_(None)))
-    return MatchStatus(last, pending or 0)
+    sin_embedding = session.scalar(select(func.count()).select_from(Job)
+                                   .where(Job.estado == "active", Job.embedding.is_(None)))
+    pendientes = None
+    profile = store.active(session)
+    if profile is not None:
+        prefs = Profile.model_validate(profile.perfil_json).preferences
+        pendientes = len(pending_candidates(session, profile.id, profile.embedding, prefs))
+        session.rollback()  # cierra la transacción que usó SET LOCAL
+    return MatchStatus(last, sin_embedding or 0, pendientes)
 
 
 def render(rows: list[SourceStats], match: MatchStatus | None = None) -> str:
@@ -87,4 +98,6 @@ def render(rows: list[SourceStats], match: MatchStatus | None = None) -> str:
                          f"evaluadas={r.evaluadas} fallidas={r.fallidas}"
                          + (" · cuota agotada" if r.cuota_agotada else ""))
         lines.append(f"Ofertas activas sin embedding: {match.sin_embedding}")
+        if match.pendientes is not None:
+            lines.append(f"Candidatas pendientes de evaluar: {match.pendientes}")
     return "\n".join(lines)

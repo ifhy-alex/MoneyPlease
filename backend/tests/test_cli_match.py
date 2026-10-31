@@ -125,3 +125,23 @@ def test_scheduler_skips_match_without_key(monkeypatch):
     monkeypatch.setattr(scheduler, "get_settings", lambda: Settings(_env_file=None, gemini_api_key=None))
     scheduler.ingest_job(exclude={"jsearch"})
     assert calls == []
+
+
+def test_stats_pending_candidates(session, setup):
+    prof, _ = setup
+    src = session.scalars(__import__("sqlalchemy").select(Source)).first()
+    emb = FakeEmbedder()
+    for i in range(2):
+        session.add(Job(source_id=src.id, titulo=f"Dev {i}", empresa="E", ubicacion="Heredia", modalidad="hibrido",
+                        provincia="Heredia", pais="CR", url=f"p{i}", hash=f"p{i}", raw_json={},
+                        embedding=emb.embed([f"dev {i}"])[0]))
+    session.commit()
+    status = match_status(session)
+    assert status.pendientes == 2
+    assert "Candidatas pendientes de evaluar: 2" in render(collect(session, NOW), status)
+
+
+def test_stats_pending_without_profile(session):
+    status = match_status(session)
+    assert status.pendientes is None
+    assert "pendientes" not in render(collect(session, NOW), status)
