@@ -32,6 +32,8 @@ def main(argv: list[str] | None = None) -> None:
     lab.add_argument("job_id", type=int)
     lab.add_argument("etiqueta", choices=["buena", "regular", "mala"])
     sub.add_parser("eval", help="mide el top 10 contra las etiquetas")
+    demo = sub.add_parser("demo", help="base de datos con datos ficticios").add_subparsers(dest="action", required=True)
+    demo.add_parser("seed", help="crea y llena la base demo (DEMO_DATABASE_URL)")
     args = parser.parse_args(argv)
 
     logging.basicConfig(level=logging.INFO, stream=sys.stdout,
@@ -69,6 +71,12 @@ def main(argv: list[str] | None = None) -> None:
         for job in sched.get_jobs():
             logging.info("Job %s programado: %s", job.id, job.trigger)
         sched.start()
+    elif args.cmd == "demo":
+        from moneyplease.demo import ensure_database, seed
+
+        ensure_database(settings.demo_database_url)
+        counts = seed(make_session(settings.demo_database_url), datetime.now(UTC))
+        print("Base demo lista: " + ", ".join(f"{k}={v}" for k, v in counts.items()))
     else:
         _matching_command(args, settings)
 
