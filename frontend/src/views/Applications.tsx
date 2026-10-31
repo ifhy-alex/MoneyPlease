@@ -5,6 +5,7 @@ import type { ApplicationItem, Estado } from '../api/types'
 import { ApplicationEditor } from '../components/ApplicationEditor'
 import { Kanban } from '../components/Kanban'
 import { Toast, type ToastState } from '../components/Toast'
+import { EmptyState } from '../decor/EmptyState'
 import { usePrefersReducedMotion } from '../lib/motion'
 
 const Garden = lazy(() => import('../art/Garden'))
@@ -47,10 +48,8 @@ export default function Applications() {
       </header>
       {apps.isLoading && <p className="text-muted">Cargando…</p>}
       {apps.data && list.length === 0 && (
-        <div className="rounded-[var(--radius-card)] border border-line bg-surface p-6 text-center">
-          <p className="font-display text-lg">Todavía no guardaste ninguna oferta.</p>
-          <p className="mt-1 text-sm text-muted">Usa 🔖 Guardar en Inicio o Explorar para plantar la primera.</p>
-        </div>
+        <EmptyState kind="sin-postulaciones" title="Todavía no guardaste ninguna oferta."
+                    text="Usa 🔖 Guardar en Inicio o Explorar para plantar la primera." />
       )}
       {list.length > 0 && (view === 'jardin' ? (
         <Suspense fallback={null}><Garden apps={list} onSelect={setEditing} /></Suspense>

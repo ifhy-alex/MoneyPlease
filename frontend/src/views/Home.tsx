@@ -6,9 +6,11 @@ import { useCreateApplication, useFeedback, useInsights, useTop, useUpdateApplic
 import { JobCard } from '../components/JobCard'
 import { StatusStrip } from '../components/StatusStrip'
 import { Toast, type ToastState } from '../components/Toast'
+import { EmptyState } from '../decor/EmptyState'
 
 const DAY = 24 * 3600 * 1000
 const Constellation = lazy(() => import('../art/Constellation'))
+const DailySky = lazy(() => import('../art/DailySky'))
 
 export default function Home() {
   const top = useTop()
@@ -43,6 +45,7 @@ export default function Home() {
   return (
     <div className="flex flex-col gap-6">
       <header className="flex flex-col gap-2">
+        <Suspense fallback={null}><DailySky /></Suspense>
         <h1 className="text-3xl">Ofertas de hoy</h1>
         {insights.data && <StatusStrip insights={insights.data} />}
       </header>
@@ -56,11 +59,10 @@ export default function Home() {
             </p>
           )}
           {top.data && visible.length === 0 && (
-            <div className="rounded-[var(--radius-card)] border border-line bg-surface p-6 text-center">
-              <p className="font-display text-lg">Todavía no hay ofertas evaluadas para mostrar.</p>
-              <p className="mt-1 text-sm text-muted">Guarda tu perfil para que el matching empiece a puntuar ofertas.</p>
-              <Link to="/perfil" className="mt-3 inline-block text-accent underline">Ir a Perfil</Link>
-            </div>
+            <EmptyState kind="sin-ofertas" title="Todavía no hay ofertas evaluadas para mostrar."
+                        text="Guarda tu perfil para que el matching empiece a puntuar ofertas.">
+              <Link to="/perfil" className="text-accent underline">Ir a Perfil</Link>
+            </EmptyState>
           )}
           <AnimatePresence initial={false}>
             {visible.map((item, i) => (

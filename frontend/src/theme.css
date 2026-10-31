@@ -71,3 +71,18 @@ h3 {
     transition-duration: 0.01ms !important;
   }
 }
+
+/* Fondo nocturno: se desplaza muy lento; con movimiento reducido queda quieto (regla de arriba). */
+.night-gradient {
+  background:
+    radial-gradient(60vmax 40vmax at 20% 10%, color-mix(in srgb, var(--sky-a) 70%, transparent), transparent 70%),
+    radial-gradient(50vmax 40vmax at 85% 90%, color-mix(in srgb, var(--accent) 10%, transparent), transparent 70%),
+    var(--bg);
+  background-size: 140% 140%, 140% 140%, auto;
+  animation: night-drift 60s ease-in-out infinite alternate;
+}
+
+@keyframes night-drift {
+  from { background-position: 0% 0%, 100% 100%, 0 0; }
+  to { background-position: 30% 20%, 70% 80%, 0 0; }
+}

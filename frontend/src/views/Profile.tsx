@@ -3,9 +3,11 @@ import { ApiError, errorMessage } from '../api/client'
 import { useDraftFromCv, useProfile, useProfileVersions, useSaveProfile } from '../api/hooks'
 import type { Perfil } from '../api/types'
 import { errorsByField, ProfileForm } from '../components/ProfileForm'
+import { EmptyState } from '../decor/EmptyState'
 
 const ProfileGlyph = lazy(() => import('../art/ProfileGlyph'))
 const Constellation = lazy(() => import('../art/Constellation'))
+const FlowField = lazy(() => import('../art/FlowField'))
 
 const EMPTY: Perfil = {
   skills: [], languages: [], experience_months: 0, seniority_target: ['practica', 'junior'], roles_target: [], summary: '',
@@ -53,7 +55,8 @@ export default function Profile() {
 
   const value = form ?? (noProfile ? EMPTY : null)
   return (
-    <div className="flex flex-col gap-6">
+    <div className="relative flex flex-col gap-6">
+      <Suspense fallback={null}><FlowField className="absolute inset-x-0 top-0 -z-10 h-72 w-full opacity-60" /></Suspense>
       <header className="flex flex-wrap items-end justify-between gap-3">
         <div>
           <h1 className="text-3xl">Tu perfil</h1>
@@ -67,9 +70,8 @@ export default function Profile() {
       </header>
 
       {noProfile && !form && (
-        <p className="rounded-[var(--radius-card)] border border-line bg-surface p-4">
-          Todavía no tienes perfil guardado. Sube tu CV para generar un borrador o llena el formulario.
-        </p>
+        <EmptyState kind="sin-perfil" title="Todavía no tienes perfil guardado."
+                    text="Sube tu CV para generar un borrador o llena el formulario." />
       )}
       {notice && (
         <p role={notice.tone === 'error' ? 'alert' : 'status'} className={notice.tone === 'error' ? 'text-danger' : 'text-ok'}>

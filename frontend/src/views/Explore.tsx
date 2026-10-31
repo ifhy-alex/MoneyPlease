@@ -6,6 +6,7 @@ import { Filters, filtersFromParams } from '../components/Filters'
 import { JobCard } from '../components/JobCard'
 import { JobDetail } from '../components/JobDetail'
 import { Toast, type ToastState } from '../components/Toast'
+import { EmptyState } from '../decor/EmptyState'
 
 const OfferRiver = lazy(() => import('../art/OfferRiver'))
 const PAGE = 25
@@ -49,6 +50,9 @@ export default function Explore() {
         {jobs.data ? `${jobs.data.total} ofertas` : jobs.isLoading ? 'Cargando…' : ''}
       </p>
       {jobs.isError && <p role="alert" className="text-danger">No se pudieron cargar las ofertas.</p>}
+      {jobs.data && jobs.data.total === 0 && (
+        <EmptyState kind="sin-ofertas" title="Ninguna oferta coincide con estos filtros." text="Prueba quitando alguno." />
+      )}
       <div className="grid gap-3 xl:grid-cols-2">
         {jobs.data?.items.map((item) => (
           <JobCard key={item.job.id} job={item.job} match={item.match} onOpen={() => setOpen(item.job.id)}

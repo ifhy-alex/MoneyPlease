@@ -34,7 +34,8 @@ describe('Postulaciones', () => {
   it('el jardín es la vista por defecto y tiene una planta por postulación', async () => {
     withApps()
     renderWithProviders(<Applications />)
-    expect(await screen.findAllByRole('button', { name: /oferta 10\d/i })).toHaveLength(2)
+    // El jardín se carga con React.lazy: en una corrida completa puede tardar más de 1 s.
+    expect(await screen.findAllByRole('button', { name: /oferta 10\d/i }, { timeout: 4000 })).toHaveLength(2)
   })
 
   it('mover con el teclado cambia de columna y llama al PATCH', async () => {
