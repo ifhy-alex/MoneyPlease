@@ -4,13 +4,13 @@ import { Link } from 'react-router-dom'
 import { ApiError, errorMessage } from '../api/client'
 import { useCreateApplication, useFeedback, useInsights, useTop, useUpdateApplication, type FeedbackValue } from '../api/hooks'
 import { JobCard } from '../components/JobCard'
+import { JobDetail } from '../components/JobDetail'
 import { StatusStrip } from '../components/StatusStrip'
 import { Toast, type ToastState } from '../components/Toast'
 import { EmptyState } from '../decor/EmptyState'
 
 const DAY = 24 * 3600 * 1000
-const Constellation = lazy(() => import('../art/Constellation'))
-const DailySky = lazy(() => import('../art/DailySky'))
+const SemanticMap = lazy(() => import('../art/SemanticMap'))
 
 export default function Home() {
   const top = useTop()
@@ -19,6 +19,7 @@ export default function Home() {
   const save = useCreateApplication()
   const update = useUpdateApplication()
   const [toast, setToast] = useState<ToastState | null>(null)
+  const [open, setOpen] = useState<number | null>(null)
   const closeToast = useCallback(() => setToast(null), [])
 
   const sendFeedback = (jobId: number, valor: FeedbackValue, undoable = false) =>
@@ -45,10 +46,13 @@ export default function Home() {
   return (
     <div className="flex flex-col gap-6">
       <header className="flex flex-col gap-2">
-        <Suspense fallback={null}><DailySky /></Suspense>
-        <h1 className="text-3xl">Ofertas de hoy</h1>
+        <h1>Ofertas de hoy</h1>
         {insights.data && <StatusStrip insights={insights.data} />}
       </header>
+
+      <section aria-label="Mapa de ofertas">
+        <Suspense fallback={null}><SemanticMap onOpen={setOpen} /></Suspense>
+      </section>
 
       <div className="grid gap-6 lg:grid-cols-[1fr_18rem]">
         <section aria-label="Top del día" className="flex flex-col gap-3">
@@ -83,7 +87,6 @@ export default function Home() {
         <aside className="flex flex-col gap-4">
           <section className="glass p-4">
             <h2 className="text-lg">Brechas de la semana</h2>
-            <Suspense fallback={null}><Constellation compact /></Suspense>
             {insights.data?.brechas_semana.length ? (
               <ol className="mt-2 flex flex-col gap-1 text-sm">
                 {insights.data.brechas_semana.map((g) => (
@@ -123,6 +126,10 @@ export default function Home() {
           )}
         </aside>
       </div>
+      {open !== null && (
+        <JobDetail id={open} onClose={() => setOpen(null)} onInterest={() => sendFeedback(open, 'interesa')}
+                   onDismiss={() => sendFeedback(open, 'no_interesa', true)} onSave={() => saveJob(open)} />
+      )}
       <Toast toast={toast} onClose={closeToast} />
     </div>
   )

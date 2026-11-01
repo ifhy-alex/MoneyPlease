@@ -1,8 +1,9 @@
-import { screen, waitFor, within } from '@testing-library/react'
+import { fireEvent, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { http, HttpResponse } from 'msw'
 import { describe, expect, it } from 'vitest'
-import { application, insights, server } from '../test/handlers'
+import { application, insights, job, mapPoint, server } from '../test/handlers'
+import { media } from '../test/setup'
 import { renderWithProviders } from '../test/render'
 import Home from './Home'
 
@@ -69,5 +70,65 @@ describe('Inicio', () => {
     server.use(http.get('/api/insights', () => HttpResponse.json(insights({ seguimiento: [app] }))))
     renderWithProviders(<Home />)
     expect(await screen.findByText(/hace 12 días/i)).toBeInTheDocument()
+  })
+})
+
+describe('Mapa semántico', () => {
+  const threePoints = () => server.use(http.get('/api/map', () =>
+    HttpResponse.json({ total: 3, puntos: [mapPoint(1, 90, 0.2, -0.3), mapPoint(2, 70, -0.5, 0.4), mapPoint(3, null, 0.6, 0.6)] })))
+
+  it('anuncia el resumen del mapa', async () => {
+    threePoints()
+    renderWithProviders(<Home />)
+    expect(await screen.findByRole('img', { name: /3 ofertas; 2 con puntaje/ })).toBeInTheDocument()
+  })
+
+  it('sin ofertas en el mapa se ve el estado vacío', async () => {
+    renderWithProviders(<Home />)
+    expect(await screen.findByText(/el mapa se dibuja/i)).toBeInTheDocument()
+    expect(screen.queryByRole('img', { name: /ofertas;/ })).toBeNull()
+  })
+
+  it('tocar dos veces abre el detalle', async () => {
+    threePoints()
+    server.use(http.get('/api/jobs/1', () => HttpResponse.json({
+      job: job(1), descripcion_texto: 'Texto', match: null, etiqueta: null, postulacion: null,
+    })))
+    renderWithProviders(<Home />)
+    const canvas = await screen.findByRole('img', { name: /3 ofertas/ })
+    canvas.getBoundingClientRect = () => ({ left: 0, top: 0, width: 600, height: 420, right: 600, bottom: 420, x: 0, y: 0, toJSON() {} })
+    // Oferta 1 está en (0.2, -0.3): px = 300 + 0.2·276 = 355.2, py = 210 − 0.3·186 = 154.2
+    fireEvent.pointerDown(canvas, { pointerType: 'touch', clientX: 355, clientY: 154 })
+    expect(await screen.findByRole('tooltip')).toHaveTextContent('Oferta 1')
+    expect(screen.queryByRole('dialog')).toBeNull()
+    fireEvent.pointerDown(canvas, { pointerType: 'touch', clientX: 355, clientY: 154 })
+    expect(await screen.findByRole('dialog', { name: 'Detalle de la oferta' })).toBeInTheDocument()
+  })
+
+  it('con movimiento reducido el mapa no anima', async () => {
+    media.reducedMotion = true
+    threePoints()
+    renderWithProviders(<Home />)
+    expect(await screen.findByRole('img', { name: /3 ofertas/ })).toHaveAttribute('data-animating', 'false')
+  })
+
+  it('sin movimiento reducido el mapa anima', async () => {
+    threePoints()
+    renderWithProviders(<Home />)
+    expect(await screen.findByRole('img', { name: /3 ofertas/ })).toHaveAttribute('data-animating', 'true')
+  })
+
+  it('si el mapa falla, se puede reintentar', async () => {
+    let calls = 0
+    server.use(http.get('/api/map', () => {
+      calls += 1
+      return calls === 1
+        ? HttpResponse.json({ detail: 'Falló el mapa' }, { status: 500 })
+        : HttpResponse.json({ total: 1, puntos: [mapPoint(1)] })
+    }))
+    renderWithProviders(<Home />)
+    expect(await screen.findByText('Falló el mapa')).toBeInTheDocument()
+    await userEvent.click(screen.getByRole('button', { name: 'Reintentar' }))
+    expect(await screen.findByRole('img', { name: /1 ofertas/ })).toBeInTheDocument()
   })
 })
