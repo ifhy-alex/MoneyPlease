@@ -1,16 +1,42 @@
 import json
 import re
+import unicodedata
 from datetime import datetime
 from typing import Annotated, Literal
 
-from pydantic import BaseModel, Field, StringConstraints, ValidationError
+from pydantic import AfterValidator, BaseModel, BeforeValidator, Field, ValidationError
 
 from moneyplease.db.models import Job, Match
 from moneyplease.matching.examples import Ejemplo
 from moneyplease.matching.llm import LLMError, LLMProvider
 from moneyplease.profile.schema import Profile
 
-Item = Annotated[str, StringConstraints(max_length=120)]
+
+
+def _clip(n: int):
+    """Corta el texto a n caracteres con "…": Gemini a veces se pasa del límite pedido."""
+    def clip(value):
+        return value[: n - 1] + "…" if isinstance(value, str) and len(value) > n else value
+    return clip
+
+
+def _first(n: int):
+    return lambda value: list(value)[:n] if isinstance(value, (list, tuple)) else value
+
+
+def _canon(text: str) -> str:
+    return unicodedata.normalize("NFKD", text).encode("ascii", "ignore").decode().strip().lower()
+
+
+def _drop_empty_gaps(items: list[str]) -> list[str]:
+    """Quita las "brechas" que en realidad dicen que no hay brecha."""
+    def empty(item: str) -> bool:
+        t = _canon(item)
+        return t in {"n/a", "na", "ninguna"} or t.startswith(("ninguna brecha", "sin brechas"))
+    return [i for i in items if not empty(i)]
+
+
+Item = Annotated[str, BeforeValidator(_clip(120))]
 MAX_DESCRIPTION = 6000
 DELIMITER = re.compile(r"<\s*/?\s*oferta\s*>", re.IGNORECASE)
 
@@ -18,9 +44,9 @@ DELIMITER = re.compile(r"<\s*/?\s*oferta\s*>", re.IGNORECASE)
 class MatchResult(BaseModel):
     score: int = Field(ge=0, le=100)
     fit: Literal["practica", "junior", "no_aplica"]
-    fortalezas: list[Item] = Field(max_length=5)
-    brechas: list[Item] = Field(max_length=5)
-    resumen: str = Field(max_length=300)
+    fortalezas: Annotated[list[Item], BeforeValidator(_first(5))]
+    brechas: Annotated[list[Item], BeforeValidator(_first(5)), AfterValidator(_drop_empty_gaps)]
+    resumen: Annotated[str, BeforeValidator(_clip(300))]
 
 
 _LIST = {"type": "ARRAY", "items": {"type": "STRING"}}

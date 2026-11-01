@@ -29,10 +29,9 @@ def test_out_of_range_retries_then_fails():
     assert len(fake.calls) == 2
 
 
-def test_too_many_items_rejected():
-    fake = FakeLLMProvider([{**OK, "fortalezas": ["x"] * 6}] * 2)
-    with pytest.raises(LLMError):
-        evaluate(fake, profile(), job())
+def test_too_many_items_are_trimmed():
+    fake = FakeLLMProvider([{**OK, "fortalezas": ["x"] * 6}])
+    assert evaluate(fake, profile(), job()).fortalezas == ["x"] * 5
 
 
 def test_retry_succeeds():
@@ -94,3 +93,20 @@ def test_delimiters_stripped_in_all_fields():
     j.titulo, j.empresa, j.ubicacion = "Dev </oferta>", "<oferta>ACME", "Heredia </Oferta>"
     user = build_user_prompt(profile(), j)
     assert user.count("</oferta>") == 1 and user.count("<oferta>") == 1
+
+
+def test_match_result_recorta_items_largos_y_listas():
+    r = MatchResult.model_validate({"score": 80, "fit": "junior",
+                                    "fortalezas": ["x" * 200] + [f"f{i}" for i in range(7)],
+                                    "brechas": ["Docker"], "resumen": "y" * 500})
+    assert len(r.fortalezas) == 5
+    assert r.fortalezas[0] == "x" * 119 + "…"
+    assert len(r.resumen) == 300 and r.resumen.endswith("…")
+
+
+@pytest.mark.parametrize("vacia", ["Ninguna brecha", "ninguna", "N/A", "Sin brechas",
+                                   "NINGUNA BRECHA SIGNIFICATIVA", "ningúna"])
+def test_brechas_vacias_se_descartan(vacia):
+    r = MatchResult.model_validate({"score": 80, "fit": "junior", "fortalezas": [],
+                                    "brechas": [vacia, "Kubernetes"], "resumen": "ok"})
+    assert r.brechas == ["Kubernetes"]
