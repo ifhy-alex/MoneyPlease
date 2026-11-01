@@ -50,3 +50,14 @@ def test_graph_maximo_8_faltantes(client, session, world):
     faltantes = [s for s in g["habilidades"] if not s["tiene"]]
     assert len(faltantes) == 8
     assert {s["nombre"].lower() for s in faltantes} == set(missing[:8])
+
+
+def test_los_idiomas_del_perfil_cuentan_como_propios(client, session, world):
+    perfil = Profile.model_validate({**DRAFT, "preferences": DEFAULT_PREFERENCES.model_dump(),
+                                     "skills": [{"name": "Java", "level": "intermedio", "evidence": "x"}],
+                                     "languages": [{"name": "Inglés", "level": "B2"}]})
+    prof = store.save(session, perfil, "cv", FakeEmbedder())
+    world.match(prof, world.job(descripcion="Java and fluent English required"), score=80)
+    skills = {s["nombre"]: s for s in client.get("/api/skills-graph").json()["habilidades"]}
+    assert "English" not in skills or skills["English"]["tiene"]
+    assert skills["Inglés"]["tiene"] and skills["Inglés"]["grado"] == 1

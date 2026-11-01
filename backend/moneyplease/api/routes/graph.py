@@ -8,7 +8,7 @@ from moneyplease.api.schemas import GraphEdge, GraphOffer, GraphSkill, SkillsGra
 from moneyplease.eval import top_matches
 from moneyplease.profile import store
 from moneyplease.profile.schema import Profile
-from moneyplease.skill_areas import area_of, display_skill, fold_skill, skills_in
+from moneyplease.skill_areas import area_of, canonical_skill, display_skill, skills_in
 
 router = APIRouter()
 TOP_OFFERS = 40
@@ -24,7 +24,8 @@ def skills_graph(session: Session = Depends(get_session)) -> SkillsGraph:
     if not rows:
         return SkillsGraph(habilidades=[], ofertas=[], aristas=[])
     perfil = Profile.model_validate(active.perfil_json)
-    mine = {fold_skill(s.name): s for s in perfil.skills}
+    # Los idiomas del perfil también son tuyos: si una oferta pide inglés, no aparece como faltante.
+    mine = {canonical_skill(s.name): s for s in [*perfil.skills, *perfil.languages]}
     found = {job.id: skills_in(f"{job.titulo} {job.descripcion or ''}") for _, job in rows}
     degree = Counter(skill for skills in found.values() for skill in skills)
     missing = sorted((s for s in degree if s not in mine), key=lambda s: (-degree[s], s))[:MAX_MISSING]

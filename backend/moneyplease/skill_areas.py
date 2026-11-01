@@ -54,7 +54,7 @@ FOLDED_AREA: dict[str, str] = {fold_skill(skill): area for area, skills in _BY_A
 # Siguen teniendo área (para el perfil); en las ofertas se reconocen "golang", "rest api" o "restful apis".
 AMBIGUOUS = {"go", "rest"}
 # Variantes que cuentan como la misma skill.
-ALIASES = {"asp.net": ".net", "vb.net": ".net"}
+ALIASES = {"asp.net": ".net", "vb.net": ".net", "ingles": "english", "espanol": "spanish"}
 _FOLDED_BY_LENGTH = sorted((s for s in FOLDED_AREA if s not in AMBIGUOUS), key=len, reverse=True)
 
 
@@ -83,3 +83,9 @@ def area_of(skill: str) -> str:
 def display_skill(skill: str) -> str:
     """Nombre para mostrar de una skill canónica: siglas en mayúsculas ("AWS", ".NET"), el resto capitalizado."""
     return skill.upper() if len(skill) <= 3 or skill.startswith(".") else skill.title()
+
+
+def canonical_skill(name: str) -> str:
+    """Clave para comparar una skill del perfil con las que detecta `skills_in` ("Inglés" → "english")."""
+    key = fold_skill(name)
+    return ALIASES.get(key, key)
