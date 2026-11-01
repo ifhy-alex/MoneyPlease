@@ -141,6 +141,7 @@ describe('Grafo de habilidades', () => {
     const graph = await screen.findByRole('group', { name: /grafo de habilidades/i })
     expect(within(graph).getByRole('button', { name: /java: 2 ofertas/i })).toHaveAttribute('data-tiene', 'true')
     expect(within(graph).getByRole('button', { name: /docker: 1 oferta/i })).toHaveAttribute('data-tiene', 'false')
+    expect(await screen.findByText(/sin ofertas que las pidan/i)).toHaveTextContent('Python')
   })
 
   it('pasar sobre una habilidad atenúa lo que no está conectado', async () => {
@@ -148,7 +149,7 @@ describe('Grafo de habilidades', () => {
     renderWithProviders(<Profile />)
     const graph = await screen.findByRole('group', { name: /grafo de habilidades/i })
     await userEvent.hover(within(graph).getByRole('button', { name: /docker/i }))
-    expect(within(graph).getByRole('button', { name: /python/i })).toHaveAttribute('opacity', '0.2')
+    expect(within(graph).getByRole('button', { name: /abrir oferta 2/i })).toHaveAttribute('opacity', '0.2')
     expect(within(graph).getByRole('button', { name: /docker/i })).toHaveAttribute('opacity', '1')
   })
 

@@ -3,7 +3,7 @@ import { useSkillsGraph } from '../api/hooks'
 import type { SkillsGraph } from '../api/types'
 import { usePrefersReducedMotion } from '../lib/motion'
 import { ArtFrame } from './ArtFrame'
-import { layoutGraph, type GraphNode } from './skillGraphLayout'
+import { labelSide, layoutGraph, type GraphNode } from './skillGraphLayout'
 
 /** Grafo de tus habilidades y las ofertas que las piden; las que piden y no tienes van punteadas. */
 export default function SkillGraph({ onOpen }: { onOpen: (jobId: number) => void }) {
@@ -25,7 +25,7 @@ function GraphSvg({ data, height, onOpen }: { data: SkillsGraph; height: number;
   const [width, setWidth] = useState(600)
   const [focus, setFocus] = useState<string | null>(null)
   const [shown, setShown] = useState(reduced)
-  const { nodes, links } = useMemo(() => layoutGraph(data, width, height), [data, width, height])
+  const { nodes, links, isolated } = useMemo(() => layoutGraph(data, width, height), [data, width, height])
 
   useEffect(() => {
     const el = wrap.current
@@ -59,6 +59,7 @@ function GraphSvg({ data, height, onOpen }: { data: SkillsGraph; height: number;
   })
 
   return (
+    <div className="flex flex-col gap-2">
     <div ref={wrap} className="glass overflow-hidden" style={{ height }}>
       <svg role="group" aria-label="Grafo de habilidades" data-animating={reduced ? 'false' : 'true'}
            viewBox={`0 0 ${width} ${height}`} width="100%" height={height}
@@ -84,12 +85,20 @@ function GraphSvg({ data, height, onOpen }: { data: SkillsGraph; height: number;
               <circle cx={n.x} cy={n.y} r={n.r} fill="var(--bg)"
                       stroke={n.tiene ? 'var(--silver)' : 'var(--danger)'} strokeWidth={1}
                       strokeDasharray={n.tiene ? undefined : '2 2'} />
-              <text x={n.x + n.r + 4} y={n.y} dominantBaseline="central" fontSize={11}
+              <text x={labelSide(n, width) === 'right' ? n.x + n.r + 4 : n.x - n.r - 4} y={n.y}
+                    textAnchor={labelSide(n, width) === 'right' ? 'start' : 'end'} dominantBaseline="central" fontSize={11}
                     fontFamily="var(--font-mono)" fill={n.tiene ? 'var(--silver)' : 'var(--muted)'}>{n.label}</text>
             </g>
           )
         })}
       </svg>
+    </div>
+    {isolated.length > 0 && (
+      <p className="text-xs text-muted">
+        Sin ofertas que las pidan todavía:{' '}
+        {isolated.map((name) => <span key={name} className="mono mr-1.5 inline-block rounded border border-line px-1.5 text-[11px] text-silver">{name}</span>)}
+      </p>
+    )}
     </div>
   )
 }
