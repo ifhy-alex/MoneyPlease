@@ -149,7 +149,9 @@ export function createScene(container: HTMLElement, opts: { reducedMotion: boole
 
   const scene = new THREE.Scene()
   const camera = new THREE.PerspectiveCamera(55, width() / height(), 0.1, 300)
-  camera.position.set(0, 5, 16)
+  // En vertical (celular) el campo de visión horizontal es angosto: se aleja la cámara para que quepa la galaxia.
+  const fit = Math.max(1, 0.75 / camera.aspect)
+  camera.position.set(0, 5 * fit, 16 * fit)
   const controls = new OrbitControls(camera, renderer.domElement)
   controls.enableDamping = true
   controls.dampingFactor = 0.08
