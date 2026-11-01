@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import UTC, datetime
 
 import httpx
 from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
@@ -56,10 +56,21 @@ def get_profile(session: Session = Depends(get_session)) -> ProfileVersion:
     return _version(row)
 
 
+def _cv_text(session: Session, settings: Settings) -> str:
+    """El CV importado más reciente: private/cv.txt si es posterior a la versión activa."""
+    active = store.active(session)
+    cv_txt = settings.private_dir / "cv.txt"
+    if cv_txt.exists():
+        modified = datetime.fromtimestamp(cv_txt.stat().st_mtime, UTC)
+        if active is None or modified > active.creado_en:
+            return cv_txt.read_text(encoding="utf-8")
+    return active.cv_texto if active else ""
+
+
 @router.put("/profile", response_model=ProfileVersion, status_code=201)
-def put_profile(perfil: Profile, session: Session = Depends(get_session),
-                embedder=Depends(get_embedder)) -> ProfileVersion:
-    cv_text = (store.active(session).cv_texto if store.active(session) else "")
+def put_profile(perfil: Profile, session: Session = Depends(get_session), embedder=Depends(get_embedder),
+                settings: Settings = Depends(get_settings)) -> ProfileVersion:
+    cv_text = _cv_text(session, settings)
     for attempt in range(2):
         try:
             return _version(store.save(session, perfil, cv_text, embedder))

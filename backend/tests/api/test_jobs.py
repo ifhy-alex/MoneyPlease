@@ -72,3 +72,22 @@ def test_detail_text_not_html(client, world):
 
 def test_detail_404(client):
     assert client.get("/api/jobs/99999").status_code == 404
+
+
+def test_feedback_upsert_no_falla_si_la_etiqueta_aparece_entre_medias(client, world, session, monkeypatch):
+    from sqlalchemy import select
+    from sqlalchemy.orm import Session
+
+    from moneyplease.db.models import JobLabel
+    job = world.job()
+    session.add(JobLabel(job_id=job.id, etiqueta="buena"))
+    session.commit()
+    original = Session.get
+    # Como en la carrera real: la otra petición insertó la etiqueta después de que esta la buscara.
+    monkeypatch.setattr(Session, "get", lambda self, model, *a, **k:
+                        None if model is JobLabel else original(self, model, *a, **k))
+    resp = client.post(f"/api/jobs/{job.id}/feedback", json={"valor": "no_interesa"})
+    assert resp.status_code == 204
+    session.expire_all()
+    rows = session.scalars(select(JobLabel).where(JobLabel.job_id == job.id)).all()
+    assert [r.etiqueta for r in rows] == ["mala"]

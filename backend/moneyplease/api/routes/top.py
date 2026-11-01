@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Query
 from sqlalchemy import or_, select
 from sqlalchemy.orm import Session
 
@@ -11,7 +11,7 @@ router = APIRouter()
 
 
 @router.get("/top", response_model=list[TopItem])
-def top(n: int = 10, session: Session = Depends(get_session)) -> list[TopItem]:
+def top(n: int = Query(10, ge=1, le=50), session: Session = Depends(get_session)) -> list[TopItem]:
     active = store.active(session)
     if active is None:
         return []

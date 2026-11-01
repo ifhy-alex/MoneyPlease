@@ -1,3 +1,5 @@
+import pytest
+
 from moneyplease.db.models import Application, JobLabel
 from tests.api.conftest import NOW
 
@@ -53,3 +55,8 @@ def test_feedback_invalid_value_422(client, world):
 
 def test_feedback_unknown_job_404(client):
     assert client.post("/api/jobs/99999/feedback", json={"valor": "interesa"}).status_code == 404
+
+
+@pytest.mark.parametrize("n", [-1, 0, 51])
+def test_n_fuera_de_rango_es_422(client, n):
+    assert client.get(f"/api/top?n={n}").status_code == 422

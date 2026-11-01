@@ -3,7 +3,8 @@ from typing import Literal
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Response
 from pydantic import BaseModel
-from sqlalchemy import and_, func, or_, select
+from sqlalchemy import and_, delete, func, or_, select
+from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.orm import Session
 
 from moneyplease.api.deps import get_session
@@ -25,14 +26,13 @@ class Feedback(BaseModel):
 def feedback(job_id: int, body: Feedback, session: Session = Depends(get_session)) -> Response:
     if session.get(Job, job_id) is None:
         raise HTTPException(404, "La oferta no existe")
-    existing = session.get(JobLabel, job_id)
     if body.valor is None:
-        if existing:
-            session.delete(existing)
-    elif existing:
-        existing.etiqueta = LABELS[body.valor]
+        session.execute(delete(JobLabel).where(JobLabel.job_id == job_id))
     else:
-        session.add(JobLabel(job_id=job_id, etiqueta=LABELS[body.valor]))
+        # Upsert: dos clics seguidos sobre la misma oferta no chocan con la clave única.
+        etiqueta = LABELS[body.valor]
+        session.execute(insert(JobLabel).values(job_id=job_id, etiqueta=etiqueta)
+                        .on_conflict_do_update(index_elements=[JobLabel.job_id], set_={"etiqueta": etiqueta}))
     session.commit()
     return Response(status_code=204)
 

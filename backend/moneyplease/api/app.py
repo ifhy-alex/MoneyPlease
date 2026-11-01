@@ -1,7 +1,8 @@
 from pathlib import Path
 
 from fastapi import FastAPI, HTTPException
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, JSONResponse
+from sqlalchemy.exc import ProgrammingError
 from fastapi.staticfiles import StaticFiles
 from sqlalchemy.orm import Session, sessionmaker
 
@@ -21,6 +22,10 @@ def create_app(settings: Settings | None = None, session_factory: sessionmaker[S
         settings.demo_database_url if settings.demo_mode else settings.database_url)
     for module in (top, jobs, profile, applications, insights):
         app.include_router(module.router, prefix="/api")
+    if settings.demo_mode:
+        @app.exception_handler(ProgrammingError)
+        def demo_unseeded(request, exc):
+            return JSONResponse({"detail": "Modo demo sin datos: corre `demo seed`"}, status_code=503)
 
     @app.api_route("/api/{rest:path}", methods=["GET", "POST", "PUT", "PATCH", "DELETE"], include_in_schema=False)
     def api_not_found(rest: str):

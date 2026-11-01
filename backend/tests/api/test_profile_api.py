@@ -101,3 +101,30 @@ def test_from_cv_demo_503(api, settings):
     demo = settings.model_copy(update={"demo_mode": True, "gemini_api_key": "k"})
     resp = api(llm=FakeLLMProvider([DRAFT]), settings_override=demo).post("/api/profile/from-cv", files={"archivo": PDF})
     assert resp.status_code == 503 and "demo" in resp.json()["detail"].lower()
+
+
+def _active_cv(session):
+    session.expire_all()
+    return store_mod.active(session).cv_texto
+
+
+def test_put_usa_el_cv_txt_mas_reciente(api, session, settings):
+    from tests.test_profile_store import profile
+    store_mod.save(session, profile(), "viejo", FakeEmbedder())
+    settings.private_dir.mkdir(parents=True, exist_ok=True)
+    (settings.private_dir / "cv.txt").write_text("nuevo", encoding="utf-8")
+    assert api().put("/api/profile", json=PROFILE).status_code == 201
+    assert _active_cv(session) == "nuevo"
+
+
+def test_put_ignora_cv_txt_anterior_a_la_version(api, session, settings):
+    import os
+
+    from tests.test_profile_store import profile
+    store_mod.save(session, profile(), "viejo", FakeEmbedder())
+    settings.private_dir.mkdir(parents=True, exist_ok=True)
+    cv_txt = settings.private_dir / "cv.txt"
+    cv_txt.write_text("nuevo", encoding="utf-8")
+    os.utime(cv_txt, (0, 0))
+    assert api().put("/api/profile", json=PROFILE).status_code == 201
+    assert _active_cv(session) == "viejo"
