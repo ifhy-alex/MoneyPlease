@@ -38,3 +38,7 @@ class QuotaExhausted(Exception):
     def __init__(self, until: date):
         super().__init__(f"cuota agotada hasta {until.isoformat()}")
         self.until = until
+
+
+class Maintenance(Exception):
+    """La fuente está en mantenimiento: es temporal, se reintenta en la próxima corrida."""

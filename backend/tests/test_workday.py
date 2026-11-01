@@ -111,3 +111,27 @@ def test_404_is_source_gone():
     respx.post(f"{API}/jobs").respond(404)
     with pytest.raises(SourceGone):
         connector().fetch()
+
+
+MAINTENANCE = "https://community.workday.com/maintenance-page"
+
+
+@respx.mock
+def test_redireccion_a_mantenimiento():
+    from moneyplease.ingest.base import Maintenance
+    respx.get(f"{HOST}/robots.txt").respond(200, text=ROBOTS_OK)
+    respx.post(f"{API}/jobs").respond(303, headers={"Location": MAINTENANCE})
+    respx.get(MAINTENANCE).respond(200, html="<html>maintenance</html>")
+    with pytest.raises(Maintenance, match="Workday en mantenimiento"):
+        connector().fetch()
+
+
+@respx.mock
+def test_detalle_en_mantenimiento():
+    from moneyplease.ingest.base import Maintenance
+    respx.get(f"{HOST}/robots.txt").respond(200, text=ROBOTS_OK)
+    respx.post(f"{API}/jobs").mock(side_effect=[httpx.Response(200, json=FACETS), httpx.Response(200, json=LISTING)])
+    respx.get(url__startswith=f"{API}/job").respond(303, headers={"Location": MAINTENANCE})
+    respx.get(MAINTENANCE).respond(200, html="<html>maintenance</html>")
+    with pytest.raises(Maintenance, match="Workday en mantenimiento"):
+        connector().fetch()

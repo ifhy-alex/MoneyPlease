@@ -1,6 +1,8 @@
 from datetime import UTC, datetime
 
-from moneyplease.ingest.base import ConnectorResult, RawJob, SourceGone
+import httpx
+
+from moneyplease.ingest.base import ConnectorResult, Maintenance, RawJob, SourceGone
 from moneyplease.ingest.http import PoliteClient
 
 PAGE = 20
@@ -30,6 +32,25 @@ def _published(start: str | None) -> datetime | None:
         return None
 
 
+def _is_maintenance(resp: httpx.Response) -> bool:
+    urls = [str(resp.url), resp.headers.get("location", "")]
+    urls += [str(r.url) for r in resp.history] + [r.headers.get("location", "") for r in resp.history]
+    return any("maintenance" in u for u in urls)
+
+
+def _json(request) -> dict:
+    """JSON de la respuesta; si Workday redirige a su página de mantenimiento, lo dice claramente."""
+    try:
+        resp = request()
+    except httpx.HTTPStatusError as exc:
+        if _is_maintenance(exc.response):
+            raise Maintenance("Workday en mantenimiento") from exc
+        raise
+    if _is_maintenance(resp):
+        raise Maintenance("Workday en mantenimiento")
+    return resp.json()
+
+
 class WorkdayConnector:
     """Sitio público de empleo de Workday, filtrado a las ofertas en Costa Rica."""
 
@@ -43,8 +64,8 @@ class WorkdayConnector:
 
     def _jobs(self, facets: dict, offset: int, limit: int) -> dict:
         body = {"appliedFacets": facets, "limit": limit, "offset": offset, "searchText": ""}
-        return self.client.post(f"{self.api}/jobs", json=body, headers={"Accept": "application/json"},
-                                check_robots=False).json()
+        return _json(lambda: self.client.post(f"{self.api}/jobs", json=body, headers={"Accept": "application/json"},
+                                              check_robots=False))
 
     def fetch(self) -> ConnectorResult:
         # El API no lo publican como tal: si robots.txt prohíbe el sitio de empleo, no se lee.
@@ -67,8 +88,8 @@ class WorkdayConnector:
         return ConnectorResult([self._job(p) for p in postings])
 
     def _job(self, posting: dict) -> RawJob:
-        detail = self.client.get(f"{self.api}{posting['externalPath']}", headers={"Accept": "application/json"},
-                                 check_robots=False).json()
+        detail = _json(lambda: self.client.get(f"{self.api}{posting['externalPath']}",
+                                               headers={"Accept": "application/json"}, check_robots=False))
         info = detail.get("jobPostingInfo", {})
         location = info.get("location") or posting.get("locationsText") or ""
         remote = REMOTE_TYPES.get(str(info.get("remoteType") or "").strip().lower())
