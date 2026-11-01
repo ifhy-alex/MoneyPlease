@@ -28,7 +28,7 @@ def _canon(text: str) -> str:
     return unicodedata.normalize("NFKD", text).encode("ascii", "ignore").decode().strip().lower()
 
 
-def _drop_empty_gaps(items: list[str]) -> list[str]:
+def drop_empty_gaps(items: list[str]) -> list[str]:
     """Quita las "brechas" que en realidad dicen que no hay brecha."""
     def empty(item: str) -> bool:
         t = _canon(item)
@@ -45,7 +45,7 @@ class MatchResult(BaseModel):
     score: int = Field(ge=0, le=100)
     fit: Literal["practica", "junior", "no_aplica"]
     fortalezas: Annotated[list[Item], BeforeValidator(_first(5))]
-    brechas: Annotated[list[Item], BeforeValidator(_first(5)), AfterValidator(_drop_empty_gaps)]
+    brechas: Annotated[list[Item], BeforeValidator(_first(5)), AfterValidator(drop_empty_gaps)]
     resumen: Annotated[str, BeforeValidator(_clip(300))]
 
 

@@ -3,6 +3,7 @@ from datetime import date, datetime
 from pydantic import BaseModel
 
 from moneyplease.db.models import Job, Match
+from moneyplease.matching.score import drop_empty_gaps
 
 
 class JobOut(BaseModel):
@@ -35,8 +36,9 @@ class MatchOut(BaseModel):
     def of(cls, match: Match | None) -> "MatchOut | None":
         if match is None:
             return None
-        return cls(score=match.score, fit=match.fit, fortalezas=match.fortalezas, brechas=match.brechas,
-                   resumen=match.resumen)
+        # Los matches guardados antes del filtro de "ninguna brecha" también se limpian al leer.
+        return cls(score=match.score, fit=match.fit, fortalezas=match.fortalezas,
+                   brechas=drop_empty_gaps(match.brechas), resumen=match.resumen)
 
 
 class TopItem(BaseModel):

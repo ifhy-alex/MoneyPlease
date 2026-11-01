@@ -60,3 +60,11 @@ def test_feedback_unknown_job_404(client):
 @pytest.mark.parametrize("n", [-1, 0, 51])
 def test_n_fuera_de_rango_es_422(client, n):
     assert client.get(f"/api/top?n={n}").status_code == 422
+
+
+def test_brechas_vacias_guardadas_antes_no_se_muestran(client, world):
+    prof = world.profile()
+    job = world.job()
+    world.match(prof, job, brechas=["Ninguna brecha técnica significativa para una pasantía", "Docker"])
+    item = client.get("/api/top").json()[0]
+    assert item["match"]["brechas"] == ["Docker"]

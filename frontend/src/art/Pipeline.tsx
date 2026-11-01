@@ -47,6 +47,18 @@ export default function Pipeline({ apps, onSelect }: { apps: ApplicationItem[]; 
       {nodes.map((n) => {
         const app = byId.get(n.id)!
         const rejected = n.estado === 'rechazada'
+        const columnWidth = rejected ? width * 0.18 : (width * 0.82) / STAGES.length
+        return (
+          <span key={`l${n.id}`} aria-hidden="true"
+                className="mono pointer-events-none absolute -translate-y-1/2 truncate text-[11px] text-muted"
+                style={{ left: n.x + 14, top: n.y + top, maxWidth: Math.max(columnWidth / 2 - 18, 40) }}>
+            {app.job.empresa}
+          </span>
+        )
+      })}
+      {nodes.map((n) => {
+        const app = byId.get(n.id)!
+        const rejected = n.estado === 'rechazada'
         return (
           <button key={n.id} type="button" onClick={() => onSelect(app)} aria-label={`Editar ${n.titulo}`}
                   title={`${n.titulo} — ${app.job.empresa} (${n.estado})`}
