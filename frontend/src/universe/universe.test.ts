@@ -80,3 +80,13 @@ describe('grafo 3D', () => {
     expect(a.links).toHaveLength(3)
   })
 })
+
+describe('estrellas de habilidades', () => {
+  it('tuyas en plata, faltantes en rojo, ofertas pequeñas', async () => {
+    const { skillStars } = await import('./stars')
+    const byId = Object.fromEntries(skillStars(layoutGraph3d(skillsGraph()).nodes).map((s) => [s.id, s]))
+    expect([byId['s:Java'].color, byId['s:Java'].size, byId['s:Java'].label]).toEqual(['#CBD5E1', 1.6, 'Java'])
+    expect([byId['s:Docker'].color, byId['s:Docker'].kind, byId['s:Docker'].opacity]).toEqual(['#E0626F', 'missing', 0.8])
+    expect([byId['o:1'].size, byId['o:1'].color, byId['o:2'].color]).toEqual([0.35, '#FFFFFF', '#2547B8'])
+  })
+})

@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { ApiError, errorMessage } from '../api/client'
-import { useCreateApplication, useFeedback, useUniverse } from '../api/hooks'
+import { useCreateApplication, useFeedback, useSkillsGraph, useUniverse } from '../api/hooks'
 import type { UniversePoint } from '../api/types'
 import { JobDetail } from '../components/JobDetail'
 import { Toast, type ToastState } from '../components/Toast'
@@ -9,7 +9,8 @@ import { EmptyState } from '../decor/EmptyState'
 import { usePrefersReducedMotion } from '../lib/motion'
 import { Panel } from '../universe/Panel'
 import { createScene, NoWebGL, type SceneHandle } from '../universe/scene'
-import { offerStars, scaled, topLinks3d, type Filters } from '../universe/stars'
+import { layoutGraph3d } from '../universe/graph3d'
+import { offerStars, scaled, skillStars, topLinks3d, type Filters, type Vec3 } from '../universe/stars'
 
 type Vista = 'ofertas' | 'habilidades'
 const ALL: Filters = { minScore: 0, empresa: null, fit: 'todas' }
@@ -28,6 +29,11 @@ export default function Universe() {
   const closeToast = useCallback(() => setToast(null), [])
   const feedback = useFeedback()
   const save = useCreateApplication()
+  // Cada pestaña decide qué hacer al pasar o tocar una estrella; la escena siempre llama a estos refs.
+  const showTooltip = useCallback((id: string | null, at: { x: number; y: number }) => setTooltip(id ? { id, ...at } : null), [])
+  const openOffer = useCallback((id: string) => { if (id.startsWith('o:')) setOpen(Number(id.slice(2))) }, [])
+  const hoverRef = useRef(showTooltip)
+  const pickRef = useRef(openOffer)
 
   useEffect(() => {
     if (!container.current) return
@@ -41,8 +47,8 @@ export default function Universe() {
       }
       throw err
     }
-    handle.onHover((id, at) => setTooltip(id ? { id, ...at } : null))
-    handle.onPick((id) => { if (id.startsWith('o:')) setOpen(Number(id.slice(2))) })
+    handle.onHover((id, at) => hoverRef.current(id, at))
+    handle.onPick((id) => pickRef.current(id))
     setScene(handle)
     return () => {
       handle.dispose()
@@ -76,7 +82,9 @@ export default function Universe() {
           </div>
         ) : vista === 'ofertas' ? (
           <Offers scene={scene} />
-        ) : null}
+        ) : (
+          <Skills scene={scene} hoverRef={hoverRef} pickRef={pickRef} showTooltip={showTooltip} openOffer={openOffer} />
+        )}
       </div>
       {tooltip && <StarTooltip id={tooltip.id} x={tooltip.x} y={tooltip.y} />}
       {open !== null && (
@@ -118,6 +126,7 @@ function Offers({ scene }: { scene: SceneHandle | null }) {
 
   useEffect(() => {
     if (!scene) return
+    scene.highlight(null)
     scene.setCenter(true)
     scene.setStars(offerStars(puntos, filters))
     scene.setLinks(topLinks3d(puntos).map((p) => [[0, 0, 0], p]))
@@ -190,3 +199,86 @@ function Offers({ scene }: { scene: SceneHandle | null }) {
   )
 }
 
+type Hover = (id: string | null, at: { x: number; y: number }) => void
+
+function Skills({ scene, hoverRef, pickRef, showTooltip, openOffer }: {
+  scene: SceneHandle | null
+  hoverRef: { current: Hover }
+  pickRef: { current: (id: string) => void }
+  showTooltip: Hover
+  openOffer: (id: string) => void
+}) {
+  const graph = useSkillsGraph()
+  const [selected, setSelected] = useState<string | null>(null)
+  const layout = useMemo(() => (graph.data ? layoutGraph3d(graph.data) : null), [graph.data])
+  const pos = useMemo(() => new Map<string, Vec3>(layout?.nodes.map((n) => [n.id, n.pos]) ?? []), [layout])
+  const neighbours = useMemo(() => {
+    const map = new Map<string, string[]>()
+    for (const [a, b] of layout?.links ?? []) {
+      map.set(a, [...(map.get(a) ?? []), b])
+      map.set(b, [...(map.get(b) ?? []), a])
+    }
+    return map
+  }, [layout])
+
+  useEffect(() => {
+    if (!scene || !layout) return
+    scene.highlight(null)
+    scene.setCenter(false)
+    const stars = skillStars(layout.nodes)
+    scene.setStars(stars)
+    scene.setLinks(layout.links.map(([a, b]) => [pos.get(a)!, pos.get(b)!]), 0.15)
+    scene.setLabels(stars.filter((s) => s.label).map((s) => ({
+      pos: s.pos, text: s.label!, color: s.kind === 'missing' ? '#E0626F' : '#CBD5E1',
+    })))
+  }, [scene, layout, pos])
+
+  // Mientras esta pestaña está abierta: hover resalta lo conectado; tocar una habilidad la lista, una oferta la abre.
+  useEffect(() => {
+    hoverRef.current = (id, at) => {
+      scene?.highlight(id ? [id, ...(neighbours.get(id) ?? [])] : null)
+      showTooltip(id?.startsWith('o:') ? id : null, at)
+    }
+    pickRef.current = (id) => (id.startsWith('s:') ? setSelected(id) : openOffer(id))
+    return () => {
+      hoverRef.current = showTooltip
+      pickRef.current = openOffer
+    }
+  }, [scene, neighbours, hoverRef, pickRef, showTooltip, openOffer])
+
+  const items = useMemo(() => (layout?.nodes ?? []).map((n) => ({ id: n.id, text: n.kind === 'skill' ? n.label : `${n.label} · oferta` })), [layout])
+  const offersOf = (skillId: string) => (layout?.nodes ?? [])
+    .filter((n) => n.kind === 'offer' && neighbours.get(skillId)?.includes(n.id))
+    .sort((a, b) => (b.puntaje ?? 0) - (a.puntaje ?? 0))
+
+  if (graph.isError) {
+    return <p role="alert" className="pointer-events-auto m-auto text-sm text-muted">{errorMessage(graph.error)}</p>
+  }
+  if (graph.isPending || !layout) return <p className="mono pointer-events-auto text-xs text-muted">Cargando habilidades…</p>
+  const skillName = selected?.slice(2)
+  return (
+    <Panel items={items} onChoose={(id) => { const p = pos.get(id); if (p) scene?.flyTo(p); if (id.startsWith('s:')) setSelected(id) }}>
+      {selected && (
+        <ul aria-label={`Ofertas de ${skillName}`} className="flex flex-col gap-1">
+          <li className="mono text-[11px] text-muted">Ofertas que piden {skillName}</li>
+          {offersOf(selected).map((n) => (
+            <li key={n.id}>
+              <button type="button" onClick={() => openOffer(n.id)}
+                      className="flex w-full justify-between gap-2 rounded-md px-2 py-1 text-left text-sm hover:bg-surface-strong">
+                <span className="truncate">{n.label}</span>
+                <span className="mono text-muted">{n.puntaje}</span>
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
+      {layout.isolated.length > 0 && (
+        <p className="text-xs text-muted">
+          Sin ofertas que las pidan todavía:{' '}
+          {layout.isolated.map((name) => <span key={name} className="mono mr-1.5 inline-block rounded border border-line px-1.5 text-[11px] text-silver">{name}</span>)}
+        </p>
+      )}
+      <p className="mono text-[11px] text-muted">Plata: tus habilidades · rojo: las que piden y te faltan</p>
+    </Panel>
+  )
+}

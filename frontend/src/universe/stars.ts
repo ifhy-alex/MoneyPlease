@@ -1,4 +1,5 @@
 import type { UniversePoint } from '../api/types'
+import type { Graph3dNode } from './graph3d'
 
 export type Vec3 = [number, number, number]
 
@@ -53,4 +54,19 @@ export function offerStars(puntos: UniversePoint[], f: Filters): StarSpec[] {
 /** Posiciones de las mejores ofertas evaluadas: las que se unen al centro con una línea de luz. */
 export function topLinks3d(puntos: UniversePoint[], n = 6): Vec3[] {
   return puntos.filter((p) => p.puntaje !== null).sort((a, b) => b.puntaje! - a.puntaje!).slice(0, n).map(scaled)
+}
+
+/** Estrellas del grafo 3D: tus habilidades en plata, las que faltan en rojo apagado, las ofertas pequeñas. */
+export function skillStars(nodes: Graph3dNode[]): StarSpec[] {
+  const maxDegree = Math.max(1, ...nodes.map((n) => n.grado ?? 0))
+  return nodes.map((n) => {
+    if (n.kind === 'offer') {
+      const good = (n.puntaje ?? 0) >= 60
+      return { id: n.id, pos: n.pos, size: 0.35, color: good ? '#FFFFFF' : '#2547B8', opacity: 1, ring: false, kind: 'offer' }
+    }
+    const size = 0.8 + (0.8 * (n.grado ?? 0)) / maxDegree
+    return n.tiene
+      ? { id: n.id, pos: n.pos, size, color: '#CBD5E1', opacity: 1, ring: false, kind: 'skill', label: n.label }
+      : { id: n.id, pos: n.pos, size, color: '#E0626F', opacity: 0.8, ring: false, kind: 'missing', label: n.label }
+  })
 }

@@ -2,7 +2,7 @@ import { act, fireEvent, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { http, HttpResponse } from 'msw'
 import { describe, expect, it, vi } from 'vitest'
-import { job, server, universePoint } from '../test/handlers'
+import { job, server, skillsGraph, universePoint } from '../test/handlers'
 import { media } from '../test/setup'
 import { renderWithProviders } from '../test/render'
 import { SCALE } from '../universe/stars'
@@ -146,5 +146,59 @@ describe('Universo: ofertas', () => {
     reset()
     renderWithProviders(<Universe />)
     expect(await screen.findByText('Todavía no hay ofertas para mostrar en el universo.')).toBeInTheDocument()
+  })
+})
+
+describe('Universo: habilidades', () => {
+  function withGraph() {
+    reset()
+    server.use(
+      http.get('/api/skills-graph', () => HttpResponse.json(skillsGraph())),
+      http.get('/api/jobs/2', () => HttpResponse.json({ job: job(2), descripcion_texto: 'x', match: null, etiqueta: null, postulacion: null })),
+    )
+  }
+  const route = '/universo?vista=habilidades'
+
+  it('dibuja las habilidades con nombre y sus conexiones', async () => {
+    withGraph()
+    renderWithProviders(<Universe />, { route })
+    await waitFor(() => expect((last('setLinks')?.[0] as unknown[])?.length).toBe(3))
+    const labels = (last('setLabels')?.[0] as { text: string }[]).map((l) => l.text)
+    expect(labels).toEqual(expect.arrayContaining(['Java', 'Docker']))
+    expect(last('setCenter')).toEqual([false])
+  })
+
+  it('pasar sobre una habilidad resalta sus ofertas', async () => {
+    withGraph()
+    renderWithProviders(<Universe />, { route })
+    await waitFor(() => expect((last('setLinks')?.[0] as unknown[])?.length).toBe(3))
+    act(() => fake.hover!('s:Docker', { x: 10, y: 10 }))
+    expect(last('highlight')).toEqual([['s:Docker', 'o:1']])
+    act(() => fake.hover!(null, { x: 0, y: 0 }))
+    expect(last('highlight')).toEqual([null])
+  })
+
+  it('tocar una habilidad lista sus ofertas por puntaje', async () => {
+    withGraph()
+    renderWithProviders(<Universe />, { route })
+    await waitFor(() => expect(fake.pick).toBeTruthy())
+    act(() => fake.pick!('s:Java'))
+    const list = await screen.findByRole('list', { name: /ofertas de java/i })
+    expect(within(list).getAllByRole('button').map((b) => b.textContent)).toEqual([
+      expect.stringContaining('Oferta 1'), expect.stringContaining('Oferta 2')])
+  })
+
+  it('tocar una oferta abre el detalle', async () => {
+    withGraph()
+    renderWithProviders(<Universe />, { route })
+    await waitFor(() => expect(fake.pick).toBeTruthy())
+    act(() => fake.pick!('o:2'))
+    expect(await screen.findByRole('dialog', { name: 'Detalle de la oferta' })).toBeInTheDocument()
+  })
+
+  it('muestra aparte las habilidades sin ofertas', async () => {
+    withGraph()
+    renderWithProviders(<Universe />, { route })
+    expect(await screen.findByText(/sin ofertas que las pidan todavía/i)).toHaveTextContent('Python')
   })
 })
