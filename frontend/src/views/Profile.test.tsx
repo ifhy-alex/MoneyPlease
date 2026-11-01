@@ -1,10 +1,10 @@
-import { screen, waitFor, within } from '@testing-library/react'
+import { act, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { delay, http, HttpResponse } from 'msw'
 import { describe, expect, it } from 'vitest'
 import type { Perfil, ProfileVersion } from '../api/types'
-import { server, skillsGraph } from '../test/handlers'
-import { media } from '../test/setup'
+import { job, server, skillsGraph } from '../test/handlers'
+import { media, setMedia } from '../test/setup'
 import { renderWithProviders } from '../test/render'
 import Profile from './Profile'
 
@@ -164,5 +164,31 @@ describe('Grafo de habilidades', () => {
     withProfile()
     renderWithProviders(<Profile />)
     expect(await screen.findByRole('img', { name: /huella de 2 versiones/i })).toBeInTheDocument()
+  })
+})
+
+describe('Detalle desde el grafo', () => {
+  it('si marcar la oferta falla, avisa', async () => {
+    withProfile()
+    server.use(
+      http.get('/api/skills-graph', () => HttpResponse.json(skillsGraph())),
+      http.get('/api/jobs/1', () => HttpResponse.json({ job: job(1), descripcion_texto: 'x', match: null, etiqueta: null, postulacion: null })),
+      http.post('/api/jobs/1/feedback', () => HttpResponse.json({ detail: 'No se pudo guardar la marca' }, { status: 500 })),
+    )
+    renderWithProviders(<Profile />)
+    const graph = await screen.findByRole('group', { name: /grafo de habilidades/i })
+    await userEvent.click(within(graph).getByRole('button', { name: /abrir oferta 1/i }))
+    await userEvent.click(await screen.findByRole('button', { name: /^👍 me interesa/i }))
+    expect(await screen.findByText('No se pudo guardar la marca')).toBeInTheDocument()
+  })
+
+  it('el grafo cambia de alto al girar el celular', async () => {
+    withProfile()
+    server.use(http.get('/api/skills-graph', () => HttpResponse.json(skillsGraph())))
+    renderWithProviders(<Profile />)
+    const graph = await screen.findByRole('group', { name: /grafo de habilidades/i })
+    expect(graph).toHaveAttribute('height', '360')
+    act(() => setMedia('narrow', true))
+    await waitFor(() => expect(screen.getByRole('group', { name: /grafo de habilidades/i })).toHaveAttribute('height', '300'))
   })
 })

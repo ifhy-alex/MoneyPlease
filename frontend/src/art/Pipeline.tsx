@@ -60,7 +60,7 @@ export default function Pipeline({ apps, onSelect }: { apps: ApplicationItem[]; 
         const app = byId.get(n.id)!
         const rejected = n.estado === 'rechazada'
         return (
-          <button key={n.id} type="button" onClick={() => onSelect(app)} aria-label={`Editar ${n.titulo}`}
+          <button key={n.id} type="button" data-app-id={n.id} onClick={() => onSelect(app)} aria-label={`Editar ${n.titulo}`}
                   title={`${n.titulo} — ${app.job.empresa} (${n.estado})`}
                   className="group absolute flex h-6 w-6 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full"
                   style={{ left: n.x, top: n.y + top }}>

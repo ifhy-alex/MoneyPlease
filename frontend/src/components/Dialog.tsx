@@ -1,4 +1,5 @@
 import { useEffect, useId, useRef, type ReactNode } from 'react'
+import { createPortal } from 'react-dom'
 
 const FOCUSABLE = 'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
 // Diálogos abiertos, el último arriba: Escape y Tab solo los atiende el de arriba (la confirmación sobre el editor).
@@ -18,9 +19,10 @@ export function Dialog({ title, onClose, children, variant = 'center', hideTitle
   const titleId = useId()
   const close = useRef(onClose)
   close.current = onClose
+  const id = useRef(Symbol('dialog'))
 
   useEffect(() => {
-    const me = Symbol('dialog')
+    const me = id.current
     stack.push(me)
     const previous = document.activeElement as HTMLElement | null
     const focusables = () => Array.from(ref.current?.querySelectorAll<HTMLElement>(FOCUSABLE) ?? [])
@@ -57,14 +59,16 @@ export function Dialog({ title, onClose, children, variant = 'center', hideTitle
   const panel = variant === 'side'
     ? 'fixed inset-y-0 right-0 flex w-full max-w-xl flex-col gap-4 overflow-y-auto border-l border-line bg-bg/85 p-6 backdrop-blur-xl'
     : 'glass panel flex w-full max-w-md flex-col gap-3 p-5'
-  return (
+  // En un portal: un diálogo dentro de otro panel con backdrop-filter quedaría recortado a ese panel.
+  return createPortal(
     <div className={`fixed inset-0 z-30 bg-bg/60 ${variant === 'center' ? 'flex items-center justify-center p-4' : ''}`}
-         onMouseDown={(e) => { if (e.target === e.currentTarget) onClose() }}>
+         onMouseDown={(e) => { if (e.target === e.currentTarget && stack.at(-1) === id.current) onClose() }}>
       <div ref={ref} role="dialog" aria-modal="true" aria-labelledby={titleId} tabIndex={-1} className={panel}>
         <h2 id={titleId} className={hideTitle ? 'sr-only' : 'text-xl'}>{title}</h2>
         {children}
       </div>
-    </div>
+    </div>,
+    document.body,
   )
 }
 

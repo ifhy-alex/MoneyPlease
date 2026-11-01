@@ -1,9 +1,10 @@
-import { lazy, Suspense, useEffect, useState } from 'react'
+import { lazy, Suspense, useCallback, useEffect, useState } from 'react'
 import { ApiError, errorMessage } from '../api/client'
 import { useCreateApplication, useDraftFromCv, useFeedback, useProfile, useProfileVersions, useSaveProfile } from '../api/hooks'
 import type { Perfil } from '../api/types'
 import { JobDetail } from '../components/JobDetail'
 import { errorsByField, ProfileForm } from '../components/ProfileForm'
+import { Toast, type ToastState } from '../components/Toast'
 import { EmptyState } from '../decor/EmptyState'
 
 const Fingerprint = lazy(() => import('../art/Fingerprint'))
@@ -25,6 +26,8 @@ export default function Profile() {
   const [notice, setNotice] = useState<{ text: string; tone: 'ok' | 'error' } | null>(null)
   const [sent, setSent] = useState<string | null>(null)
   const [open, setOpen] = useState<number | null>(null)
+  const [toast, setToast] = useState<ToastState | null>(null)
+  const closeToast = useCallback(() => setToast(null), [])
   const feedback = useFeedback()
   const createApp = useCreateApplication()
   const noProfile = profile.error instanceof ApiError && profile.error.status === 404
@@ -124,10 +127,13 @@ export default function Profile() {
       )}
       {open !== null && (
         <JobDetail id={open} onClose={() => setOpen(null)}
-                   onInterest={() => feedback.mutate({ jobId: open, valor: 'interesa' })}
-                   onDismiss={() => feedback.mutate({ jobId: open, valor: 'no_interesa' })}
-                   onSave={() => createApp.mutate(open)} />
+                   onFeedback={(valor) => feedback.mutate({ jobId: open, valor }, { onError: (err) => setToast({ message: errorMessage(err), tone: 'error' }) })}
+                   onSave={() => createApp.mutate(open, {
+                     onSuccess: () => setToast({ message: 'Guardada en postulaciones' }),
+                     onError: (err) => !(err instanceof ApiError && err.status === 409) && setToast({ message: errorMessage(err), tone: 'error' }),
+                   })} />
       )}
+      <Toast toast={toast} onClose={closeToast} />
     </div>
   )
 }

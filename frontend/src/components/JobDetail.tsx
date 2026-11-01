@@ -1,4 +1,4 @@
-import { useJob } from '../api/hooks'
+import { useJob, type FeedbackValue } from '../api/hooks'
 import { CompanySeal } from './CompanySeal'
 import { Dialog } from './Dialog'
 import { ScoreRing } from './ScoreRing'
@@ -6,13 +6,13 @@ import { ScoreRing } from './ScoreRing'
 interface Props {
   id: number
   onClose: () => void
-  onInterest: () => void
-  onDismiss: () => void
+  /** Volver a tocar un botón ya marcado quita la marca (null). */
+  onFeedback: (valor: FeedbackValue) => void
   onSave: () => void
 }
 
 /** Panel lateral con la descripción completa. El texto viene sin HTML y se muestra como texto plano. */
-export function JobDetail({ id, onClose, onInterest, onDismiss, onSave }: Props) {
+export function JobDetail({ id, onClose, onFeedback, onSave }: Props) {
   const detail = useJob(id)
   const d = detail.data
   return (
@@ -44,9 +44,9 @@ export function JobDetail({ id, onClose, onInterest, onDismiss, onSave }: Props)
             </section>
           )}
           <div className="flex flex-wrap gap-2 text-sm">
-            <button type="button" onClick={onInterest} aria-pressed={d.etiqueta === 'buena'}
+            <button type="button" onClick={() => onFeedback(d.etiqueta === 'buena' ? null : 'interesa')} aria-pressed={d.etiqueta === 'buena'}
                     className="rounded-lg border border-line px-3 py-1 aria-pressed:border-silver aria-pressed:text-silver">👍 Me interesa</button>
-            <button type="button" onClick={onDismiss} aria-pressed={d.etiqueta === 'mala'}
+            <button type="button" onClick={() => onFeedback(d.etiqueta === 'mala' ? null : 'no_interesa')} aria-pressed={d.etiqueta === 'mala'}
                     className="rounded-lg border border-line px-3 py-1 aria-pressed:border-silver aria-pressed:text-silver">👎 No me interesa</button>
             <button type="button" onClick={onSave} disabled={d.postulacion !== null}
                     className="rounded-lg border border-line px-3 py-1 disabled:opacity-60">

@@ -4,17 +4,26 @@ import { afterAll, afterEach, beforeAll, vi } from 'vitest'
 import { server } from './handlers'
 
 // jsdom no trae matchMedia ni canvas: los simulamos. `reducedMotion` se puede cambiar por test.
-export const media = { reducedMotion: false, dark: false }
+export const media = { reducedMotion: false, dark: false, narrow: false }
+const mediaListeners = new Set<() => void>()
+/** Cambia una media query simulada y avisa a quien la escucha (por ejemplo, al girar el celular). */
+export function setMedia(key: keyof typeof media, value: boolean) {
+  media[key] = value
+  for (const listener of mediaListeners) listener()
+}
+const matchesQuery = (query: string) =>
+  query.includes('reduce') ? media.reducedMotion : query.includes('dark') ? media.dark
+    : query.includes('max-width') ? media.narrow : false
 
 beforeAll(() => {
   server.listen({ onUnhandledFrame: 'error' })
   Object.defineProperty(window, 'matchMedia', {
     writable: true,
     value: (query: string) => ({
-      matches: query.includes('reduce') ? media.reducedMotion : query.includes('dark') ? media.dark : false,
+      get matches() { return matchesQuery(query) },
       media: query,
-      addEventListener: () => {},
-      removeEventListener: () => {},
+      addEventListener: (_: string, fn: () => void) => { mediaListeners.add(fn) },
+      removeEventListener: (_: string, fn: () => void) => { mediaListeners.delete(fn) },
       addListener: () => {},
       removeListener: () => {},
       onchange: null,
@@ -37,6 +46,8 @@ afterEach(() => {
   localStorage.clear()
   media.reducedMotion = false
   media.dark = false
+  media.narrow = false
+  mediaListeners.clear()
 })
 
 afterAll(() => server.close())

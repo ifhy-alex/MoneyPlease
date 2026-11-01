@@ -20,7 +20,7 @@ function Card({ app, onMove, onEdit }: { app: ApplicationItem } & Omit<Props, 'a
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({ id: app.id })
   const style = transform ? { transform: `translate(${transform.x}px, ${transform.y}px)` } : undefined
   return (
-    <li ref={setNodeRef} style={style}
+    <li ref={setNodeRef} style={style} data-app-id={app.id}
         className={`glass glass-hover p-3 text-sm ${isDragging ? 'opacity-70' : ''}`}>
       <div className="flex items-start gap-2">
         <span {...listeners} {...attributes} aria-label={`Arrastrar ${app.job.titulo}`} className="cursor-grab text-muted">⠿</span>

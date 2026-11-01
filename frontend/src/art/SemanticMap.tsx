@@ -2,23 +2,13 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { useMap } from '../api/hooks'
 import type { MapPoint } from '../api/types'
 import { usePrefersReducedMotion } from '../lib/motion'
+import { useIsNarrow } from '../lib/useIsNarrow'
 import { ArtFrame } from './ArtFrame'
 import { layoutMap, nearestPoint, topLinks, type ScreenPoint } from './mapLayout'
 
 const ENTER_MS = 900
 const FRAME_MS = 1000 / 30
 const easeOutCubic = (t: number) => 1 - (1 - t) ** 3
-
-function useIsNarrow(): boolean {
-  const [narrow, setNarrow] = useState(() => window.matchMedia('(max-width: 639px)').matches)
-  useEffect(() => {
-    const mq = window.matchMedia('(max-width: 639px)')
-    const onChange = () => setNarrow(mq.matches)
-    mq.addEventListener('change', onChange)
-    return () => mq.removeEventListener('change', onChange)
-  }, [])
-  return narrow
-}
 
 /** Mapa semántico: el perfil en el centro y cada oferta a la distancia de su similitud real. */
 export default function SemanticMap({ onOpen }: { onOpen: (jobId: number) => void }) {
@@ -28,7 +18,8 @@ export default function SemanticMap({ onOpen }: { onOpen: (jobId: number) => voi
   return (
     <ArtFrame query={map} height={height} empty={puntos.length === 0}
               emptyTitle="El mapa se dibuja cuando haya ofertas analizadas."
-              emptyText="Aparece después de la próxima ingesta con tu perfil guardado.">
+              emptyText="Aparece después de la próxima ingesta con tu perfil guardado."
+              noProfileTitle="Guarda tu perfil para ver el mapa de ofertas.">
       <MapCanvas puntos={puntos} height={height} onOpen={onOpen} />
     </ArtFrame>
   )

@@ -1,6 +1,9 @@
+import { prefersReducedMotion } from './motion'
+
 /** Mueve el brillo del borde de las tarjetas de vidrio (.glass-hover) hacia el puntero. */
 export function installGlassGlow(root: Document = document): () => void {
   const onMove = (e: PointerEvent) => {
+    if (prefersReducedMotion()) return  // con movimiento reducido el brillo queda fijo
     const el = (e.target as Element | null)?.closest?.('.glass-hover') as HTMLElement | null
     if (!el) return
     const box = el.getBoundingClientRect()

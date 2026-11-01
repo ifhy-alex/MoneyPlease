@@ -2,18 +2,19 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { useSkillsGraph } from '../api/hooks'
 import type { SkillsGraph } from '../api/types'
 import { usePrefersReducedMotion } from '../lib/motion'
+import { useIsNarrow } from '../lib/useIsNarrow'
 import { ArtFrame } from './ArtFrame'
 import { labelSide, layoutGraph, type GraphNode } from './skillGraphLayout'
 
 /** Grafo de tus habilidades y las ofertas que las piden; las que piden y no tienes van punteadas. */
 export default function SkillGraph({ onOpen }: { onOpen: (jobId: number) => void }) {
   const graph = useSkillsGraph()
-  const narrow = window.matchMedia('(max-width: 639px)').matches
-  const height = narrow ? 300 : 360
+  const height = useIsNarrow() ? 300 : 360
   const empty = !graph.data || graph.data.habilidades.length === 0
   return (
     <ArtFrame query={graph} height={height} empty={empty} emptyKind="sin-perfil"
-              emptyTitle="El grafo aparece cuando haya ofertas evaluadas con tu perfil.">
+              emptyTitle="El grafo aparece cuando haya ofertas evaluadas con tu perfil."
+              noProfileTitle="Guarda tu perfil para ver el grafo de habilidades.">
       {graph.data && <GraphSvg data={graph.data} height={height} onOpen={onOpen} />}
     </ArtFrame>
   )

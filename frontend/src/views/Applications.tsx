@@ -2,6 +2,7 @@ import { lazy, Suspense, useCallback, useState } from 'react'
 import { errorMessage } from '../api/client'
 import { useApplications, useDeleteApplication, useUpdateApplication, type ApplicationChanges } from '../api/hooks'
 import type { ApplicationItem, Estado } from '../api/types'
+import { burstOrigin } from '../art/burstOrigin'
 import { ApplicationEditor } from '../components/ApplicationEditor'
 import { Kanban } from '../components/Kanban'
 import { Toast, type ToastState } from '../components/Toast'
@@ -20,6 +21,7 @@ export default function Applications() {
   const [view, setView] = useState<'pipeline' | 'tablero'>('pipeline')
   const [editing, setEditing] = useState<ApplicationItem | null>(null)
   const [burst, setBurst] = useState(0)
+  const [origin, setOrigin] = useState<{ x: number; y: number } | null>(null)
   const [toast, setToast] = useState<ToastState | null>(null)
   const closeToast = useCallback(() => setToast(null), [])
   const endBurst = useCallback(() => setBurst(0), [])
@@ -27,7 +29,10 @@ export default function Applications() {
   const change = (id: number, changes: ApplicationChanges) =>
     update.mutate({ id, changes }, {
       onSuccess: () => {
-        if (changes.estado && CELEBRATE.includes(changes.estado) && !reduced) setBurst(Date.now())
+        if (changes.estado && CELEBRATE.includes(changes.estado) && !reduced) {
+          setOrigin(burstOrigin(id))
+          setBurst(Date.now())
+        }
       },
       onError: (err) => setToast({ message: errorMessage(err), tone: 'error' }),
     })
@@ -64,7 +69,7 @@ export default function Applications() {
           onDelete={() => { remove.mutate(editing.id); setEditing(null) }}
         />
       )}
-      {burst > 0 && <Suspense fallback={null}><ParticleBurst seed={burst} onDone={endBurst} /></Suspense>}
+      {burst > 0 && <Suspense fallback={null}><ParticleBurst seed={burst} origin={origin} onDone={endBurst} /></Suspense>}
       <Toast toast={toast} onClose={closeToast} />
     </div>
   )

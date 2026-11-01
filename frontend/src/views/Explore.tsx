@@ -31,7 +31,7 @@ export default function Explore() {
   })
   const sendFeedback = (jobId: number, valor: FeedbackValue) =>
     feedback.mutate({ jobId, valor }, {
-      onSuccess: () => setToast({ message: valor === 'interesa' ? 'Marcada como interesante' : 'Marcada como no interesante' }),
+      onSuccess: () => setToast({ message: valor === null ? 'Marca quitada' : valor === 'interesa' ? 'Marcada como interesante' : 'Marcada como no interesante' }),
       onError: (err) => setToast({ message: errorMessage(err), tone: 'error' }),
     })
   const saveJob = (jobId: number) => save.mutate(jobId, {
@@ -67,8 +67,8 @@ export default function Explore() {
         </nav>
       )}
       {open !== null && (
-        <JobDetail id={open} onClose={() => setOpen(null)} onInterest={() => sendFeedback(open, 'interesa')}
-                   onDismiss={() => sendFeedback(open, 'no_interesa')} onSave={() => saveJob(open)} />
+        <JobDetail id={open} onClose={() => setOpen(null)} onFeedback={(valor) => sendFeedback(open, valor)}
+                   onSave={() => saveJob(open)} />
       )}
       <Toast toast={toast} onClose={closeToast} />
     </div>

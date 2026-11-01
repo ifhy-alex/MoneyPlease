@@ -159,3 +159,12 @@ describe('Mapa semántico', () => {
     expect(await screen.findByRole('img', { name: /1 ofertas/ })).toBeInTheDocument()
   })
 })
+
+describe('Mapa sin perfil', () => {
+  it('sin perfil guardado invita a ir a Perfil en vez de mostrar un error', async () => {
+    server.use(http.get('/api/map', () => HttpResponse.json({ detail: 'Todavía no hay perfil guardado' }, { status: 404 })))
+    renderWithProviders(<Home />)
+    expect(await screen.findByText(/guarda tu perfil para ver el mapa/i)).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Reintentar' })).toBeNull()
+  })
+})

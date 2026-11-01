@@ -127,8 +127,8 @@ export default function Home() {
         </aside>
       </div>
       {open !== null && (
-        <JobDetail id={open} onClose={() => setOpen(null)} onInterest={() => sendFeedback(open, 'interesa')}
-                   onDismiss={() => sendFeedback(open, 'no_interesa', true)} onSave={() => saveJob(open)} />
+        <JobDetail id={open} onClose={() => setOpen(null)} onFeedback={(valor) => sendFeedback(open, valor, valor === 'no_interesa')}
+                   onSave={() => saveJob(open)} />
       )}
       <Toast toast={toast} onClose={closeToast} />
     </div>

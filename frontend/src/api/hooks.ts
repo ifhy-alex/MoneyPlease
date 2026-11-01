@@ -53,6 +53,7 @@ export function useFeedback() {
       qc.invalidateQueries({ queryKey: ['job'] })
       qc.invalidateQueries({ queryKey: ['insights'] })
       qc.invalidateQueries({ queryKey: ['map'] })
+      qc.invalidateQueries({ queryKey: ['skills-graph'] })
     },
   })
 }

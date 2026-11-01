@@ -1,11 +1,13 @@
 import { useEffect, useRef } from 'react'
 import { mulberry32 } from './random'
 
+export { burstOrigin } from './burstOrigin'
+
 const DURATION = 1200
 const PARTICLES = 60
 
 /** Estallido breve de partículas (1,2 s) al pasar una postulación a Entrevista u Oferta. */
-export default function ParticleBurst({ onDone, seed = Date.now() }: { onDone: () => void; seed?: number }) {
+export default function ParticleBurst({ onDone, seed = Date.now(), origin = null }: { onDone: () => void; seed?: number; origin?: { x: number; y: number } | null }) {
   const ref = useRef<HTMLCanvasElement>(null)
   useEffect(() => {
     const canvas = ref.current
@@ -17,7 +19,7 @@ export default function ParticleBurst({ onDone, seed = Date.now() }: { onDone: (
     const parts = Array.from({ length: PARTICLES }, (_, i) => {
       const angle = (i / PARTICLES) * Math.PI * 2 + rnd() * 0.2
       const speed = 2 + rnd() * 5
-      return { x: w / 2, y: h / 2, vx: Math.cos(angle) * speed, vy: Math.sin(angle) * speed, silver: rnd() > 0.35 }
+      return { x: origin?.x ?? w / 2, y: origin?.y ?? h / 2, vx: Math.cos(angle) * speed, vy: Math.sin(angle) * speed, silver: rnd() > 0.35 }
     })
     const start = performance.now()
     let frame = 0
@@ -39,6 +41,6 @@ export default function ParticleBurst({ onDone, seed = Date.now() }: { onDone: (
     }
     frame = requestAnimationFrame(tick)
     return () => cancelAnimationFrame(frame)
-  }, [onDone, seed])
+  }, [onDone, seed, origin])
   return <canvas ref={ref} data-testid="burst" aria-hidden="true" className="pointer-events-none fixed inset-0 z-40" />
 }

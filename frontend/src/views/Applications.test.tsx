@@ -1,4 +1,4 @@
-import { screen, waitFor, within } from '@testing-library/react'
+import { fireEvent, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { http, HttpResponse } from 'msw'
 import { describe, expect, it } from 'vitest'
@@ -127,5 +127,29 @@ describe('Borrar una postulación', () => {
     const confirm = screen.getByRole('dialog', { name: /¿borrar esta postulación\?/i })
     await userEvent.click(within(confirm).getByRole('button', { name: 'Eliminar' }))
     await waitFor(() => expect(deletes).toEqual([1]))
+  })
+})
+
+describe('Confirmación de borrado', () => {
+  it('la confirmación cubre toda la pantalla y su fondo solo la cierra a ella', async () => {
+    withApps()
+    await openBoard()
+    await userEvent.click(screen.getByRole('button', { name: /editar oferta 101/i }))
+    const editor = screen.getByRole('dialog', { name: 'Oferta 101' })
+    await userEvent.click(screen.getByRole('button', { name: 'Eliminar' }))
+    const confirm = screen.getByRole('dialog', { name: /¿borrar esta postulación\?/i })
+    expect(editor.contains(confirm)).toBe(false)
+    fireEvent.mouseDown(confirm.parentElement!)
+    expect(screen.queryByRole('dialog', { name: /¿borrar/i })).not.toBeInTheDocument()
+    expect(screen.getByRole('dialog', { name: 'Oferta 101' })).toBeInTheDocument()
+  })
+
+  it('el estallido sale de la tarjeta que se movió', async () => {
+    const { burstOrigin } = await import('../art/ParticleBurst')
+    document.body.innerHTML = '<div data-app-id="5"></div>'
+    const el = document.querySelector<HTMLElement>('[data-app-id="5"]')!
+    el.getBoundingClientRect = () => ({ left: 100, top: 40, width: 200, height: 60 } as DOMRect)
+    expect(burstOrigin(5)).toEqual({ x: 200, y: 70 })
+    expect(burstOrigin(99)).toBeNull()
   })
 })

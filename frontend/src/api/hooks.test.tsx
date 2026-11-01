@@ -4,7 +4,7 @@ import userEvent from '@testing-library/user-event'
 import { http, HttpResponse } from 'msw'
 import { describe, expect, it } from 'vitest'
 import { server } from '../test/handlers'
-import { useMap, useSaveProfile, useTop } from './hooks'
+import { useFeedback, useMap, useSaveProfile, useSkillsGraph, useTop } from './hooks'
 import type { Perfil } from './types'
 
 function Probe() {
@@ -27,5 +27,25 @@ describe('hooks', () => {
     await waitFor(() => expect(calls).toEqual({ top: 1, map: 1 }))
     await userEvent.click(screen.getByRole('button', { name: 'Guardar' }))
     await waitFor(() => expect(calls).toEqual({ top: 2, map: 2 }))
+  })
+})
+
+describe('feedback', () => {
+  it('marcar una oferta vuelve a pedir el grafo de habilidades', async () => {
+    let graphCalls = 0
+    server.use(
+      http.get('/api/skills-graph', () => { graphCalls += 1; return HttpResponse.json({ habilidades: [], ofertas: [], aristas: [] }) }),
+      http.post('/api/jobs/1/feedback', () => new HttpResponse(null, { status: 204 })),
+    )
+    function Probe2() {
+      useSkillsGraph()
+      const fb = useFeedback()
+      return <button type="button" onClick={() => fb.mutate({ jobId: 1, valor: 'no_interesa' })}>Marcar</button>
+    }
+    const client = new QueryClient({ defaultOptions: { queries: { retry: false } } })
+    render(<QueryClientProvider client={client}><Probe2 /></QueryClientProvider>)
+    await waitFor(() => expect(graphCalls).toBe(1))
+    await userEvent.click(screen.getByRole('button', { name: 'Marcar' }))
+    await waitFor(() => expect(graphCalls).toBe(2))
   })
 })

@@ -13,3 +13,17 @@ describe('brillo del vidrio', () => {
     off()
   })
 })
+
+describe('brillo con movimiento reducido', () => {
+  it('queda fijo', async () => {
+    const { media } = await import('../test/setup')
+    media.reducedMotion = true
+    document.body.innerHTML = '<div class="glass-hover"></div>'
+    const card = document.querySelector<HTMLElement>('.glass-hover')!
+    card.getBoundingClientRect = () => ({ left: 0, top: 0 } as DOMRect)
+    const off = installGlassGlow()
+    card.dispatchEvent(new MouseEvent('pointermove', { bubbles: true, clientX: 40, clientY: 25 }))
+    expect(card.style.getPropertyValue('--mx')).toBe('')
+    off()
+  })
+})

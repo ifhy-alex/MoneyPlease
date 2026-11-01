@@ -83,3 +83,30 @@ describe('Flujo de ingesta', () => {
     expect(await screen.findByRole('img', { name: /flujo de ofertas/i }, { timeout: 4000 })).toBeInTheDocument()
   })
 })
+
+describe('Quitar la marca', () => {
+  it('volver a tocar un botón marcado quita la marca', async () => {
+    trackJobs()
+    const calls: unknown[] = []
+    // Como el servidor real: el detalle devuelve la etiqueta guardada por el último feedback.
+    let etiqueta: string | null = null
+    server.use(
+      http.post('/api/jobs/7/feedback', async ({ request }) => {
+        const body = (await request.json()) as { valor: string | null }
+        calls.push(body)
+        etiqueta = body.valor === 'interesa' ? 'buena' : body.valor === 'no_interesa' ? 'mala' : null
+        return new HttpResponse(null, { status: 204 })
+      }),
+      http.get('/api/jobs/7', () => HttpResponse.json({
+        job: job(7, { titulo: 'Backend Intern' }), descripcion_texto: 'Hola', match: null, etiqueta, postulacion: null,
+      })),
+    )
+    renderWithProviders(<Explore />)
+    await userEvent.click(await screen.findByRole('button', { name: 'Backend Intern' }))
+    const like = () => screen.getByRole('button', { name: /^👍 me interesa/i })
+    await userEvent.click(await screen.findByRole('button', { name: /^👍 me interesa/i }))
+    await waitFor(() => expect(like()).toHaveAttribute('aria-pressed', 'true'))
+    await userEvent.click(like())
+    await waitFor(() => expect(calls).toEqual([{ valor: 'interesa' }, { valor: null }]))
+  })
+})
