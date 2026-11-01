@@ -3,7 +3,7 @@ from collections import Counter
 
 import numpy as np
 
-from moneyplease.skill_areas import display_skill, skills_in
+from moneyplease.skill_areas import area_of, display_skill, skills_in
 
 MAX_ITER = 50
 
@@ -42,7 +42,8 @@ def cluster_names(texts_by_cluster: list[list[str]]) -> list[str]:
     """Las 2 skills más frecuentes de cada nube ("Java · Python"); sin ninguna, "Grupo N"."""
     names = []
     for i, texts in enumerate(texts_by_cluster):
-        counts = Counter(skill for text in texts for skill in skills_in(text))
+        # Los idiomas (sobre todo el inglés) aparecen en casi todas las ofertas: no sirven para nombrar una nube.
+        counts = Counter(skill for text in texts for skill in skills_in(text) if area_of(skill) != "idiomas")
         top = sorted(counts, key=lambda s: (-counts[s], s))[:2]
         names.append(" · ".join(display_skill(s) for s in top) if top else f"Grupo {i + 1}")
     return names

@@ -24,3 +24,8 @@ def test_cluster_count():
 def test_cluster_names():
     assert cluster_names([["Java y Spring Boot", "Java y Python"], ["Linux y redes"]]) == ["Java · Python", "Linux · Redes"]
     assert cluster_names([["a"], ["b"], ["sin nada técnico"]])[2] == "Grupo 3"
+
+
+def test_los_idiomas_no_nombran_nubes():
+    # El inglés lo piden casi todas las ofertas: no distingue una nube de otra.
+    assert cluster_names([["English y Java", "English y Python", "English"]]) == ["Java · Python"]
