@@ -7,7 +7,6 @@ import { EmptyState } from '../decor/EmptyState'
 
 const ProfileGlyph = lazy(() => import('../art/ProfileGlyph'))
 const Constellation = lazy(() => import('../art/Constellation'))
-const FlowField = lazy(() => import('../art/FlowField'))
 
 const EMPTY: Perfil = {
   skills: [], languages: [], experience_months: 0, seniority_target: ['practica', 'junior'], roles_target: [], summary: '',
@@ -56,7 +55,6 @@ export default function Profile() {
   const value = form ?? (noProfile ? EMPTY : null)
   return (
     <div className="relative flex flex-col gap-6">
-      <Suspense fallback={null}><FlowField className="absolute inset-x-0 top-0 -z-10 h-72 w-full opacity-60" /></Suspense>
       <header className="flex flex-wrap items-end justify-between gap-3">
         <div>
           <h1 className="text-3xl">Tu perfil</h1>
