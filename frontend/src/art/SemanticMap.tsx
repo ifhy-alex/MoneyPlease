@@ -155,7 +155,7 @@ function MapCanvas({ puntos, height, onOpen }: { puntos: MapPoint[]; height: num
       />
       {active && (
         <div role="tooltip"
-             className="glass pointer-events-none absolute z-10 max-w-60 bg-bg/80 px-3 py-2 text-xs"
+             className="glass panel pointer-events-none absolute z-10 max-w-60 px-3 py-2 text-xs"
              style={{ left: Math.max(8, Math.min(active.px + 12, width - 248)), top: Math.max(active.py - 12, 8) }}>
           <p className="font-medium text-text">{active.titulo}</p>
           <p className="text-muted">{active.empresa}</p>

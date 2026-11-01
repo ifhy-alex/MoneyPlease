@@ -70,6 +70,12 @@ h3 { font-size: 15px; line-height: 1.35; }
   -webkit-backdrop-filter: blur(14px);
 }
 
+/* Paneles flotantes (diálogos, avisos, tooltips): el mismo vidrio pero casi opaco, para que no se lea lo de atrás. */
+.glass.panel {
+  background: rgba(8, 10, 20, 0.94);
+  border-color: var(--line-strong);
+}
+
 /* Brillo del borde que sigue al puntero (las coordenadas --mx/--my las pone JS; sin JS queda arriba al centro). */
 .glass-hover {
   position: relative;

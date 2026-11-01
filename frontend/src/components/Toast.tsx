@@ -16,7 +16,7 @@ export function Toast({ toast, onClose, ms = 6000 }: { toast: ToastState | null;
   return (
     <div
       role={toast.tone === 'error' ? 'alert' : 'status'}
-      className="fixed bottom-20 left-1/2 z-30 flex -translate-x-1/2 items-center gap-3 glass bg-bg/85 px-4 py-2 text-sm md:bottom-6"
+      className="fixed bottom-20 left-1/2 z-30 flex -translate-x-1/2 items-center gap-3 glass panel px-4 py-2 text-sm md:bottom-6"
     >
       <span className={toast.tone === 'error' ? 'text-danger' : ''}>{toast.message}</span>
       {toast.action && (

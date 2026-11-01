@@ -56,7 +56,7 @@ export function Dialog({ title, onClose, children, variant = 'center', hideTitle
 
   const panel = variant === 'side'
     ? 'fixed inset-y-0 right-0 flex w-full max-w-xl flex-col gap-4 overflow-y-auto border-l border-line bg-bg/85 p-6 backdrop-blur-xl'
-    : 'glass flex w-full max-w-md flex-col gap-3 bg-bg/85 p-5'
+    : 'glass panel flex w-full max-w-md flex-col gap-3 p-5'
   return (
     <div className={`fixed inset-0 z-30 bg-bg/60 ${variant === 'center' ? 'flex items-center justify-center p-4' : ''}`}
          onMouseDown={(e) => { if (e.target === e.currentTarget) onClose() }}>
