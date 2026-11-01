@@ -85,7 +85,7 @@ const VERTEX = `
     vAlpha = alpha;
     vTint = tint;
     vec4 mv = modelViewMatrix * vec4(position, 1.0);
-    gl_PointSize = size * scale / -mv.z;
+    gl_PointSize = min(size * scale / -mv.z, 64.0);  // de cerca, el brillo no tapa la pantalla
     gl_Position = projectionMatrix * mv;
   }`
 const FRAGMENT = `
@@ -119,8 +119,9 @@ function textSprite(text: string, color: string): THREE.Sprite {
   x.fillText(text, 8, 16)
   const tex = new THREE.CanvasTexture(c)
   tex.minFilter = THREE.LinearFilter
-  const sprite = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, transparent: true, depthWrite: false }))
-  sprite.scale.set(c.width / 64, c.height / 64, 1)
+  // Tamaño fijo en pantalla (sin atenuación): las etiquetas se leen igual de cerca y de lejos.
+  const sprite = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, transparent: true, depthWrite: false, sizeAttenuation: false }))
+  sprite.scale.set(0.034 * (c.width / c.height), 0.034, 1)
   return sprite
 }
 
