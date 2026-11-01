@@ -50,3 +50,37 @@ def test_menos_de_tres_reparte_por_id():
 
 def test_vacio():
     assert project(unit(0), np.empty((0, D)), []) == []
+
+
+def test_3d_radio_igual_que_2d():
+    from moneyplease.projection import project3d
+    out = project3d(unit(0), jobs_with([0.9, 0.7, 0.5, 0.3]), [1, 2, 3, 4])
+    assert np.allclose([math.sqrt(x * x + y * y + z * z) for x, y, z, _ in out], [0, 1 / 3, 2 / 3, 1], atol=1e-6)
+
+
+def test_3d_signo_determinista_sin_importar_el_orden():
+    from moneyplease.projection import project3d
+    rng = np.random.default_rng(5)
+    jobs = rng.normal(size=(12, D))
+    jobs /= np.linalg.norm(jobs, axis=1, keepdims=True)
+    ids = list(range(200, 212))
+    first = dict(zip(ids, project3d(unit(0), jobs, ids)))
+    order = rng.permutation(12)
+    second = dict(zip([ids[i] for i in order], project3d(unit(0), jobs[order], [ids[i] for i in order])))
+    for i in ids:
+        assert np.allclose(first[i], second[i], atol=1e-9)
+
+
+def test_3d_menos_de_cuatro_en_espiral():
+    from moneyplease.projection import project3d
+    out = project3d(unit(0), jobs_with([0.6, 0.6, 0.6]), [7, 3, 5])
+    vecs = [np.array(o[:3]) for o in out]
+    assert all(abs(np.linalg.norm(v) - 0.5) < 1e-9 for v in vecs)
+    for a in range(3):
+        for b in range(a + 1, 3):
+            assert vecs[a] @ vecs[b] / 0.25 < 0.99
+
+
+def test_3d_vacio():
+    from moneyplease.projection import project3d
+    assert project3d(unit(0), np.empty((0, D)), []) == []
