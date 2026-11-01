@@ -1,6 +1,6 @@
 import numpy as np
 from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy import and_, or_, select
+from sqlalchemy import and_, or_, select, text
 from sqlalchemy.orm import Session
 
 from moneyplease.api.deps import get_session
@@ -22,11 +22,15 @@ def get_map(session: Session = Depends(get_session)) -> MapData:
     if active is None:
         raise HTTPException(404, "Todavía no hay perfil guardado")
     prefs = Profile.model_validate(active.perfil_json).preferences
+    # Igual que la preselección del matching: sin el índice HNSW (con filtros devuelve muy pocas filas) y con
+    # un filtro de lugar barato en SQL, para que las ofertas extranjeras parecidas no llenen la ventana.
+    session.execute(text("SET LOCAL enable_indexscan = off"))
+    place = or_(Job.pais == "CR", Job.modalidad == "remoto") if prefs.remoto_abierto else Job.pais == "CR"
     rows = session.execute(
         select(Job, Match.score, JobLabel.etiqueta)
         .outerjoin(Match, and_(Match.job_id == Job.id, Match.profile_id == active.id))
         .outerjoin(JobLabel, JobLabel.job_id == Job.id)
-        .where(Job.estado == "active", Job.embedding.is_not(None),
+        .where(Job.estado == "active", Job.embedding.is_not(None), place,
                or_(JobLabel.etiqueta.is_(None), JobLabel.etiqueta != "mala"))
         .order_by(Job.embedding.cosine_distance(active.embedding))
         .limit(CANDIDATES)).all()

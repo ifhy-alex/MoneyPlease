@@ -57,3 +57,19 @@ def test_coordenadas_en_rango(client, world):
     for p in client.get("/api/map").json()["puntos"]:
         assert -1 <= p["x"] <= 1 and -1 <= p["y"] <= 1
         assert math.hypot(p["x"], p["y"]) <= 1 + 1e-9
+
+
+def test_las_ofertas_de_cr_no_quedan_tapadas_por_extranjeras_mas_parecidas(client, world, session):
+    from moneyplease.db.models import Job
+    from tests.api.conftest import NOW
+    prof = world.profile()
+    foreign = [Job(source_id=world.source.id, titulo=f"Dev {i}", empresa="X", ubicacion="Austin, TX",
+                   modalidad="presencial", pais="US", provincia=None, url=f"https://x/us{i}", hash=f"us{i}",
+                   raw_json={}, descripcion="d", primera_vez_visto=NOW,
+                   ultima_vez_visto=NOW, embedding=near(prof.embedding, 0.95, 1000 + i))
+               for i in range(650)]
+    session.add_all(foreign)
+    session.commit()
+    cr = [world.job(embedding=near(prof.embedding, 0.5, i)) for i in range(5)]
+    ids = {p["job_id"] for p in client.get("/api/map").json()["puntos"]}
+    assert {j.id for j in cr} <= ids
