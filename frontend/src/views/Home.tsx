@@ -76,6 +76,7 @@ export default function Home() {
                 job={item.job}
                 match={item.match}
                 saved={item.postulacion_id !== null}
+                duplicados={item.duplicados}
                 onInterest={() => sendFeedback(item.job.id, 'interesa')}
                 onDismiss={() => sendFeedback(item.job.id, 'no_interesa', true)}
                 onSave={() => saveJob(item.job.id)}

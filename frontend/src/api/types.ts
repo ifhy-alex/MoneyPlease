@@ -29,12 +29,14 @@ export interface TopItem {
   match: MatchInfo
   etiqueta: Etiqueta | null
   postulacion_id: number | null
+  duplicados?: DuplicateRef[]
 }
 
 export interface ExploreItem {
   job: Job
   match: MatchInfo | null
   etiqueta: Etiqueta | null
+  duplicados?: DuplicateRef[]
 }
 
 export interface ExplorePage {
@@ -49,6 +51,7 @@ export interface JobDetail {
   match: MatchInfo | null
   etiqueta: Etiqueta | null
   postulacion: { id: number; estado: Estado } | null
+  duplicados?: DuplicateRef[]
 }
 
 export interface Skill {
@@ -186,4 +189,39 @@ export interface SkillsGraph {
   habilidades: GraphSkill[]
   ofertas: GraphOffer[]
   aristas: GraphEdge[]
+}
+
+export interface DuplicateRef {
+  job_id: number
+  url: string
+}
+
+export interface UniversePoint {
+  job_id: number
+  titulo: string
+  empresa: string
+  x: number
+  y: number
+  z: number
+  similitud: number
+  puntaje: number | null
+  fit: Fit | null
+  etiqueta: Etiqueta | null
+  nube: number
+  duplicados: number[]
+}
+
+export interface Nube {
+  id: number
+  nombre: string
+  x: number
+  y: number
+  z: number
+  n: number
+}
+
+export interface UniverseData {
+  total: number
+  puntos: UniversePoint[]
+  nubes: Nube[]
 }

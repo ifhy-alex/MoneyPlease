@@ -1,6 +1,7 @@
 import { useJob, type FeedbackValue } from '../api/hooks'
 import { CompanySeal } from './CompanySeal'
 import { Dialog } from './Dialog'
+import { DuplicatesNote } from './DuplicatesNote'
 import { ScoreRing } from './ScoreRing'
 
 interface Props {
@@ -30,6 +31,7 @@ export function JobDetail({ id, onClose, onFeedback, onSave }: Props) {
             </div>
             {d.match && <ScoreRing score={d.match.score} fit={d.match.fit} size={56} />}
           </header>
+          <DuplicatesNote duplicados={d.duplicados} />
           {d.match && (
             <section className="grid gap-3 text-sm sm:grid-cols-2">
               <div>

@@ -1,6 +1,6 @@
 import { http, HttpResponse } from 'msw'
 import { setupServer } from 'msw/node'
-import type { ApplicationItem, Insights, MapPoint, SkillsGraph, TopItem } from '../api/types'
+import type { ApplicationItem, Insights, MapPoint, SkillsGraph, TopItem, UniversePoint } from '../api/types'
 
 export const job = (id: number, extra: Partial<TopItem['job']> = {}): TopItem['job'] => ({
   id, titulo: `Oferta ${id}`, empresa: 'ACME', ubicacion: 'Heredia, Costa Rica', modalidad: 'hibrido', pais: 'CR',
@@ -46,7 +46,14 @@ export const skillsGraph = (): SkillsGraph => ({
   aristas: [{ habilidad: 'Java', job_id: 1 }, { habilidad: 'Java', job_id: 2 }, { habilidad: 'Docker', job_id: 1 }],
 })
 
+export const universePoint = (id: number, puntaje: number | null = 80, nube = 0,
+                              extra: Partial<UniversePoint> = {}): UniversePoint => ({
+  job_id: id, titulo: `Oferta ${id}`, empresa: 'ACME', x: 0.1 * id, y: -0.1 * id, z: 0.05 * id, similitud: 0.8,
+  puntaje, fit: 'junior', etiqueta: null, nube, duplicados: [], ...extra,
+})
+
 export const handlers = [
+  http.get('/api/universe', () => HttpResponse.json({ total: 0, puntos: [], nubes: [] })),
   http.get('/api/map', () => HttpResponse.json({ total: 0, puntos: [] })),
   http.get('/api/skills-graph', () => HttpResponse.json({ habilidades: [], ofertas: [], aristas: [] })),
   http.get('/api/insights', () => HttpResponse.json(insights())),

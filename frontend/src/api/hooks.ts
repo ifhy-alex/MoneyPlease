@@ -2,7 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { api } from './client'
 import type {
   ApplicationItem, DailyPoint, Draft, Estado, Etiqueta, ExploreFilters, ExplorePage, FlowPoint, Insights, JobDetail,
-  MapData, Perfil, ProfileVersion, SkillPoint, SkillsGraph, TopItem,
+  MapData, Perfil, ProfileVersion, SkillPoint, SkillsGraph, TopItem, UniverseData,
 } from './types'
 
 export type FeedbackValue = 'interesa' | 'no_interesa' | null
@@ -15,6 +15,8 @@ export const useJobs = (f: ExploreFilters) =>
 export const useJob = (id: number | null) =>
   useQuery({ queryKey: ['job', id], queryFn: () => api.get<JobDetail>(`/jobs/${id}`), enabled: id !== null })
 export const useMap = () => useQuery({ queryKey: ['map'], queryFn: () => api.get<MapData>('/map'), retry: false })
+export const useUniverse = () =>
+  useQuery({ queryKey: ['universe'], queryFn: () => api.get<UniverseData>('/universe'), retry: false })
 export const useSkillsGraph = () =>
   useQuery({ queryKey: ['skills-graph'], queryFn: () => api.get<SkillsGraph>('/skills-graph'), retry: false })
 export const useSkills = () => useQuery({ queryKey: ['skills'], queryFn: () => api.get<SkillPoint[]>('/insights/skills') })
@@ -54,6 +56,7 @@ export function useFeedback() {
       qc.invalidateQueries({ queryKey: ['insights'] })
       qc.invalidateQueries({ queryKey: ['map'] })
       qc.invalidateQueries({ queryKey: ['skills-graph'] })
+      qc.invalidateQueries({ queryKey: ['universe'] })
     },
   })
 }
@@ -124,7 +127,7 @@ export function useSaveProfile() {
       qc.invalidateQueries({ queryKey: ['profile-versions'] })
       qc.invalidateQueries({ queryKey: ['skills'] })
       // El perfil nuevo cambia el top, el mapa y el grafo: Inicio se refresca solo.
-      for (const key of ['top', 'insights', 'map', 'skills-graph']) qc.invalidateQueries({ queryKey: [key] })
+      for (const key of ['top', 'insights', 'map', 'skills-graph', 'universe']) qc.invalidateQueries({ queryKey: [key] })
     },
   })
 }

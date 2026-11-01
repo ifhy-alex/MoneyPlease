@@ -1,7 +1,8 @@
 import { motion } from 'framer-motion'
-import type { MatchInfo, Job } from '../api/types'
+import type { DuplicateRef, MatchInfo, Job } from '../api/types'
 import { usePrefersReducedMotion } from '../lib/motion'
 import { CompanySeal } from './CompanySeal'
+import { DuplicatesNote } from './DuplicatesNote'
 import { ScoreRing } from './ScoreRing'
 
 const FIT_LABEL = { practica: 'Práctica', junior: 'Junior', no_aplica: 'No aplica' } as const
@@ -15,9 +16,10 @@ interface Props {
   onDismiss?: () => void
   onSave?: () => void
   onOpen?: () => void
+  duplicados?: DuplicateRef[]
 }
 
-export function JobCard({ job, match, saved, index = 0, onInterest, onDismiss, onSave, onOpen }: Props) {
+export function JobCard({ job, match, saved, index = 0, onInterest, onDismiss, onSave, onOpen, duplicados }: Props) {
   const reduced = usePrefersReducedMotion()
   return (
     <motion.article
@@ -60,6 +62,7 @@ export function JobCard({ job, match, saved, index = 0, onInterest, onDismiss, o
           <p className="mt-2 text-sm text-muted">{match.resumen}</p>
         </>
       )}
+      <div className="mt-2"><DuplicatesNote duplicados={duplicados} /></div>
       <div className="mt-3 flex flex-wrap gap-2 text-sm">
         {onInterest && <ActionButton label="Me interesa" icon="👍" onClick={onInterest} />}
         {onDismiss && <ActionButton label="No me interesa" icon="👎" onClick={onDismiss} />}
