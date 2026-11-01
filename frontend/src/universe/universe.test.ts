@@ -75,7 +75,8 @@ describe('grafo 3D', () => {
     const a = layoutGraph3d(skillsGraph(), 3)
     const b = layoutGraph3d(skillsGraph(), 3)
     expect(a.nodes.map((n) => n.pos)).toEqual(b.nodes.map((n) => n.pos))
-    for (const n of a.nodes) expect(Math.hypot(...n.pos)).toBeLessThan(60)
+    const far = Math.max(...a.nodes.map((n) => Math.hypot(...n.pos)))
+    expect(far).toBeCloseTo(7, 5)  // escalado para caber en la vista, como el universo de ofertas
     expect(a.isolated).toEqual(['Python'])
     expect(a.links).toHaveLength(3)
   })
