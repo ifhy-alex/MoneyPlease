@@ -88,3 +88,37 @@ describe('Postulaciones', () => {
     expect(await screen.findByText(/todavía no guardaste/i)).toBeInTheDocument()
   })
 })
+
+describe('Borrar una postulación', () => {
+  function trackDeletes() {
+    const deletes: number[] = []
+    server.use(http.delete('/api/applications/:id', ({ params }) => {
+      deletes.push(Number(params.id))
+      return new HttpResponse(null, { status: 204 })
+    }))
+    return deletes
+  }
+
+  it('pide confirmación y cancelar no borra', async () => {
+    withApps()
+    const deletes = trackDeletes()
+    await openBoard()
+    await userEvent.click(screen.getByRole('button', { name: /editar oferta 101/i }))
+    await userEvent.click(screen.getByRole('button', { name: 'Eliminar' }))
+    const confirm = screen.getByRole('dialog', { name: /¿borrar esta postulación\?/i })
+    await userEvent.click(within(confirm).getByRole('button', { name: 'Cancelar' }))
+    expect(screen.queryByRole('dialog', { name: /¿borrar/i })).not.toBeInTheDocument()
+    expect(deletes).toEqual([])
+  })
+
+  it('confirmar borra', async () => {
+    withApps()
+    const deletes = trackDeletes()
+    await openBoard()
+    await userEvent.click(screen.getByRole('button', { name: /editar oferta 101/i }))
+    await userEvent.click(screen.getByRole('button', { name: 'Eliminar' }))
+    const confirm = screen.getByRole('dialog', { name: /¿borrar esta postulación\?/i })
+    await userEvent.click(within(confirm).getByRole('button', { name: 'Eliminar' }))
+    await waitFor(() => expect(deletes).toEqual([1]))
+  })
+})

@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import type { ApplicationChanges } from '../api/hooks'
 import type { ApplicationItem, Estado } from '../api/types'
+import { ConfirmDialog, Dialog } from './Dialog'
 import { ESTADOS } from './Kanban'
 
 interface Props {
@@ -17,16 +18,14 @@ export function ApplicationEditor({ app, onSave, onDelete, onClose }: Props) {
   const [notas, setNotas] = useState(app.notas)
   const [fecha, setFecha] = useState(app.fecha_aplicacion ?? '')
   const [siguiente, setSiguiente] = useState(app.siguiente_paso)
+  const [confirming, setConfirming] = useState(false)
   const save = () => {
     const changes: ApplicationChanges = { notas, siguiente_paso: siguiente, fecha_aplicacion: fecha || null }
     if (estado !== app.estado) changes.estado = estado
     onSave(changes)
   }
   return (
-    <div role="dialog" aria-modal="true" aria-label={`Editar postulación: ${app.job.titulo}`}
-         className="fixed inset-0 z-30 flex items-center justify-center bg-black/40 p-4">
-      <div className="flex w-full max-w-md flex-col gap-3 glass bg-bg/80 p-5">
-        <h2 className="text-xl">{app.job.titulo}</h2>
+    <Dialog title={app.job.titulo} onClose={onClose}>
         <p className="-mt-2 text-sm text-muted">{app.job.empresa}</p>
         <label className="flex flex-col gap-1 text-sm">Estado
           <select value={estado} onChange={(e) => setEstado(e.target.value as Estado)} className={field}>
@@ -49,13 +48,16 @@ export function ApplicationEditor({ app, onSave, onDelete, onClose }: Props) {
           </button>
         )}
         <div className="mt-2 flex justify-between">
-          <button type="button" onClick={onDelete} className="text-sm text-danger">Eliminar</button>
+          <button type="button" onClick={() => setConfirming(true)} className="text-sm text-danger">Eliminar</button>
           <div className="flex gap-2">
             <button type="button" onClick={onClose} className="rounded-lg px-3 py-1.5 text-sm text-muted">Cancelar</button>
-            <button type="button" onClick={save} className="rounded-lg bg-accent px-3 py-1.5 text-sm font-medium text-bg">Guardar</button>
+            <button type="button" onClick={save} className="rounded-lg bg-silver px-3 py-1.5 text-sm font-medium text-bg">Guardar</button>
           </div>
         </div>
-      </div>
-    </div>
+      {confirming && (
+        <ConfirmDialog title="¿Borrar esta postulación?" text="Se pierden sus notas y su historial."
+                       confirmLabel="Eliminar" onConfirm={onDelete} onCancel={() => setConfirming(false)} />
+      )}
+    </Dialog>
   )
 }
