@@ -44,8 +44,10 @@ export function JobDetail({ id, onClose, onInterest, onDismiss, onSave }: Props)
             </section>
           )}
           <div className="flex flex-wrap gap-2 text-sm">
-            <button type="button" onClick={onInterest} className="rounded-lg border border-line px-3 py-1">👍 Me interesa</button>
-            <button type="button" onClick={onDismiss} className="rounded-lg border border-line px-3 py-1">👎 No me interesa</button>
+            <button type="button" onClick={onInterest} aria-pressed={d.etiqueta === 'buena'}
+                    className="rounded-lg border border-line px-3 py-1 aria-pressed:border-silver aria-pressed:text-silver">👍 Me interesa</button>
+            <button type="button" onClick={onDismiss} aria-pressed={d.etiqueta === 'mala'}
+                    className="rounded-lg border border-line px-3 py-1 aria-pressed:border-silver aria-pressed:text-silver">👎 No me interesa</button>
             <button type="button" onClick={onSave} disabled={d.postulacion !== null}
                     className="rounded-lg border border-line px-3 py-1 disabled:opacity-60">
               🔖 {d.postulacion ? `En postulaciones (${d.postulacion.estado})` : 'Guardar'}

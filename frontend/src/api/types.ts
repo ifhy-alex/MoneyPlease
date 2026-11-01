@@ -145,3 +145,45 @@ export interface ExploreFilters {
   page?: number
   sort?: 'score' | 'fecha'
 }
+
+export interface MapPoint {
+  job_id: number
+  titulo: string
+  empresa: string
+  x: number
+  y: number
+  similitud: number
+  puntaje: number | null
+  etiqueta: Etiqueta | null
+}
+
+export interface MapData {
+  total: number
+  puntos: MapPoint[]
+}
+
+export interface GraphSkill {
+  nombre: string
+  nivel: string | null
+  area: string
+  grado: number
+  tiene: boolean
+}
+
+export interface GraphOffer {
+  job_id: number
+  titulo: string
+  empresa: string
+  puntaje: number
+}
+
+export interface GraphEdge {
+  habilidad: string
+  job_id: number
+}
+
+export interface SkillsGraph {
+  habilidades: GraphSkill[]
+  ofertas: GraphOffer[]
+  aristas: GraphEdge[]
+}

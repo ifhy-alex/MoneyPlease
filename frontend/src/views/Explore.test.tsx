@@ -1,6 +1,6 @@
 import { screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { http, HttpResponse } from 'msw'
+import { delay, http, HttpResponse } from 'msw'
 import { describe, expect, it } from 'vitest'
 import { job, server } from '../test/handlers'
 import { renderWithProviders } from '../test/render'
@@ -55,5 +55,18 @@ describe('Explorar', () => {
     await userEvent.click(await screen.findByRole('button', { name: 'Backend Intern' }))
     expect(await screen.findByText(/<script>alert\(1\)<\/script>/)).toBeInTheDocument()
     expect(document.querySelector('script')).toBeNull()
+  })
+})
+
+describe('Feedback en Explorar', () => {
+  it('el feedback del detalle es inmediato', async () => {
+    trackJobs()
+    server.use(http.post('/api/jobs/7/feedback', async () => { await delay('infinite'); return new HttpResponse(null, { status: 204 }) }))
+    renderWithProviders(<Explore />)
+    await userEvent.click(await screen.findByRole('button', { name: 'Backend Intern' }))
+    const dismiss = await screen.findByRole('button', { name: /no me interesa/i })
+    expect(dismiss).toHaveAttribute('aria-pressed', 'false')
+    await userEvent.click(dismiss)
+    await waitFor(() => expect(screen.getByRole('button', { name: /no me interesa/i })).toHaveAttribute('aria-pressed', 'true'))
   })
 })

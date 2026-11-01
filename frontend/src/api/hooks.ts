@@ -2,7 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { api } from './client'
 import type {
   ApplicationItem, DailyPoint, Draft, Estado, Etiqueta, ExploreFilters, ExplorePage, FlowPoint, Insights, JobDetail,
-  Perfil, ProfileVersion, SkillPoint, TopItem,
+  MapData, Perfil, ProfileVersion, SkillPoint, SkillsGraph, TopItem,
 } from './types'
 
 export type FeedbackValue = 'interesa' | 'no_interesa' | null
@@ -14,6 +14,9 @@ export const useJobs = (f: ExploreFilters) =>
   useQuery({ queryKey: ['jobs', f], queryFn: () => api.get<ExplorePage>('/jobs', { ...f }) })
 export const useJob = (id: number | null) =>
   useQuery({ queryKey: ['job', id], queryFn: () => api.get<JobDetail>(`/jobs/${id}`), enabled: id !== null })
+export const useMap = () => useQuery({ queryKey: ['map'], queryFn: () => api.get<MapData>('/map'), retry: false })
+export const useSkillsGraph = () =>
+  useQuery({ queryKey: ['skills-graph'], queryFn: () => api.get<SkillsGraph>('/skills-graph'), retry: false })
 export const useSkills = () => useQuery({ queryKey: ['skills'], queryFn: () => api.get<SkillPoint[]>('/insights/skills') })
 export const useDaily = () => useQuery({ queryKey: ['daily'], queryFn: () => api.get<DailyPoint[]>('/insights/daily') })
 export const useFlow = () => useQuery({ queryKey: ['flow'], queryFn: () => api.get<FlowPoint[]>('/insights/flow') })
@@ -25,18 +28,31 @@ export function useFeedback() {
     mutationFn: ({ jobId, valor }: { jobId: number; valor: FeedbackValue }) =>
       api.post<void>(`/jobs/${jobId}/feedback`, { valor }),
     onMutate: async ({ jobId, valor }) => {
-      await qc.cancelQueries({ queryKey: ['top'] })
-      const previous = qc.getQueryData<TopItem[]>(['top'])
+      await Promise.all([['top'], ['job', jobId], ['jobs']].map((queryKey) => qc.cancelQueries({ queryKey })))
+      const previous = {
+        top: qc.getQueryData<TopItem[]>(['top']),
+        job: qc.getQueryData<JobDetail>(['job', jobId]),
+        jobs: qc.getQueriesData<ExplorePage>({ queryKey: ['jobs'] }),
+      }
       const etiqueta = valor ? LABEL[valor] : null
       qc.setQueryData<TopItem[]>(['top'], (items) =>
         items?.map((i) => (i.job.id === jobId ? { ...i, etiqueta } : i)))
-      return { previous }
+      qc.setQueryData<JobDetail>(['job', jobId], (d) => (d ? { ...d, etiqueta } : d))
+      qc.setQueriesData<ExplorePage>({ queryKey: ['jobs'] }, (page) =>
+        page && { ...page, items: page.items.map((i) => (i.job.id === jobId ? { ...i, etiqueta } : i)) })
+      return { previous, jobId }
     },
-    onError: (_e, _v, ctx) => ctx?.previous && qc.setQueryData(['top'], ctx.previous),
+    onError: (_e, _v, ctx) => {
+      if (!ctx) return
+      qc.setQueryData(['top'], ctx.previous.top)
+      qc.setQueryData(['job', ctx.jobId], ctx.previous.job)
+      for (const [key, data] of ctx.previous.jobs) qc.setQueryData(key, data)
+    },
     onSettled: () => {
       qc.invalidateQueries({ queryKey: ['jobs'] })
       qc.invalidateQueries({ queryKey: ['job'] })
       qc.invalidateQueries({ queryKey: ['insights'] })
+      qc.invalidateQueries({ queryKey: ['map'] })
     },
   })
 }
@@ -106,6 +122,8 @@ export function useSaveProfile() {
       qc.invalidateQueries({ queryKey: ['profile'] })
       qc.invalidateQueries({ queryKey: ['profile-versions'] })
       qc.invalidateQueries({ queryKey: ['skills'] })
+      // El perfil nuevo cambia el top, el mapa y el grafo: Inicio se refresca solo.
+      for (const key of ['top', 'insights', 'map', 'skills-graph']) qc.invalidateQueries({ queryKey: [key] })
     },
   })
 }
