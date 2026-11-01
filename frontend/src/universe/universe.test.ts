@@ -75,8 +75,10 @@ describe('grafo 3D', () => {
     const a = layoutGraph3d(skillsGraph(), 3)
     const b = layoutGraph3d(skillsGraph(), 3)
     expect(a.nodes.map((n) => n.pos)).toEqual(b.nodes.map((n) => n.pos))
-    const far = Math.max(...a.nodes.map((n) => Math.hypot(...n.pos)))
-    expect(far).toBeCloseTo(7, 5)  // escalado para caber en la vista, como el universo de ofertas
+    // Escalado por la mediana (el grueso del grafo se reparte) y con tope para los nodos lejanos.
+    const dists = a.nodes.map((n) => Math.hypot(...n.pos)).sort((x, y) => x - y)
+    expect(dists[Math.floor(dists.length / 2)]).toBeCloseTo(4.5, 5)
+    expect(dists.at(-1)!).toBeLessThanOrEqual(9 + 1e-9)
     expect(a.isolated).toEqual(['Python'])
     expect(a.links).toHaveLength(3)
   })
