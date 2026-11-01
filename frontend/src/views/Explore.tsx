@@ -8,7 +8,7 @@ import { JobDetail } from '../components/JobDetail'
 import { Toast, type ToastState } from '../components/Toast'
 import { EmptyState } from '../decor/EmptyState'
 
-const OfferRiver = lazy(() => import('../art/OfferRiver'))
+const SignalFlow = lazy(() => import('../art/SignalFlow'))
 const PAGE = 25
 
 export default function Explore() {
@@ -42,8 +42,8 @@ export default function Explore() {
   return (
     <div className="flex flex-col gap-5">
       <header className="flex flex-col gap-3">
-        <h1 className="text-3xl">Explorar ofertas</h1>
-        <Suspense fallback={null}><OfferRiver /></Suspense>
+        <h1>Explorar ofertas</h1>
+        <Suspense fallback={null}><SignalFlow /></Suspense>
         <Filters />
       </header>
       <p className="text-sm text-muted" aria-live="polite">

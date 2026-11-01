@@ -18,5 +18,5 @@ export function toSeries(flow: FlowPoint[]): RiverSeries {
   return { semanas: semanas.slice(first), fuentes, matrix: matrix.slice(first) }
 }
 
-// Un color por tipo de fuente, derivado de los acentos del tema.
-export const SOURCE_COLORS = ['var(--accent)', 'var(--ok)', 'var(--danger)', '#8b9cf7', '#c58cf2', '#5fc9d9']
+// Un color por tipo de fuente: plata, azul y grises azulados de la paleta medianoche y plata.
+export const SOURCE_COLORS = ['var(--silver)', 'var(--glow)', '#8FA3D6', '#5E6E9C', '#B4BED4', '#3E4F86']

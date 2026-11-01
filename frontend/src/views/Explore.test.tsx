@@ -70,3 +70,16 @@ describe('Feedback en Explorar', () => {
     await waitFor(() => expect(screen.getByRole('button', { name: /no me interesa/i })).toHaveAttribute('aria-pressed', 'true'))
   })
 })
+
+describe('Flujo de ingesta', () => {
+  it('muestra el flujo de ofertas con tres semanas de datos', async () => {
+    trackJobs()
+    server.use(http.get('/api/insights/flow', () => HttpResponse.json([
+      { semana: '2026-10-12', fuente: 'workday', nuevas: 4 },
+      { semana: '2026-10-19', fuente: 'workday', nuevas: 6 },
+      { semana: '2026-10-26', fuente: 'greenhouse', nuevas: 3 },
+    ])))
+    renderWithProviders(<Explore />)
+    expect(await screen.findByRole('img', { name: /flujo de ofertas/i }, { timeout: 4000 })).toBeInTheDocument()
+  })
+})

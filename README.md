@@ -98,14 +98,16 @@ docker compose exec worker python -m moneyplease eval
 
 La primera corrida calcula los embeddings de todas las ofertas en CPU y puede tardar bastante. Después solo procesa las nuevas. El modelo (`intfloat/multilingual-e5-small`) se descarga una sola vez en el volumen `hf_cache`.
 
-## Dashboard (Fase 3)
+## Dashboard
 
 `docker compose up -d --build` levanta también el servicio `web`. Se abre en **http://localhost:8000**, que solo escucha en tu computadora y no tiene login.
 
-- **Inicio:** el cielo del día, el top de ofertas con 👍 / 👎 / 🔖, las brechas de la semana, los recordatorios de seguimiento y el indicador del punto de control.
-- **Explorar:** todas las ofertas, con filtros guardados en la URL, el río de ofertas por fuente y el detalle de cada una.
-- **Postulaciones:** el jardín (cada postulación crece con su etapa) y un tablero kanban, que se puede arrastrar o mover con el teclado.
-- **Perfil:** subir el CV (genera un borrador sin guardarlo), editar con el formulario, ver el historial de versiones, la huella y la constelación de habilidades.
+La identidad es **medianoche y plata**: solo modo oscuro, tarjetas de vidrio sobre un campo de partículas, fuentes Geist y Geist Mono (incluidas en la app, sin internet). Todo el arte es algorítmico y usa tus datos reales; con "reducir movimiento" activado en el sistema, queda quieto.
+
+- **Inicio:** el **mapa semántico** (tú en el centro y cada oferta a la distancia de su similitud real con tu perfil; al pasar o tocar se ve la oferta, al hacer clic se abre), el top con 👍 / 👎 / 🔖, las brechas de la semana, los recordatorios de seguimiento y el punto de control.
+- **Explorar:** todas las ofertas, con filtros guardados en la URL, el **flujo de ingesta** por fuente y el detalle de cada una.
+- **Postulaciones:** el **pipeline** (cada postulación es un nodo que avanza por las etapas) y un tablero kanban, que se puede arrastrar o mover con el teclado. Borrar pide confirmación.
+- **Perfil:** subir el CV (genera un borrador sin guardarlo), editar con el formulario, el historial de versiones, la **huella** generativa y el **grafo de habilidades** (tus habilidades conectadas con las ofertas que las piden; punteadas, las que piden y te faltan).
 
 Las etiquetas 👍 / 👎 sirven también como ejemplos para Gemini. A partir de 6 etiquetas (al menos 2 de cada tipo) ajustan el score en ±15 puntos, y el top se vuelve a evaluar cuando cambian.
 

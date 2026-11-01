@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { toSeries } from './river'
 
-describe('río de ofertas', () => {
+describe('flujo de ofertas', () => {
   it('rellena con 0 las combinaciones que faltan', () => {
     const s = toSeries([
       { semana: '2026-10-19', fuente: 'workday', nuevas: 5 },
@@ -17,7 +17,7 @@ describe('río de ofertas', () => {
   })
 })
 
-describe('río de ofertas con historia corta', () => {
+describe('flujo de ofertas con historia corta', () => {
   it('recorta las semanas vacías del principio', () => {
     const s = toSeries([
       { semana: '2026-10-12', fuente: 'workday', nuevas: 0 },
@@ -26,5 +26,14 @@ describe('río de ofertas con historia corta', () => {
     ])
     expect(s.semanas).toEqual(['2026-10-26'])
     expect(s.matrix).toEqual([[9]])
+  })
+})
+
+describe('colores del flujo', () => {
+  it('usa la paleta medianoche y plata', async () => {
+    const { SOURCE_COLORS } = await import('./river')
+    expect(SOURCE_COLORS).toHaveLength(6)
+    expect(SOURCE_COLORS).not.toContain('var(--accent)')
+    expect(SOURCE_COLORS[0]).toBe('var(--silver)')
   })
 })
