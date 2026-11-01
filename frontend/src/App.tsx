@@ -8,6 +8,7 @@ const Home = lazy(() => import('./views/Home'))
 const Explore = lazy(() => import('./views/Explore'))
 const Applications = lazy(() => import('./views/Applications'))
 const Profile = lazy(() => import('./views/Profile'))
+const Universe = lazy(() => import('./views/Universe'))
 
 export default function App() {
   return (
@@ -18,6 +19,7 @@ export default function App() {
           <Route path="/explorar" element={<Explore />} />
           <Route path="/postulaciones" element={<Applications />} />
           <Route path="/perfil" element={<Profile />} />
+          <Route path="/universo" element={<Universe />} />
         </Routes>
       </Suspense>
     </Layout>
