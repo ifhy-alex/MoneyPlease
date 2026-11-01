@@ -78,3 +78,8 @@ def area_of(skill: str) -> str:
         return SKILL_AREA[key]
     found = find_skill(skill)
     return SKILL_AREA[found] if found else "otros"
+
+
+def display_skill(skill: str) -> str:
+    """Nombre para mostrar de una skill canónica: siglas en mayúsculas ("AWS", ".NET"), el resto capitalizado."""
+    return skill.upper() if len(skill) <= 3 or skill.startswith(".") else skill.title()
