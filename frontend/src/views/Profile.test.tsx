@@ -3,7 +3,8 @@ import userEvent from '@testing-library/user-event'
 import { delay, http, HttpResponse } from 'msw'
 import { describe, expect, it } from 'vitest'
 import type { Perfil, ProfileVersion } from '../api/types'
-import { server } from '../test/handlers'
+import { server, skillsGraph } from '../test/handlers'
+import { media } from '../test/setup'
 import { renderWithProviders } from '../test/render'
 import Profile from './Profile'
 
@@ -124,5 +125,42 @@ describe('Perfil: reintentar el mismo CV', () => {
     expect(input.value).toBe('')
     await userEvent.upload(input, file)
     await waitFor(() => expect(posts).toBe(2))
+  })
+})
+
+describe('Grafo de habilidades', () => {
+  const withGraph = () => {
+    withProfile()
+    server.use(http.get('/api/skills-graph', () => HttpResponse.json(skillsGraph())))
+  }
+
+  it('muestra habilidades y marca las que faltan', async () => {
+    withGraph()
+    renderWithProviders(<Profile />)
+    const graph = await screen.findByRole('group', { name: /grafo de habilidades/i })
+    expect(within(graph).getByRole('button', { name: /java: 2 ofertas/i })).toHaveAttribute('data-tiene', 'true')
+    expect(within(graph).getByRole('button', { name: /docker: 1 oferta/i })).toHaveAttribute('data-tiene', 'false')
+  })
+
+  it('pasar sobre una habilidad atenúa lo que no está conectado', async () => {
+    withGraph()
+    renderWithProviders(<Profile />)
+    const graph = await screen.findByRole('group', { name: /grafo de habilidades/i })
+    await userEvent.hover(within(graph).getByRole('button', { name: /docker/i }))
+    expect(within(graph).getByRole('button', { name: /python/i })).toHaveAttribute('opacity', '0.2')
+    expect(within(graph).getByRole('button', { name: /docker/i })).toHaveAttribute('opacity', '1')
+  })
+
+  it('con movimiento reducido el grafo no anima', async () => {
+    media.reducedMotion = true
+    withGraph()
+    renderWithProviders(<Profile />)
+    expect(await screen.findByRole('group', { name: /grafo de habilidades/i })).toHaveAttribute('data-animating', 'false')
+  })
+
+  it('la huella se dibuja con las versiones', async () => {
+    withProfile()
+    renderWithProviders(<Profile />)
+    expect(await screen.findByRole('img', { name: /huella de 2 versiones/i })).toBeInTheDocument()
   })
 })

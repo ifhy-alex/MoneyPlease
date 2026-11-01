@@ -20,3 +20,21 @@ describe('huella del perfil', () => {
     expect(normalizeAreas([])).toEqual([])
   })
 })
+
+describe('huella generativa', () => {
+  it('es determinista y dibuja al menos 3 arcos por sector', async () => {
+    const { fingerprintPaths } = await import('./glyph')
+    const axes = [1, 0.5, 0.2, 0.8, 0.3, 0.6]
+    const a = fingerprintPaths(axes, 70, 'v2')
+    expect(a).toEqual(fingerprintPaths(axes, 70, 'v2'))
+    expect(a.length).toBeGreaterThanOrEqual(18)
+    expect(a.join(' ')).not.toContain('NaN')
+  })
+
+  it('con todo en cero deja una marca mínima por sector', async () => {
+    const { fingerprintPaths } = await import('./glyph')
+    const out = fingerprintPaths([0, 0, 0, 0, 0, 0], 70, 'v1')
+    expect(out).toHaveLength(6)
+    expect(out.join(' ')).not.toContain('NaN')
+  })
+})

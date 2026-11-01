@@ -1,12 +1,13 @@
 import { lazy, Suspense, useEffect, useState } from 'react'
 import { ApiError, errorMessage } from '../api/client'
-import { useDraftFromCv, useProfile, useProfileVersions, useSaveProfile } from '../api/hooks'
+import { useCreateApplication, useDraftFromCv, useFeedback, useProfile, useProfileVersions, useSaveProfile } from '../api/hooks'
 import type { Perfil } from '../api/types'
+import { JobDetail } from '../components/JobDetail'
 import { errorsByField, ProfileForm } from '../components/ProfileForm'
 import { EmptyState } from '../decor/EmptyState'
 
-const ProfileGlyph = lazy(() => import('../art/ProfileGlyph'))
-const Constellation = lazy(() => import('../art/Constellation'))
+const Fingerprint = lazy(() => import('../art/Fingerprint'))
+const SkillGraph = lazy(() => import('../art/SkillGraph'))
 
 const EMPTY: Perfil = {
   skills: [], languages: [], experience_months: 0, seniority_target: ['practica', 'junior'], roles_target: [], summary: '',
@@ -23,6 +24,9 @@ export default function Profile() {
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [notice, setNotice] = useState<{ text: string; tone: 'ok' | 'error' } | null>(null)
   const [sent, setSent] = useState<string | null>(null)
+  const [open, setOpen] = useState<number | null>(null)
+  const feedback = useFeedback()
+  const createApp = useCreateApplication()
   const noProfile = profile.error instanceof ApiError && profile.error.status === 404
 
   useEffect(() => {
@@ -57,7 +61,7 @@ export default function Profile() {
     <div className="relative flex flex-col gap-6">
       <header className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h1 className="text-3xl">Tu perfil</h1>
+          <h1>Tu perfil</h1>
           {profile.data && <p className="text-sm text-muted">Versión activa: {profile.data.version}</p>}
         </div>
         <label className="cursor-pointer rounded-lg border border-line px-3 py-2 text-sm hover:bg-surface">
@@ -96,8 +100,8 @@ export default function Profile() {
       {versions.data && versions.data.length > 0 && (
         <section className="grid gap-6 lg:grid-cols-[18rem_1fr]">
           <div className="flex flex-col gap-3">
-            <h2 className="text-xl">Huella e historial</h2>
-            <Suspense fallback={null}><ProfileGlyph versions={versions.data} /></Suspense>
+            <h2>Huella e historial</h2>
+            <Suspense fallback={null}><Fingerprint versions={versions.data} /></Suspense>
             <ol className="flex flex-col gap-2 text-sm">
               {versions.data.map((v) => (
                 <li key={v.version} className="flex items-center justify-between gap-2">
@@ -112,10 +116,17 @@ export default function Profile() {
             </ol>
           </div>
           <div className="flex flex-col gap-3">
-            <h2 className="text-xl">Constelación de habilidades</h2>
-            <Suspense fallback={null}><Constellation /></Suspense>
+            <h2>Grafo de habilidades</h2>
+            <p className="-mt-2 text-sm text-muted">Tus habilidades y las ofertas que las piden. Punteadas: las que piden y te faltan.</p>
+            <Suspense fallback={null}><SkillGraph onOpen={setOpen} /></Suspense>
           </div>
         </section>
+      )}
+      {open !== null && (
+        <JobDetail id={open} onClose={() => setOpen(null)}
+                   onInterest={() => feedback.mutate({ jobId: open, valor: 'interesa' })}
+                   onDismiss={() => feedback.mutate({ jobId: open, valor: 'no_interesa' })}
+                   onSave={() => createApp.mutate(open)} />
       )}
     </div>
   )
