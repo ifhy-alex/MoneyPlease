@@ -74,3 +74,29 @@ class MapPoint(BaseModel):
 class MapData(BaseModel):
     total: int
     puntos: list[MapPoint]
+
+
+class GraphSkill(BaseModel):
+    nombre: str
+    nivel: str | None
+    area: str
+    grado: int
+    tiene: bool
+
+
+class GraphOffer(BaseModel):
+    job_id: int
+    titulo: str
+    empresa: str
+    puntaje: int
+
+
+class GraphEdge(BaseModel):
+    habilidad: str
+    job_id: int
+
+
+class SkillsGraph(BaseModel):
+    habilidades: list[GraphSkill]
+    ofertas: list[GraphOffer]
+    aristas: list[GraphEdge]

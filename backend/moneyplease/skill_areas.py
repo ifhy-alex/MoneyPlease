@@ -1,12 +1,13 @@
 """Asignación de skills a áreas (backend, frontend, datos…) para el arte y las agregaciones del dashboard."""
 import re
+import unicodedata
 
 from moneyplease.ingest.normalize import canonical
 
 AREAS = ("backend", "frontend", "datos", "cloud", "testing", "idiomas")
 
 _BY_AREA = {
-    "backend": ["java", "spring", "spring boot", "spring cloud", "python", "django", "flask", "fastapi", "node",
+    "backend": ["c#", "c++", "java", "spring", "spring boot", "spring cloud", "python", "django", "flask", "fastapi", "node",
                 "node.js", "express", ".net", "go", "golang", "php", "laravel", "ruby", "rails", "kotlin",
                 "rest", "restful apis", "graphql", "microservices", "microservicios", "api", "apis", "hibernate",
                 "jpa", "kafka", "rabbitmq"],
@@ -42,7 +43,31 @@ def find_skill(text: str) -> str | None:
     return None
 
 
+def fold_skill(text: str) -> str:
+    """Minúsculas y sin acentos, pero conservando # + . / (canonical los borra: "C#" quedaría "c")."""
+    text = unicodedata.normalize("NFKD", (text or "").lower())
+    return re.sub(r"\s+", " ", "".join(c for c in text if not unicodedata.combining(c))).strip()
+
+
+FOLDED_AREA: dict[str, str] = {fold_skill(skill): area for area, skills in _BY_AREA.items() for skill in skills}
+_FOLDED_BY_LENGTH = sorted(FOLDED_AREA, key=len, reverse=True)
+
+
+def skills_in(text: str) -> set[str]:
+    """Todas las skills conocidas que aparecen como palabra completa; la más larga gana si se solapan."""
+    t = fold_skill(text)
+    found: set[str] = set()
+    for skill in _FOLDED_BY_LENGTH:
+        pattern = rf"(?<![\w#+.]){re.escape(skill)}(?![\w#+])"
+        if re.search(pattern, t):
+            found.add(skill)
+            t = re.sub(pattern, " ", t)  # "spring boot" no cuenta además como "spring"
+    return found
+
+
 def area_of(skill: str) -> str:
+    if fold_skill(skill) in FOLDED_AREA:
+        return FOLDED_AREA[fold_skill(skill)]
     key = canonical(skill)
     if key in SKILL_AREA:
         return SKILL_AREA[key]
