@@ -42,7 +42,8 @@ describe('Perfil', () => {
   it('editar el nivel de una skill y guardar envía el PUT', async () => {
     const puts = withProfile()
     renderWithProviders(<Profile />)
-    await userEvent.selectOptions(await screen.findByLabelText(/nivel de java/i), 'avanzado')
+    // Con la suite completa en paralelo el formulario puede tardar más de 1 s en aparecer.
+    await userEvent.selectOptions(await screen.findByLabelText(/nivel de java/i, {}, { timeout: 4000 }), 'avanzado')
     await userEvent.click(screen.getByRole('button', { name: /guardar versión/i }))
     await waitFor(() => expect(puts).toHaveLength(1))
     expect(puts[0].skills[0]).toMatchObject({ name: 'Java', level: 'avanzado' })

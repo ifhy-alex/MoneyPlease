@@ -31,11 +31,18 @@ async function openBoard() {
 }
 
 describe('Postulaciones', () => {
-  it('el jardín es la vista por defecto y tiene una planta por postulación', async () => {
+  it('el pipeline es la vista por defecto y tiene un nodo por postulación', async () => {
     withApps()
     renderWithProviders(<Applications />)
-    // El jardín se carga con React.lazy: en una corrida completa puede tardar más de 1 s.
-    expect(await screen.findAllByRole('button', { name: /oferta 10\d/i }, { timeout: 4000 })).toHaveLength(2)
+    // El pipeline se carga con React.lazy: en una corrida completa puede tardar más de 1 s.
+    expect(await screen.findAllByRole('button', { name: /editar oferta 10\d/i }, { timeout: 4000 })).toHaveLength(2)
+  })
+
+  it('una rechazada sigue siendo editable en el pipeline', async () => {
+    server.use(http.get('/api/applications', () => HttpResponse.json([application(1), application(3, 'rechazada')])))
+    renderWithProviders(<Applications />)
+    await userEvent.click(await screen.findByRole('button', { name: /editar oferta 103/i }, { timeout: 4000 }))
+    expect(screen.getByRole('dialog', { name: 'Oferta 103' })).toBeInTheDocument()
   })
 
   it('mover con el teclado cambia de columna y llama al PATCH', async () => {
@@ -56,21 +63,21 @@ describe('Postulaciones', () => {
       expect(within(screen.getByRole('region', { name: /guardada/i })).getByText('Oferta 101')).toBeInTheDocument())
   })
 
-  it('pasar a entrevista lanza la lluvia de estrellas', async () => {
+  it('pasar a entrevista lanza el estallido de partículas', async () => {
     withApps()
     await openBoard()
     const column = screen.getByRole('region', { name: /^aplicada/i })
     await userEvent.selectOptions(within(column).getByLabelText(/mover oferta 102/i), 'entrevista')
-    expect(await screen.findByTestId('starfall')).toBeInTheDocument()
+    expect(await screen.findByTestId('burst')).toBeInTheDocument()
   })
 
-  it('con movimiento reducido no hay lluvia de estrellas', async () => {
+  it('con movimiento reducido no hay estallido', async () => {
     media.reducedMotion = true
     withApps()
     await openBoard()
     const column = screen.getByRole('region', { name: /^aplicada/i })
     await userEvent.selectOptions(within(column).getByLabelText(/mover oferta 102/i), 'entrevista')
-    await waitFor(() => expect(screen.queryByTestId('starfall')).not.toBeInTheDocument())
+    await waitFor(() => expect(screen.queryByTestId('burst')).not.toBeInTheDocument())
   })
 
   it('el editor guarda las notas', async () => {
