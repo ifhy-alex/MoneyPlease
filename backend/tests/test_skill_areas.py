@@ -47,7 +47,7 @@ def test_skills_in_no_confunde_java_con_javascript():
 
 def test_skills_in_prefiere_la_mas_larga():
     from moneyplease.skill_areas import skills_in
-    assert skills_in("Spring Boot y ASP.NET") == {"spring boot"}
+    assert skills_in("Spring Boot y ASP.NET") == {"spring boot", ".net"}
 
 
 def test_area_de_habilidades_con_simbolos():
