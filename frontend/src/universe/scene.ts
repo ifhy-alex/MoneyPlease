@@ -110,7 +110,8 @@ function textSprite(text: string, color: string): THREE.Sprite {
   const x = c.getContext('2d')!
   const font = '500 22px "Geist Mono Variable", ui-monospace, monospace'
   x.font = font
-  c.width = Math.ceil(x.measureText(text).width) + 16
+  // Margen holgado: la medida puede hacerse con la fuente de respaldo y el texto final ser algo más ancho.
+  c.width = Math.ceil(x.measureText(text).width * 1.2) + 24
   c.height = 32
   x.font = font
   x.fillStyle = color
@@ -204,7 +205,7 @@ export function createScene(container: HTMLElement, opts: { reducedMotion: boole
       stars = new THREE.Points(pointsOf(list, 1, (s) => s.opacity), starMat)
       scene.add(stars)
       const ringed = list.filter((s) => s.ring)
-      rings = new THREE.Points(pointsOf(ringed, 2.4, (s) => s.opacity * 0.6), ringMat)
+      rings = new THREE.Points(pointsOf(ringed, 1.5, (s) => s.opacity * 0.55), ringMat)
       scene.add(rings)
       dirty = true
     },
