@@ -47,11 +47,12 @@ export function layoutGraph(g: SkillsGraph, width: number, height: number, seed 
   const sim = forceSimulation(nodes)
     .randomSource(rnd)
     .force('link', forceLink<GraphNode, GraphLink>(links).distance(Math.min(width, height) / 5).strength(0.6))
-    .force('charge', forceManyBody<GraphNode>().strength(-55))
+    .force('charge', forceManyBody<GraphNode>().strength(-90))
     .force('center', forceCenter(width / 2, height / 2))
-    .force('x', forceX<GraphNode>(width / 2).strength(0.08))
-    .force('y', forceY<GraphNode>(height / 2).strength(0.12))
-    .force('collide', forceCollide<GraphNode>((n) => n.r + 6))
+    .force('x', forceX<GraphNode>(width / 2).strength(0.05))
+    .force('y', forceY<GraphNode>(height / 2).strength(0.09))
+    // Las habilidades llevan etiqueta (mono de 11 px ≈ 6,6 px por letra): el choque cuenta la mitad de su ancho.
+    .force('collide', forceCollide<GraphNode>((n) => (n.kind === 'skill' ? Math.max(n.r + 6, n.label.length * 3.4 + 6) : n.r + 5)).iterations(2))
     .stop()
   for (let i = 0; i < TICKS; i++) sim.tick()
   for (const n of nodes) {
