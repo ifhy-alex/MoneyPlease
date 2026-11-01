@@ -102,3 +102,33 @@ class SkillsGraph(BaseModel):
     habilidades: list[GraphSkill]
     ofertas: list[GraphOffer]
     aristas: list[GraphEdge]
+
+
+class UniversePoint(BaseModel):
+    job_id: int
+    titulo: str
+    empresa: str
+    x: float
+    y: float
+    z: float
+    similitud: float
+    puntaje: int | None
+    fit: str | None
+    etiqueta: str | None
+    nube: int
+    duplicados: list[int]
+
+
+class Nube(BaseModel):
+    id: int
+    nombre: str
+    x: float
+    y: float
+    z: float
+    n: int
+
+
+class UniverseData(BaseModel):
+    total: int
+    puntos: list[UniversePoint]
+    nubes: list[Nube]
