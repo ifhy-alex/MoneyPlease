@@ -7,10 +7,9 @@ describe('contraste', () => {
     expect(ratio('#000000', '#ffffff')).toBeCloseTo(21, 0)
   })
 
-  it.each(['dark', 'light'] as const)('los tokens %s cumplen AA', (theme) => {
-    const t = TOKENS[theme]
-    for (const [fg, bg] of [[t.text, t.bg], [t.text, t.surface], [t.muted, t.bg], [t.muted, t.surface]]) {
-      expect(ratio(fg, bg)).toBeGreaterThanOrEqual(4.5)
-    }
+  it('los tokens de medianoche y plata cumplen AA', () => {
+    const t = TOKENS
+    const pairs = [[t.text, t.bg], [t.text, t.glass], [t.muted, t.bg], [t.muted, t.glass], [t.silver, t.bg], [t.silver, t.glass]]
+    for (const [fg, bg] of pairs) expect(ratio(fg, bg)).toBeGreaterThanOrEqual(4.5)
   })
 })

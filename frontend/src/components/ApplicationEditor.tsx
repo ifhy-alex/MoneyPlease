@@ -25,7 +25,7 @@ export function ApplicationEditor({ app, onSave, onDelete, onClose }: Props) {
   return (
     <div role="dialog" aria-modal="true" aria-label={`Editar postulación: ${app.job.titulo}`}
          className="fixed inset-0 z-30 flex items-center justify-center bg-black/40 p-4">
-      <div className="flex w-full max-w-md flex-col gap-3 rounded-[var(--radius-card)] bg-surface p-5 shadow-2xl">
+      <div className="flex w-full max-w-md flex-col gap-3 glass bg-bg/80 p-5">
         <h2 className="text-xl">{app.job.titulo}</h2>
         <p className="-mt-2 text-sm text-muted">{app.job.empresa}</p>
         <label className="flex flex-col gap-1 text-sm">Estado

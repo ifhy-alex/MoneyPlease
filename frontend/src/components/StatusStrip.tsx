@@ -6,7 +6,7 @@ const fmt = (iso: string | null) =>
 export function StatusStrip({ insights }: { insights: Insights }) {
   const { estado, punto_control } = insights
   return (
-    <ul className="flex flex-wrap gap-x-5 gap-y-1 text-xs text-muted">
+    <ul className="mono flex flex-wrap gap-x-5 gap-y-1 text-[11px] text-muted">
       <li>Última ingesta: {fmt(estado.ultima_ingesta)}</li>
       {estado.matching && (
         <li>

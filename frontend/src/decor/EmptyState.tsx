@@ -43,9 +43,9 @@ const ART: Record<EmptyKind, () => ReactNode> = { 'sin-ofertas': Moon, 'sin-post
 export function EmptyState({ kind, title, text, children }: { kind: EmptyKind; title: string; text?: string; children?: ReactNode }) {
   const Art = ART[kind]
   return (
-    <div className="flex flex-col items-center gap-2 rounded-[var(--radius-card)] border border-line bg-surface p-6 text-center">
+    <div className="flex flex-col items-center gap-2 glass p-6 text-center">
       <Art />
-      <p className="font-display text-lg">{title}</p>
+      <p className="font-semibold text-lg">{title}</p>
       {text && <p className="text-sm text-muted">{text}</p>}
       {children}
     </div>

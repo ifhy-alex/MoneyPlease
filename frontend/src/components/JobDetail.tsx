@@ -16,7 +16,7 @@ export function JobDetail({ id, onClose, onInterest, onDismiss, onSave }: Props)
   const d = detail.data
   return (
     <aside role="dialog" aria-label="Detalle de la oferta"
-           className="fixed inset-y-0 right-0 z-30 flex w-full max-w-xl flex-col gap-4 overflow-y-auto border-l border-line bg-surface p-6 shadow-2xl">
+           className="fixed inset-y-0 right-0 z-30 flex w-full max-w-xl flex-col gap-4 overflow-y-auto border-l border-line bg-bg/85 p-6 backdrop-blur-xl">
       <button type="button" onClick={onClose} className="self-end text-sm text-muted hover:text-text">Cerrar ✕</button>
       {detail.isLoading && <p className="text-muted">Cargando…</p>}
       {detail.isError && <p role="alert" className="text-danger">No se pudo cargar la oferta.</p>}

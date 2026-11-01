@@ -1,47 +1,39 @@
 @import "tailwindcss";
 
-/* Tokens "cielo nocturno": mismos valores que src/lib/tokens.ts (el test de contraste los verifica). */
-:root,
-:root[data-theme="light"] {
-  --bg: #f6f1e7;
-  --surface: #fffaf0;
-  --text: #1b1f33;
-  --muted: #5b5f78;
-  --accent: #b7791f;
-  --danger: #c2410c;
-  --ok: #2f855a;
-  --line: color-mix(in srgb, var(--text) 12%, transparent);
-  --sky-a: #e9dfc9;
-  --sky-b: #f3ecdc;
-  color-scheme: light;
-}
-
-:root[data-theme="dark"] {
-  --bg: #0b1020;
-  --surface: #141a33;
-  --text: #e8e6f0;
-  --muted: #9a9cb8;
-  --accent: #f2b84b;
-  --danger: #ff7a6b;
-  --ok: #7dd3a8;
-  --line: color-mix(in srgb, var(--text) 14%, transparent);
-  --sky-a: #1c2a5a;
-  --sky-b: #0b1020;
+/* Identidad "Medianoche y plata": un solo tema oscuro. Mismos valores que src/lib/tokens.ts
+   (el test de contraste los verifica). */
+:root {
+  --bg: #04060f;
+  --glass: rgba(255, 255, 255, 0.045);
+  --glass-strong: rgba(255, 255, 255, 0.07);
+  --line: rgba(255, 255, 255, 0.09);
+  --line-strong: rgba(255, 255, 255, 0.16);
+  --text: #f1f5f9;
+  --muted: #7a8399;
+  --silver: #cbd5e1;
+  --glow: #2547b8;
+  --ok: #5fb89a;
+  --danger: #e0626f;
   color-scheme: dark;
 }
 
 @theme {
   --color-bg: var(--bg);
-  --color-surface: var(--surface);
+  --color-surface: var(--glass);
+  --color-surface-strong: var(--glass-strong);
   --color-text: var(--text);
   --color-muted: var(--muted);
-  --color-accent: var(--accent);
+  --color-accent: var(--silver);
+  --color-silver: var(--silver);
+  --color-glow: var(--glow);
   --color-danger: var(--danger);
   --color-ok: var(--ok);
   --color-line: var(--line);
-  --font-display: "Fraunces", Georgia, serif;
-  --font-sans: "Inter", system-ui, sans-serif;
-  --radius-card: 12px;
+  --color-line-strong: var(--line-strong);
+  --font-display: "Geist Variable", system-ui, sans-serif;
+  --font-sans: "Geist Variable", system-ui, sans-serif;
+  --font-mono: "Geist Mono Variable", ui-monospace, monospace;
+  --radius-card: 14px;
 }
 
 html,
@@ -49,17 +41,63 @@ body {
   background: var(--bg);
   color: var(--text);
   font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
 }
 
 h1,
 h2,
 h3 {
-  font-family: var(--font-display);
+  font-family: var(--font-sans);
+  font-weight: 600;
+  letter-spacing: -0.015em;
 }
 
+h1 { font-size: 28px; line-height: 1.15; }
+h2 { font-size: 20px; line-height: 1.25; }
+h3 { font-size: 15px; line-height: 1.35; }
+
 :focus-visible {
-  outline: 2px solid var(--accent);
+  outline: 1.5px solid var(--silver);
   outline-offset: 2px;
+}
+
+/* Vidrio esmerilado sobre el arte del fondo. */
+.glass {
+  background: var(--glass);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-card);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+
+/* Brillo del borde que sigue al puntero (las coordenadas --mx/--my las pone JS; sin JS queda arriba al centro). */
+.glass-hover {
+  position: relative;
+  transition: border-color 200ms, background 200ms;
+}
+.glass-hover::before {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  padding: 1px;
+  background: radial-gradient(180px circle at var(--mx, 50%) var(--my, 0%), rgba(203, 213, 225, 0.35), transparent 70%);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: 0;
+  transition: opacity 200ms;
+  pointer-events: none;
+}
+.glass-hover:hover {
+  background: var(--glass-strong);
+  border-color: var(--line-strong);
+}
+.glass-hover:hover::before { opacity: 1; }
+
+.mono {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -70,19 +108,4 @@ h3 {
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
   }
-}
-
-/* Fondo nocturno: se desplaza muy lento; con movimiento reducido queda quieto (regla de arriba). */
-.night-gradient {
-  background:
-    radial-gradient(60vmax 40vmax at 20% 10%, color-mix(in srgb, var(--sky-a) 70%, transparent), transparent 70%),
-    radial-gradient(50vmax 40vmax at 85% 90%, color-mix(in srgb, var(--accent) 10%, transparent), transparent 70%),
-    var(--bg);
-  background-size: 140% 140%, 140% 140%, auto;
-  animation: night-drift 60s ease-in-out infinite alternate;
-}
-
-@keyframes night-drift {
-  from { background-position: 0% 0%, 100% 100%, 0 0; }
-  to { background-position: 30% 20%, 70% 80%, 0 0; }
 }

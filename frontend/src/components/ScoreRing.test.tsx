@@ -14,7 +14,7 @@ describe('ScoreRing', () => {
   })
 
   it('el color depende del score', () => {
-    expect(scoreColor(30)).toBe('var(--danger)')
-    expect(scoreColor(80)).toBe('var(--accent)')
+    expect(scoreColor(40)).toBe('var(--muted)')
+    expect(scoreColor(85)).toBe('var(--silver)')
   })
 })

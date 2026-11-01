@@ -1,5 +1,4 @@
 import { render, screen, waitFor } from '@testing-library/react'
-import userEvent from '@testing-library/user-event'
 import { http, HttpResponse } from 'msw'
 import { describe, expect, it } from 'vitest'
 import { renderWithProviders } from '../test/render'
@@ -15,12 +14,9 @@ describe('Layout', () => {
     expect(screen.getByText('contenido')).toBeInTheDocument()
   })
 
-  it('el selector de tema cambia data-theme y lo recuerda', async () => {
+  it('no hay selector de tema: la app es solo oscura', () => {
     renderWithProviders(<Layout><p /></Layout>)
-    expect(document.documentElement.dataset.theme).toBe('light')
-    await userEvent.click(screen.getByRole('button', { name: /tema/i }))
-    expect(document.documentElement.dataset.theme).toBe('dark')
-    expect(localStorage.getItem('theme')).toBe('dark')
+    expect(screen.queryByRole('button', { name: /tema/i })).toBeNull()
   })
 
   it('muestra el banner de modo demo', async () => {

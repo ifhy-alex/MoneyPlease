@@ -20,7 +20,7 @@ export function errorsByField(detail: unknown): Record<string, string> {
 function Group({ legend, error, children }: { legend: string; error?: string; children: ReactNode }) {
   return (
     <fieldset className="flex flex-col gap-2 rounded-[var(--radius-card)] border border-line p-4">
-      <legend className="px-1 font-display text-base">{legend}</legend>
+      <legend className="px-1 font-semibold text-base">{legend}</legend>
       {children}
       {error && <p role="alert" className="text-sm text-danger">{error}</p>}
     </fieldset>

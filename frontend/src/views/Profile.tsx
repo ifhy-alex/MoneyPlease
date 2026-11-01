@@ -79,7 +79,7 @@ export default function Profile() {
         </p>
       )}
       {sent && (
-        <details className="rounded-[var(--radius-card)] border border-line bg-surface p-3 text-sm">
+        <details className="glass p-3 text-sm">
           <summary className="cursor-pointer">Texto enviado a Gemini (sin datos de contacto)</summary>
           <pre className="mt-2 max-h-64 overflow-auto whitespace-pre-wrap text-xs text-muted">{sent}</pre>
         </details>
@@ -89,7 +89,7 @@ export default function Profile() {
         <form onSubmit={(e) => { e.preventDefault(); submit(value) }} className="flex flex-col gap-4">
           <ProfileForm value={value} onChange={setForm} errors={errors} />
           <button type="submit" disabled={save.isPending}
-                  className="self-start rounded-lg bg-accent px-4 py-2 font-medium text-bg disabled:opacity-60">
+                  className="self-start rounded-lg bg-silver px-4 py-2 font-medium text-bg disabled:opacity-60">
             {save.isPending ? 'Guardando…' : 'Guardar versión'}
           </button>
         </form>

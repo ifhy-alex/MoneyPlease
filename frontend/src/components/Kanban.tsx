@@ -21,7 +21,7 @@ function Card({ app, onMove, onEdit }: { app: ApplicationItem } & Omit<Props, 'a
   const style = transform ? { transform: `translate(${transform.x}px, ${transform.y}px)` } : undefined
   return (
     <li ref={setNodeRef} style={style}
-        className={`rounded-xl border border-line bg-surface p-3 text-sm shadow-sm ${isDragging ? 'opacity-70' : ''}`}>
+        className={`glass glass-hover p-3 text-sm ${isDragging ? 'opacity-70' : ''}`}>
       <div className="flex items-start gap-2">
         <span {...listeners} {...attributes} aria-label={`Arrastrar ${app.job.titulo}`} className="cursor-grab text-muted">⠿</span>
         <CompanySeal company={app.job.empresa} size={28} />

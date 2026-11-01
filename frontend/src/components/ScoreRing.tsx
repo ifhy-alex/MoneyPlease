@@ -1,9 +1,8 @@
 import type { Fit } from '../api/types'
 
+/** Plata para los puntajes buenos, gris para el resto: sin semáforo rojo/verde. */
 export function scoreColor(score: number): string {
-  if (score >= 70) return 'var(--accent)'
-  if (score >= 50) return 'color-mix(in srgb, var(--accent) 55%, var(--danger))'
-  return 'var(--danger)'
+  return score >= 60 ? 'var(--silver)' : 'var(--muted)'
 }
 
 /** Arco SVG de 0 a `fraction` de la circunferencia, empezando arriba. */
@@ -30,7 +29,7 @@ export function ScoreRing({ score, fit, size = 48 }: { score: number; fit: Fit; 
         strokeLinecap="round"
         {...(fit === 'practica' ? { strokeDasharray: '0.5 4' } : {})}
       />
-      <text textAnchor="middle" dominantBaseline="central" fontSize="11" fontWeight="600" fill="var(--text)">
+      <text textAnchor="middle" dominantBaseline="central" fontSize="11" fontWeight="500" fontFamily="var(--font-mono)" fill="var(--text)">
         {score}
       </text>
     </svg>

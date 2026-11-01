@@ -81,7 +81,7 @@ export default function Home() {
         </section>
 
         <aside className="flex flex-col gap-4">
-          <section className="rounded-[var(--radius-card)] border border-line bg-surface p-4">
+          <section className="glass p-4">
             <h2 className="text-lg">Brechas de la semana</h2>
             <Suspense fallback={null}><Constellation compact /></Suspense>
             {insights.data?.brechas_semana.length ? (
@@ -99,7 +99,7 @@ export default function Home() {
           </section>
 
           {insights.data && insights.data.seguimiento.length > 0 && (
-            <section className="rounded-[var(--radius-card)] border border-line bg-surface p-4">
+            <section className="glass p-4">
               <h2 className="text-lg">Para dar seguimiento</h2>
               <ul className="mt-2 flex flex-col gap-3 text-sm">
                 {insights.data.seguimiento.map((a) => (

@@ -17,7 +17,7 @@ export function filtersFromParams(p: URLSearchParams): ExploreFilters {
   }
 }
 
-const field = 'rounded-lg border border-line bg-surface px-2 py-1.5 text-sm'
+const field = 'rounded-lg border border-line bg-surface px-2 py-1.5 text-sm text-text'
 
 /** Filtros de Explorar: viven en la URL para que se puedan guardar o compartir. */
 export function Filters() {
