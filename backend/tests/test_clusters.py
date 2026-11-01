@@ -29,3 +29,10 @@ def test_cluster_names():
 def test_los_idiomas_no_nombran_nubes():
     # El inglés lo piden casi todas las ofertas: no distingue una nube de otra.
     assert cluster_names([["English y Java", "English y Python", "English"]]) == ["Java · Python"]
+
+
+def test_el_nombre_premia_lo_que_distingue_a_la_nube():
+    a = ["Security Python", "Security Python", "Security"]
+    b = ["Security Excel", "Security Excel", "Security"]
+    names = cluster_names([a, b])
+    assert names[0].startswith("Python") and names[1].startswith("Excel")

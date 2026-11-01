@@ -1,4 +1,5 @@
 """Nubes del universo 3D: k-means determinista sobre las coordenadas y un nombre por nube."""
+import math
 from collections import Counter
 
 import numpy as np
@@ -39,11 +40,18 @@ def clusters(coords: np.ndarray, k: int, seed: int = 0) -> list[int]:
 
 
 def cluster_names(texts_by_cluster: list[list[str]]) -> list[str]:
-    """Las 2 skills más frecuentes de cada nube ("Java · Python"); sin ninguna, "Grupo N"."""
+    """Las 2 skills que mejor distinguen a cada nube ("Java · Python"); sin ninguna, "Grupo N".
+
+    Puntaje TF-IDF entre nubes: cuántas ofertas de la nube la piden, por qué tan pocas nubes la comparten.
+    """
+    # Los idiomas (sobre todo el inglés) aparecen en casi todas las ofertas: no sirven para nombrar una nube.
+    counts = [Counter(skill for text in texts for skill in skills_in(text) if area_of(skill) != "idiomas")
+              for texts in texts_by_cluster]
+    k = len(counts)
+    spread = Counter(skill for c in counts for skill in c)
     names = []
-    for i, texts in enumerate(texts_by_cluster):
-        # Los idiomas (sobre todo el inglés) aparecen en casi todas las ofertas: no sirven para nombrar una nube.
-        counts = Counter(skill for text in texts for skill in skills_in(text) if area_of(skill) != "idiomas")
-        top = sorted(counts, key=lambda s: (-counts[s], s))[:2]
+    for i, c in enumerate(counts):
+        weight = {s: c[s] * math.log(1 + k / spread[s]) for s in c}
+        top = sorted(weight, key=lambda s: (-weight[s], s))[:2]
         names.append(" · ".join(display_skill(s) for s in top) if top else f"Grupo {i + 1}")
     return names
