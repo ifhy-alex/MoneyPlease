@@ -73,6 +73,12 @@ describe('Inicio', () => {
   })
 })
 
+// Un toque real: pointerdown y luego click en el mismo punto (Oferta 1 está en px 355, py 154).
+function tap(canvas: HTMLElement, pointerType: 'touch' | 'mouse', button = 0) {
+  fireEvent.pointerDown(canvas, { pointerType, button, clientX: 355, clientY: 154 })
+  fireEvent.click(canvas, { button, clientX: 355, clientY: 154 })
+}
+
 describe('Mapa semántico', () => {
   const threePoints = () => server.use(http.get('/api/map', () =>
     HttpResponse.json({ total: 3, puntos: [mapPoint(1, 90, 0.2, -0.3), mapPoint(2, 70, -0.5, 0.4), mapPoint(3, null, 0.6, 0.6)] })))
@@ -98,11 +104,32 @@ describe('Mapa semántico', () => {
     const canvas = await screen.findByRole('img', { name: /3 ofertas/ })
     canvas.getBoundingClientRect = () => ({ left: 0, top: 0, width: 600, height: 420, right: 600, bottom: 420, x: 0, y: 0, toJSON() {} })
     // Oferta 1 está en (0.2, -0.3): px = 300 + 0.2·276 = 355.2, py = 210 − 0.3·186 = 154.2
-    fireEvent.pointerDown(canvas, { pointerType: 'touch', clientX: 355, clientY: 154 })
+    tap(canvas, 'touch')
     expect(await screen.findByRole('tooltip')).toHaveTextContent('Oferta 1')
     expect(screen.queryByRole('dialog')).toBeNull()
-    fireEvent.pointerDown(canvas, { pointerType: 'touch', clientX: 355, clientY: 154 })
+    tap(canvas, 'touch')
     expect(await screen.findByRole('dialog', { name: 'Detalle de la oferta' })).toBeInTheDocument()
+  })
+
+  it('deslizar sobre el mapa no muestra ni abre nada', async () => {
+    threePoints()
+    renderWithProviders(<Home />)
+    const canvas = await screen.findByRole('img', { name: /3 ofertas/ })
+    canvas.getBoundingClientRect = () => ({ left: 0, top: 0, width: 600, height: 420, right: 600, bottom: 420, x: 0, y: 0, toJSON() {} })
+    // Un deslizamiento empieza con pointerdown pero el navegador no dispara click.
+    fireEvent.pointerDown(canvas, { pointerType: 'touch', clientX: 355, clientY: 154 })
+    fireEvent.pointerDown(canvas, { pointerType: 'touch', clientX: 355, clientY: 154 })
+    expect(screen.queryByRole('tooltip')).toBeNull()
+    expect(screen.queryByRole('dialog')).toBeNull()
+  })
+
+  it('el clic derecho no abre el detalle', async () => {
+    threePoints()
+    renderWithProviders(<Home />)
+    const canvas = await screen.findByRole('img', { name: /3 ofertas/ })
+    canvas.getBoundingClientRect = () => ({ left: 0, top: 0, width: 600, height: 420, right: 600, bottom: 420, x: 0, y: 0, toJSON() {} })
+    tap(canvas, 'mouse', 2)
+    expect(screen.queryByRole('dialog')).toBeNull()
   })
 
   it('con movimiento reducido el mapa no anima', async () => {

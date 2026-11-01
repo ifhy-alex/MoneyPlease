@@ -53,4 +53,20 @@ describe('decoración', () => {
     hidden.mockRestore()
     raf.mockRestore()
   })
+
+  it('al aparecer u ocultarse la barra del navegador móvil no reinicia el lienzo', () => {
+    const { container } = render(<AmbientField />)
+    const canvas = container.querySelector('canvas')!
+    const before = [canvas.width, canvas.height]
+    act(() => {
+      Object.defineProperty(window, 'innerHeight', { configurable: true, value: window.innerHeight + 60 })
+      window.dispatchEvent(new Event('resize'))
+    })
+    expect([canvas.width, canvas.height]).toEqual(before)
+    act(() => {
+      Object.defineProperty(window, 'innerWidth', { configurable: true, value: window.innerWidth + 200 })
+      window.dispatchEvent(new Event('resize'))
+    })
+    expect(canvas.width).not.toBe(before[0])
+  })
 })

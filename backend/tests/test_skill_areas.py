@@ -53,3 +53,14 @@ def test_skills_in_prefiere_la_mas_larga():
 def test_area_de_habilidades_con_simbolos():
     from moneyplease.skill_areas import area_of
     assert area_of("C#") == "backend" and area_of(".NET") == "backend"
+
+
+def test_skills_in_ignora_go_y_rest_del_ingles_comun():
+    from moneyplease.skill_areas import skills_in
+    assert skills_in("Our go-to-market team, a go-getter, and the rest of the crew") == set()
+    assert {"golang", "rest api"} <= skills_in("REST API services in Golang")
+
+
+def test_area_de_go_sigue_siendo_backend():
+    from moneyplease.skill_areas import area_of
+    assert area_of("Go") == "backend"

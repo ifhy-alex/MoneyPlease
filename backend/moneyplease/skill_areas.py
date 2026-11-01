@@ -9,7 +9,7 @@ AREAS = ("backend", "frontend", "datos", "cloud", "testing", "idiomas")
 _BY_AREA = {
     "backend": ["c#", "c++", "java", "spring", "spring boot", "spring cloud", "python", "django", "flask", "fastapi", "node",
                 "node.js", "express", ".net", "go", "golang", "php", "laravel", "ruby", "rails", "kotlin",
-                "rest", "restful apis", "graphql", "microservices", "microservicios", "api", "apis", "hibernate",
+                "rest", "rest api", "restful apis", "graphql", "microservices", "microservicios", "api", "apis", "hibernate",
                 "jpa", "kafka", "rabbitmq"],
     "frontend": ["react", "react native", "angular", "vue", "svelte", "next.js", "javascript", "typescript",
                  "html", "css", "tailwind", "tailwind css", "sass", "redux", "react router", "react hook form",
@@ -50,7 +50,10 @@ def fold_skill(text: str) -> str:
 
 
 FOLDED_AREA: dict[str, str] = {fold_skill(skill): area for area, skills in _BY_AREA.items() for skill in skills}
-_FOLDED_BY_LENGTH = sorted(FOLDED_AREA, key=len, reverse=True)
+# Palabras comunes del inglés ("go-to-market", "the rest of"): en texto libre no se cuentan como skills.
+# Siguen teniendo área (para el perfil); en las ofertas se reconocen "golang", "rest api" o "restful apis".
+AMBIGUOUS = {"go", "rest"}
+_FOLDED_BY_LENGTH = sorted((s for s in FOLDED_AREA if s not in AMBIGUOUS), key=len, reverse=True)
 
 
 def skills_in(text: str) -> set[str]:

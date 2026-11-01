@@ -33,9 +33,10 @@ def _published(start: str | None) -> datetime | None:
 
 
 def _is_maintenance(resp: httpx.Response) -> bool:
+    """Solo la página de mantenimiento de Workday: una oferta puede tener "maintenance" en su URL."""
     urls = [str(resp.url), resp.headers.get("location", "")]
     urls += [str(r.url) for r in resp.history] + [r.headers.get("location", "") for r in resp.history]
-    return any("maintenance" in u for u in urls)
+    return any("community.workday.com" in u or "/maintenance-page" in u for u in urls)
 
 
 def _json(request) -> dict:

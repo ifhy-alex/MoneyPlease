@@ -25,8 +25,12 @@ export default function AmbientField() {
     let w = 0
     let h = 0
     const resize = () => {
-      w = window.innerWidth || 1280
-      h = window.innerHeight || 800
+      const nw = window.innerWidth || 1280
+      const nh = window.innerHeight || 800
+      // En el celular la barra del navegador cambia el alto al hacer scroll: eso no reinicia el lienzo.
+      if (w && nw === w && Math.abs(nh - h) < 150) return
+      w = nw
+      h = nh
       canvas.width = w * dpr
       canvas.height = h * dpr
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0)

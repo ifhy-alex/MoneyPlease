@@ -135,3 +135,15 @@ def test_detalle_en_mantenimiento():
     respx.get(MAINTENANCE).respond(200, html="<html>maintenance</html>")
     with pytest.raises(Maintenance, match="Workday en mantenimiento"):
         connector().fetch()
+
+
+@respx.mock
+def test_maintenance_en_el_slug_de_una_oferta_no_es_mantenimiento():
+    respx.get(f"{HOST}/robots.txt").respond(200, text=ROBOTS_OK)
+    listing = copy.deepcopy(LISTING)
+    listing["jobPostings"] = listing["jobPostings"][:1]
+    listing["jobPostings"][0]["externalPath"] = "/job/Heredia/Building-maintenance-Lead_R1"
+    listing["total"] = 1
+    respx.post(f"{API}/jobs").mock(side_effect=[httpx.Response(200, json=FACETS), httpx.Response(200, json=listing)])
+    respx.get(f"{API}/job/Heredia/Building-maintenance-Lead_R1").respond(200, json=DETAILS[0])
+    assert len(connector().fetch().jobs) == 1

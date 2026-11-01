@@ -40,6 +40,7 @@ function MapCanvas({ puntos, height, onOpen }: { puntos: MapPoint[]; height: num
   const reduced = usePrefersReducedMotion()
   const [width, setWidth] = useState(600)
   const [active, setActive] = useState<ScreenPoint | null>(null)
+  const lastPointer = useRef('mouse')
   const points = useMemo(() => layoutMap(puntos, width, height), [puntos, width, height])
   const strong = puntos.filter((p) => (p.puntaje ?? 0) >= 60).length
 
@@ -142,9 +143,12 @@ function MapCanvas({ puntos, height, onOpen }: { puntos: MapPoint[]; height: num
         style={{ height }}
         onPointerMove={(e) => { if (e.pointerType === 'mouse') setActive(hit(e.clientX, e.clientY)) }}
         onPointerLeave={(e) => { if (e.pointerType === 'mouse') setActive(null) }}
-        onPointerDown={(e) => {
+        onPointerDown={(e) => { lastPointer.current = e.pointerType }}
+        onClick={(e) => {
+          // click solo llega con toques reales (no al deslizar) y después de los eventos de mouse simulados.
+          if (e.button !== 0) return
           const p = hit(e.clientX, e.clientY)
-          if (e.pointerType === 'mouse') {
+          if (lastPointer.current === 'mouse') {
             if (p) onOpen(p.job_id)
             return
           }
