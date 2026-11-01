@@ -43,6 +43,7 @@ export function webglAvailable(): boolean {
 }
 
 const FLY_MS = 1200
+const LABEL_PX = 24
 const BG = 0x04060f
 
 /** Textura radial suave: el "brillo" de cada estrella. */
@@ -105,7 +106,7 @@ function starMaterial(map: THREE.Texture, scale: number): THREE.ShaderMaterial {
   })
 }
 
-function textSprite(text: string, color: string): THREE.Sprite {
+function textSprite(text: string, color: string, viewHeight: number): THREE.Sprite {
   const c = document.createElement('canvas')
   const x = c.getContext('2d')!
   const font = '500 22px "Geist Mono Variable", ui-monospace, monospace'
@@ -121,7 +122,8 @@ function textSprite(text: string, color: string): THREE.Sprite {
   tex.minFilter = THREE.LinearFilter
   // Tamaño fijo en pantalla (sin atenuación): las etiquetas se leen igual de cerca y de lejos.
   const sprite = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, transparent: true, depthWrite: false, sizeAttenuation: false }))
-  sprite.scale.set(0.034 * (c.width / c.height), 0.034, 1)
+  const h = LABEL_PX / viewHeight  // misma altura en píxeles en cualquier pantalla
+  sprite.scale.set(h * (c.width / c.height), h, 1)
   return sprite
 }
 
@@ -226,7 +228,7 @@ export function createScene(container: HTMLElement, opts: { reducedMotion: boole
         labelGroup.remove(s)
       }
       for (const l of labels) {
-        const sprite = textSprite(l.text, l.color)
+        const sprite = textSprite(l.text, l.color, height())
         sprite.position.set(l.pos[0], l.pos[1] + 0.9, l.pos[2])
         labelGroup.add(sprite)
       }

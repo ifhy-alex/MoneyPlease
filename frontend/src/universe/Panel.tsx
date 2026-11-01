@@ -1,4 +1,5 @@
 import { useState, type ReactNode } from 'react'
+import { useIsNarrow } from '../lib/useIsNarrow'
 import { search } from './search'
 
 interface Props {
@@ -10,7 +11,9 @@ interface Props {
 /** Panel de exploración: buscador con resultados y, debajo, lo propio de cada pestaña. Plegable en el celular. */
 export function Panel({ items, onChoose, children }: Props) {
   const [q, setQ] = useState('')
-  const [open, setOpen] = useState(true)
+  // En el celular empieza plegado: si no, tapa casi todo el universo.
+  const narrow = useIsNarrow()
+  const [open, setOpen] = useState(!narrow)
   const results = search(q, items)
   const choose = (id: string) => {
     onChoose(id)

@@ -202,3 +202,12 @@ describe('Universo: habilidades', () => {
     expect(await screen.findByText(/sin ofertas que las pidan todavía/i)).toHaveTextContent('Python')
   })
 })
+
+describe('Universo en el celular', () => {
+  it('el panel empieza plegado para dejar ver el universo', async () => {
+    withUniverse()
+    media.narrow = true
+    renderWithProviders(<Universe />)
+    expect(await screen.findByRole('button', { name: /mostrar panel/i })).toHaveAttribute('aria-expanded', 'false')
+  })
+})
