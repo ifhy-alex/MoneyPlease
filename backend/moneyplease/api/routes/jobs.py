@@ -8,8 +8,9 @@ from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.orm import Session
 
 from moneyplease.api.deps import get_session
-from moneyplease.api.schemas import JobOut, MatchOut
+from moneyplease.api.schemas import DuplicateRef, JobOut, MatchOut
 from moneyplease.db.models import Application, Job, JobLabel, Match, Source
+from moneyplease.duplicates import duplicates_of
 from moneyplease.ingest.normalize import html_to_text
 from moneyplease.insights import CR
 from moneyplease.profile import store
@@ -24,15 +25,19 @@ class Feedback(BaseModel):
 
 @router.post("/jobs/{job_id}/feedback", status_code=204)
 def feedback(job_id: int, body: Feedback, session: Session = Depends(get_session)) -> Response:
-    if session.get(Job, job_id) is None:
+    job = session.get(Job, job_id)
+    if job is None:
         raise HTTPException(404, "La oferta no existe")
+    # La marca vale para todo el grupo de publicaciones casi idénticas.
+    ids = [job_id] + [d.id for d in duplicates_of(session, job)]
     if body.valor is None:
-        session.execute(delete(JobLabel).where(JobLabel.job_id == job_id))
+        session.execute(delete(JobLabel).where(JobLabel.job_id.in_(ids)))
     else:
         # Upsert: dos clics seguidos sobre la misma oferta no chocan con la clave única.
         etiqueta = LABELS[body.valor]
-        session.execute(insert(JobLabel).values(job_id=job_id, etiqueta=etiqueta)
-                        .on_conflict_do_update(index_elements=[JobLabel.job_id], set_={"etiqueta": etiqueta}))
+        for i in ids:
+            session.execute(insert(JobLabel).values(job_id=i, etiqueta=etiqueta)
+                            .on_conflict_do_update(index_elements=[JobLabel.job_id], set_={"etiqueta": etiqueta}))
     session.commit()
     return Response(status_code=204)
 
@@ -44,6 +49,7 @@ class ExploreItem(BaseModel):
     job: JobOut
     match: MatchOut | None
     etiqueta: str | None
+    duplicados: list[DuplicateRef] = []
 
 
 class ExplorePage(BaseModel):
@@ -90,7 +96,9 @@ def explore(q: str | None = None, source: str | None = None, modalidad: str | No
              else [Match.score.desc().nulls_last(), Job.primera_vez_visto.desc()])
     rows = session.execute(query.order_by(*order, Job.id.desc())
                            .offset((page - 1) * PAGE_SIZE).limit(PAGE_SIZE)).all()
-    return ExplorePage(items=[ExploreItem(job=JobOut.of(job, key), match=MatchOut.of(match), etiqueta=label)
+    # Explorar es la lista completa: las publicaciones casi idénticas se marcan, no se ocultan.
+    return ExplorePage(items=[ExploreItem(job=JobOut.of(job, key), match=MatchOut.of(match), etiqueta=label,
+                                          duplicados=DuplicateRef.of_all(duplicates_of(session, job)))
                               for job, key, match, label in rows], total=total or 0, page=page)
 
 
@@ -105,6 +113,7 @@ class JobDetail(BaseModel):
     match: MatchOut | None
     etiqueta: str | None
     postulacion: PostulacionRef | None
+    duplicados: list[DuplicateRef] = []
 
 
 @router.get("/jobs/{job_id}", response_model=JobDetail)
@@ -119,4 +128,5 @@ def detail(job_id: int, session: Session = Depends(get_session)) -> JobDetail:
     return JobDetail(job=JobOut.of(job, session.get(Source, job.source_id).key),
                      descripcion_texto=html_to_text(job.descripcion or ""),
                      match=MatchOut.of(match), etiqueta=label.etiqueta if label else None,
-                     postulacion=PostulacionRef(id=application.id, estado=application.estado) if application else None)
+                     postulacion=PostulacionRef(id=application.id, estado=application.estado) if application else None,
+                     duplicados=DuplicateRef.of_all(duplicates_of(session, job)))

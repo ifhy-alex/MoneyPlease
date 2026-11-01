@@ -41,11 +41,21 @@ class MatchOut(BaseModel):
                    brechas=drop_empty_gaps(match.brechas), resumen=match.resumen)
 
 
+class DuplicateRef(BaseModel):
+    job_id: int
+    url: str
+
+    @classmethod
+    def of_all(cls, jobs) -> list["DuplicateRef"]:
+        return [cls(job_id=j.id, url=j.url) for j in jobs]
+
+
 class TopItem(BaseModel):
     job: JobOut
     match: MatchOut
     etiqueta: str | None
     postulacion_id: int | None
+    duplicados: list[DuplicateRef] = []
 
 
 class ApplicationOut(BaseModel):

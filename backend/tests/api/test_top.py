@@ -68,3 +68,51 @@ def test_brechas_vacias_guardadas_antes_no_se_muestran(client, world):
     world.match(prof, job, brechas=["Ninguna brecha técnica significativa para una pasantía", "Docker"])
     item = client.get("/api/top").json()[0]
     assert item["match"]["brechas"] == ["Docker"]
+
+
+def _hpe_pair(world, prof):
+    from tests.api.test_map import near
+    a = world.job(empresa="HPE", url="https://hpe/1216552", embedding=near(prof.embedding, 0.9, 1))
+    b = world.job(empresa="HPE", url="https://hpe/1214221", embedding=list(a.embedding))
+    return a, b
+
+
+def test_top_agrupa_duplicados_y_mantiene_n(client, world):
+    from tests.api.test_map import near
+    prof = world.profile()
+    a, b = _hpe_pair(world, prof)
+    world.match(prof, a, score=95)
+    world.match(prof, b, score=94)
+    for i in range(10):
+        world.match(prof, world.job(empresa=f"E{i}", embedding=near(prof.embedding, 0.8, 50 + i)), score=80 - i)
+    items = client.get("/api/top?n=10").json()
+    ids = [i["job"]["id"] for i in items]
+    assert len(items) == 10 and a.id in ids and b.id not in ids
+    first = next(i for i in items if i["job"]["id"] == a.id)
+    assert first["duplicados"] == [{"job_id": b.id, "url": "https://hpe/1214221"}]
+
+
+def test_explorar_marca_sin_ocultar(client, world):
+    prof = world.profile()
+    a, b = _hpe_pair(world, prof)
+    items = {i["job"]["id"]: i for i in client.get("/api/jobs").json()["items"]}
+    assert items[a.id]["duplicados"] == [{"job_id": b.id, "url": b.url}]
+    assert items[b.id]["duplicados"] == [{"job_id": a.id, "url": a.url}]
+
+
+def test_detalle_lista_duplicados(client, world):
+    prof = world.profile()
+    a, b = _hpe_pair(world, prof)
+    assert client.get(f"/api/jobs/{a.id}").json()["duplicados"] == [{"job_id": b.id, "url": b.url}]
+
+
+def test_feedback_aplica_al_grupo(client, world, session):
+    from moneyplease.db.models import JobLabel
+    prof = world.profile()
+    a, b = _hpe_pair(world, prof)
+    assert client.post(f"/api/jobs/{a.id}/feedback", json={"valor": "no_interesa"}).status_code == 204
+    session.expire_all()
+    assert {session.get(JobLabel, a.id).etiqueta, session.get(JobLabel, b.id).etiqueta} == {"mala"}
+    assert client.post(f"/api/jobs/{b.id}/feedback", json={"valor": None}).status_code == 204
+    session.expire_all()
+    assert session.get(JobLabel, a.id) is None and session.get(JobLabel, b.id) is None
