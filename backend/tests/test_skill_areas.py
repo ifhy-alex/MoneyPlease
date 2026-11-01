@@ -64,3 +64,8 @@ def test_skills_in_ignora_go_y_rest_del_ingles_comun():
 def test_area_de_go_sigue_siendo_backend():
     from moneyplease.skill_areas import area_of
     assert area_of("Go") == "backend"
+
+
+def test_asp_net_y_vb_net_cuentan_como_net():
+    from moneyplease.skill_areas import skills_in
+    assert skills_in("ASP.NET Core y VB.NET") == {".net"}

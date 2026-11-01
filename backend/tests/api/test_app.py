@@ -17,11 +17,11 @@ def test_unknown_api_404_json(client):
     assert resp.status_code == 404 and resp.headers["content-type"].startswith("application/json")
 
 
-def test_demo_sin_sembrar_responde_503(settings):
+def _broken_factory(orig):
     from sqlalchemy.exc import ProgrammingError
 
     def boom(*args, **kwargs):
-        raise ProgrammingError("SELECT", {}, Exception('relation "jobs" does not exist'))
+        raise ProgrammingError("SELECT", {}, orig)
 
     class Broken:
         execute = scalars = scalar = get = boom
@@ -32,7 +32,19 @@ def test_demo_sin_sembrar_responde_503(settings):
         def __exit__(self, *exc):
             return False
 
+    return lambda: Broken()
+
+
+def test_demo_otro_error_de_sql_no_se_disfraza_de_falta_de_seed(settings):
+    import psycopg
     demo = settings.model_copy(update={"demo_mode": True})
-    resp = TestClient(create_app(demo, lambda: Broken())).get("/api/top")
-    assert resp.status_code == 503
-    assert resp.json() == {"detail": "Modo demo sin datos: corre `demo seed`"}
+    app = create_app(demo, _broken_factory(psycopg.errors.SyntaxError("syntax error at or near")))
+    resp = TestClient(app, raise_server_exceptions=False).get("/api/top")
+    assert resp.status_code == 500
+
+
+def test_demo_tabla_inexistente_es_503(settings):
+    import psycopg
+    demo = settings.model_copy(update={"demo_mode": True})
+    app = create_app(demo, _broken_factory(psycopg.errors.UndefinedTable('relation "jobs" does not exist')))
+    assert TestClient(app).get("/api/top").status_code == 503

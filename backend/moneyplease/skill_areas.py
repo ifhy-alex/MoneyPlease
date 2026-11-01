@@ -9,7 +9,7 @@ AREAS = ("backend", "frontend", "datos", "cloud", "testing", "idiomas")
 _BY_AREA = {
     "backend": ["c#", "c++", "java", "spring", "spring boot", "spring cloud", "python", "django", "flask", "fastapi", "node",
                 "node.js", "express", ".net", "go", "golang", "php", "laravel", "ruby", "rails", "kotlin",
-                "rest", "rest api", "restful apis", "graphql", "microservices", "microservicios", "api", "apis", "hibernate",
+                "rest", "rest api", "restful apis", "asp.net", "vb.net", "graphql", "microservices", "microservicios", "api", "apis", "hibernate",
                 "jpa", "kafka", "rabbitmq"],
     "frontend": ["react", "react native", "angular", "vue", "svelte", "next.js", "javascript", "typescript",
                  "html", "css", "tailwind", "tailwind css", "sass", "redux", "react router", "react hook form",
@@ -53,6 +53,8 @@ FOLDED_AREA: dict[str, str] = {fold_skill(skill): area for area, skills in _BY_A
 # Palabras comunes del inglés ("go-to-market", "the rest of"): en texto libre no se cuentan como skills.
 # Siguen teniendo área (para el perfil); en las ofertas se reconocen "golang", "rest api" o "restful apis".
 AMBIGUOUS = {"go", "rest"}
+# Variantes que cuentan como la misma skill.
+ALIASES = {"asp.net": ".net", "vb.net": ".net"}
 _FOLDED_BY_LENGTH = sorted((s for s in FOLDED_AREA if s not in AMBIGUOUS), key=len, reverse=True)
 
 
@@ -63,7 +65,7 @@ def skills_in(text: str) -> set[str]:
     for skill in _FOLDED_BY_LENGTH:
         pattern = rf"(?<![\w#+.]){re.escape(skill)}(?![\w#+])"
         if re.search(pattern, t):
-            found.add(skill)
+            found.add(ALIASES.get(skill, skill))
             t = re.sub(pattern, " ", t)  # "spring boot" no cuenta además como "spring"
     return found
 
