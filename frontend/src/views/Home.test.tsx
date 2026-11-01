@@ -168,3 +168,11 @@ describe('Mapa sin perfil', () => {
     expect(screen.queryByRole('button', { name: 'Reintentar' })).toBeNull()
   })
 })
+
+describe('Enlace al universo', () => {
+  it('el mapa ofrece explorarlo en 3D', async () => {
+    server.use(http.get('/api/map', () => HttpResponse.json({ total: 1, puntos: [mapPoint(1)] })))
+    renderWithProviders(<Home />)
+    expect(await screen.findByRole('link', { name: /explorar en 3d/i })).toHaveAttribute('href', '/universo')
+  })
+})

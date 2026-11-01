@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
+import { Link } from 'react-router-dom'
 import { useMap } from '../api/hooks'
 import type { MapPoint } from '../api/types'
 import { usePrefersReducedMotion } from '../lib/motion'
@@ -125,6 +126,9 @@ function MapCanvas({ puntos, height, onOpen }: { puntos: MapPoint[]; height: num
 
   return (
     <div ref={wrap} className="glass relative overflow-hidden" style={{ height }}>
+      <Link to="/universo" className="glass panel mono absolute right-3 top-3 z-10 px-2.5 py-1 text-[11px] text-silver hover:border-silver">
+        Explorar en 3D ↗
+      </Link>
       <canvas
         ref={canvas}
         role="img"

@@ -192,3 +192,12 @@ describe('Detalle desde el grafo', () => {
     await waitFor(() => expect(screen.getByRole('group', { name: /grafo de habilidades/i })).toHaveAttribute('height', '300'))
   })
 })
+
+describe('Enlace al grafo 3D', () => {
+  it('el grafo ofrece verlo en 3D', async () => {
+    withProfile()
+    server.use(http.get('/api/skills-graph', () => HttpResponse.json(skillsGraph())))
+    renderWithProviders(<Profile />)
+    expect(await screen.findByRole('link', { name: /ver en 3d/i })).toHaveAttribute('href', '/universo?vista=habilidades')
+  })
+})

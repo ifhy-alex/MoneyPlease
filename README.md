@@ -109,6 +109,15 @@ La identidad es **medianoche y plata**: solo modo oscuro, tarjetas de vidrio sob
 - **Postulaciones:** el **pipeline** (cada postulación es un nodo que avanza por las etapas) y un tablero kanban, que se puede arrastrar o mover con el teclado. Borrar pide confirmación.
 - **Perfil:** subir el CV (genera un borrador sin guardarlo), editar con el formulario, el historial de versiones, la **huella** generativa y el **grafo de habilidades** (tus habilidades conectadas con las ofertas que las piden; punteadas, las que piden y te faltan).
 
+### Universo 3D
+
+Desde el mapa de Inicio (**Explorar en 3D**) o el grafo de Perfil (**Ver en 3D**) se abre `/universo`, una galaxia que se puede rotar, acercar y recorrer:
+
+- **Ofertas:** cada estrella es una oferta. La distancia al centro (tú) es su similitud real con tu perfil, y las parecidas forman nubes con nombre (por ejemplo "Python · Java"). El panel tiene buscador (la cámara vuela a lo que buscas), filtros por puntaje, empresa y tipo, y la lista de nubes.
+- **Habilidades:** tus habilidades en plata y las que piden y te faltan en rojo, conectadas con las ofertas que las piden. Al pasar sobre una se iluminan sus ofertas; al tocarla, el panel las lista.
+
+Las publicaciones casi idénticas (misma empresa, mismo texto, como un puesto publicado dos veces) aparecen como una sola tarjeta con "+1 publicación casi idéntica", y 👍 / 👎 se aplica a todas.
+
 Las etiquetas 👍 / 👎 sirven también como ejemplos para Gemini. A partir de 6 etiquetas (al menos 2 de cada tipo) ajustan el score en ±15 puntos, y el top se vuelve a evaluar cuando cambian.
 
 ### Modo demo

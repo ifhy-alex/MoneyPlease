@@ -1,4 +1,5 @@
 import { lazy, Suspense, useCallback, useEffect, useState } from 'react'
+import { Link } from 'react-router-dom'
 import { ApiError, errorMessage } from '../api/client'
 import { useCreateApplication, useDraftFromCv, useFeedback, useProfile, useProfileVersions, useSaveProfile } from '../api/hooks'
 import type { Perfil } from '../api/types'
@@ -119,7 +120,12 @@ export default function Profile() {
             </ol>
           </div>
           <div className="flex flex-col gap-3">
-            <h2>Grafo de habilidades</h2>
+            <div className="flex items-center justify-between gap-2">
+              <h2>Grafo de habilidades</h2>
+              <Link to="/universo?vista=habilidades" className="mono rounded-lg border border-line px-2.5 py-1 text-[11px] text-silver hover:border-silver">
+                Ver en 3D ↗
+              </Link>
+            </div>
             <p className="-mt-2 text-sm text-muted">Tus habilidades y las ofertas que las piden. Punteadas: las que piden y te faltan.</p>
             <Suspense fallback={null}><SkillGraph onOpen={setOpen} /></Suspense>
           </div>
