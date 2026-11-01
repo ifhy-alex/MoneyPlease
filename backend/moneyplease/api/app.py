@@ -6,7 +6,7 @@ from sqlalchemy.exc import ProgrammingError
 from fastapi.staticfiles import StaticFiles
 from sqlalchemy.orm import Session, sessionmaker
 
-from moneyplease.api.routes import applications, insights, jobs, profile, top
+from moneyplease.api.routes import applications, insights, jobs, map, profile, top
 from moneyplease.config import Settings, get_settings
 from moneyplease.db.session import make_session
 
@@ -20,7 +20,7 @@ def create_app(settings: Settings | None = None, session_factory: sessionmaker[S
     app.state.settings = settings
     app.state.session_factory = session_factory or make_session(
         settings.demo_database_url if settings.demo_mode else settings.database_url)
-    for module in (top, jobs, profile, applications, insights):
+    for module in (top, jobs, profile, applications, insights, map):
         app.include_router(module.router, prefix="/api")
     if settings.demo_mode:
         @app.exception_handler(ProgrammingError)

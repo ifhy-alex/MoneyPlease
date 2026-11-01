@@ -58,3 +58,19 @@ class ApplicationOut(BaseModel):
     dias_en_estado: int
     job: JobOut
     match: MatchOut | None
+
+
+class MapPoint(BaseModel):
+    job_id: int
+    titulo: str
+    empresa: str
+    x: float
+    y: float
+    similitud: float
+    puntaje: int | None
+    etiqueta: str | None
+
+
+class MapData(BaseModel):
+    total: int
+    puntos: list[MapPoint]
