@@ -1,6 +1,6 @@
 import { act, fireEvent, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { http, HttpResponse } from 'msw'
+import { delay, http, HttpResponse } from 'msw'
 import { describe, expect, it, vi } from 'vitest'
 import { job, server, skillsGraph, universePoint } from '../test/handlers'
 import { media } from '../test/setup'
@@ -223,5 +223,33 @@ describe('Tooltip del universo', () => {
     expect(screen.getByRole('tooltip')).toBeInTheDocument()
     await userEvent.click(screen.getByRole('tab', { name: 'Habilidades' }))
     expect(screen.queryByRole('tooltip')).toBeNull()
+  })
+})
+
+describe('Pendientes de Habilidades', () => {
+  it('sin perfil invita a ir a Perfil', async () => {
+    reset()
+    server.use(http.get('/api/skills-graph', () => HttpResponse.json({ detail: 'Todavía no hay perfil guardado' }, { status: 404 })))
+    renderWithProviders(<Universe />, { route: '/universo?vista=habilidades' })
+    expect(await screen.findByText(/guarda tu perfil para ver tus habilidades/i)).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: /ir a perfil/i })).toHaveAttribute('href', '/perfil')
+  })
+
+  it('el tooltip de una oferta del grafo usa los datos del grafo', async () => {
+    reset()
+    server.use(http.get('/api/skills-graph', () => HttpResponse.json(skillsGraph())))
+    renderWithProviders(<Universe />, { route: '/universo?vista=habilidades' })
+    await waitFor(() => expect((last('setLinks')?.[0] as unknown[])?.length).toBe(3))
+    act(() => fake.hover!('o:2', { x: 50, y: 50 }))
+    expect(screen.getByRole('tooltip')).toHaveTextContent('Oferta 2')
+  })
+
+  it('al cambiar a Habilidades se borran las estrellas de Ofertas mientras carga', async () => {
+    withUniverse()
+    server.use(http.get('/api/skills-graph', async () => { await delay('infinite'); return HttpResponse.json(skillsGraph()) }))
+    renderWithProviders(<Universe />)
+    await waitFor(() => expect((last('setStars')?.[0] as unknown[])?.length).toBe(3))
+    await userEvent.click(screen.getByRole('tab', { name: 'Habilidades' }))
+    await waitFor(() => expect(last('setStars')).toEqual([[]]))
   })
 })

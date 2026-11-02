@@ -49,14 +49,33 @@ def duplicate_groups(items: list[tuple[int, str, list[float]]], score: dict[int,
     return out
 
 
-def duplicates_of(session: Session, job: Job) -> list[Job]:
-    """Otras ofertas activas de la misma empresa con similitud ≥ 0.99 con esta."""
+def _direct(session: Session, job: Job) -> list[Job]:
+    """Ofertas activas de la misma empresa con similitud ≥ 0.99 con esta (solo vecinas directas)."""
     if job.embedding is None:
         return []
     # Igual que en el mapa: sin el índice HNSW, que con filtros devuelve muy pocas filas.
+    # Ojo: SET LOCAL dura hasta el final de la transacción, no solo esta consulta. Lo que venga después en la
+    # misma petición tampoco usará índices de escaneo; hoy son consultas pequeñas, pero conviene saberlo.
     session.execute(text("SET LOCAL enable_indexscan = off"))
     rows = session.scalars(
         select(Job).where(Job.id != job.id, Job.estado == "active", Job.embedding.is_not(None),
                           Job.embedding.cosine_distance(job.embedding) <= 1 - MIN_SIMILARITY)
         .order_by(Job.id)).all()
     return [r for r in rows if canonical(r.empresa) == canonical(job.empresa)]
+
+
+def duplicates_of(session: Session, job: Job) -> list[Job]:
+    """Todo el grupo de publicaciones casi idénticas de esta oferta (sin ella), siguiendo cadenas A~B~C.
+
+    Es la misma regla que `duplicate_groups` en el universo: así el top, el feedback y el universo coinciden.
+    """
+    seen = {job.id}
+    group: list[Job] = []
+    pending = [job]
+    while pending:
+        for other in _direct(session, pending.pop()):
+            if other.id not in seen:
+                seen.add(other.id)
+                group.append(other)
+                pending.append(other)
+    return sorted(group, key=lambda j: j.id)

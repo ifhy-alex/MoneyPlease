@@ -154,8 +154,9 @@ export function createScene(container: HTMLElement, opts: { reducedMotion: boole
   const scene = new THREE.Scene()
   const camera = new THREE.PerspectiveCamera(55, width() / height(), 0.1, 300)
   // En vertical (celular) el campo de visión horizontal es angosto: se aleja la cámara para que quepa la galaxia.
-  const fit = Math.max(1, 0.75 / camera.aspect)
-  camera.position.set(0, 5 * fit, 16 * fit)
+  const fitOf = () => Math.max(1, 0.75 / camera.aspect)
+  camera.position.set(0, 5 * fitOf(), 16 * fitOf())
+  let interacted = false
   const controls = new OrbitControls(camera, renderer.domElement)
   controls.enableDamping = true
   controls.dampingFactor = 0.08
@@ -163,7 +164,10 @@ export function createScene(container: HTMLElement, opts: { reducedMotion: boole
   controls.maxDistance = 40
   controls.autoRotate = !opts.reducedMotion
   controls.autoRotateSpeed = 0.6
-  controls.addEventListener('start', () => { controls.autoRotate = false })
+  controls.addEventListener('start', () => {
+    controls.autoRotate = false
+    interacted = true
+  })
 
   const glow = glowTexture()
   const ring = ringTexture()
@@ -194,6 +198,7 @@ export function createScene(container: HTMLElement, opts: { reducedMotion: boole
   let baseAlpha: number[] = []
   let links: THREE.LineSegments | null = null
   const labelGroup = new THREE.Group()
+  let lastLabels: Label[] = []
   scene.add(labelGroup)
 
   const pointsOf = (list: StarSpec[], sizeK: number, alphaOf: (s: StarSpec) => number) => {
@@ -228,6 +233,7 @@ export function createScene(container: HTMLElement, opts: { reducedMotion: boole
       dirty = true
     },
     setLabels(labels) {
+      lastLabels = labels
       for (const child of [...labelGroup.children]) {
         const s = child as THREE.Sprite
         s.material.map?.dispose()
@@ -308,6 +314,7 @@ export function createScene(container: HTMLElement, opts: { reducedMotion: boole
     return { x: ((v.x + 1) / 2) * width(), y: ((1 - v.y) / 2) * height() }
   }
   const setHover = (s: StarSpec | null) => {
+    if ((s?.id ?? null) === hovered) return  // misma estrella: sin re-render en cada movimiento del mouse
     hovered = s?.id ?? null
     hoverCb(hovered, s ? screenOf(s.pos) : { x: 0, y: 0 })
   }
@@ -336,6 +343,10 @@ export function createScene(container: HTMLElement, opts: { reducedMotion: boole
     renderer.setSize(width(), height())
     camera.aspect = width() / height()
     camera.updateProjectionMatrix()
+    // Al girar el celular: la cámara vuelve a encuadrar la galaxia (si el usuario no la movió) y las
+    // etiquetas recuperan su altura en píxeles.
+    if (!interacted && !flight) camera.position.setLength(Math.hypot(5, 16) * fitOf())
+    handle.setLabels(lastLabels)
     starMat.uniforms.scale.value = ringMat.uniforms.scale.value = pxScale()
     dirty = true
   })

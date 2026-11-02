@@ -1,8 +1,9 @@
+import { useQueryClient } from '@tanstack/react-query'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { ApiError, errorMessage } from '../api/client'
 import { useCreateApplication, useFeedback, useSkillsGraph, useUniverse } from '../api/hooks'
-import type { UniversePoint } from '../api/types'
+import type { SkillsGraph, UniverseData, UniversePoint } from '../api/types'
 import { JobDetail } from '../components/JobDetail'
 import { Toast, type ToastState } from '../components/Toast'
 import { EmptyState } from '../decor/EmptyState'
@@ -105,8 +106,12 @@ export default function Universe() {
 
 // Los textos del tooltip salen de la última respuesta del universo (la consulta ya está en caché).
 function StarTooltip({ id, x, y }: { id: string; x: number; y: number }) {
-  const universe = useUniverse()
-  const p = universe.data?.puntos.find((q) => `o:${q.job_id}` === id)
+  // Lee lo que ya está en caché (universo u grafo), sin disparar peticiones nuevas.
+  const qc = useQueryClient()
+  const jobId = Number(id.slice(2))
+  const p: { titulo: string; empresa: string; puntaje: number | null } | undefined =
+    qc.getQueryData<UniverseData>(['universe'])?.puntos.find((q) => q.job_id === jobId)
+    ?? qc.getQueryData<SkillsGraph>(['skills-graph'])?.ofertas.find((o) => o.job_id === jobId)
   if (!p) return null
   return (
     <div role="tooltip" className="glass panel pointer-events-none fixed z-[26] max-w-64 px-3 py-2 text-xs"
@@ -222,6 +227,16 @@ function Skills({ scene, hoverRef, pickRef, showTooltip, openOffer }: {
     return map
   }, [layout])
 
+  // Al entrar a la pestaña se borra lo de Ofertas de inmediato, aunque el grafo todavía esté cargando.
+  useEffect(() => {
+    if (!scene) return
+    scene.highlight(null)
+    scene.setCenter(false)
+    scene.setStars([])
+    scene.setLinks([])
+    scene.setLabels([])
+  }, [scene])
+
   useEffect(() => {
     if (!scene || !layout) return
     scene.highlight(null)
@@ -253,7 +268,23 @@ function Skills({ scene, hoverRef, pickRef, showTooltip, openOffer }: {
     .sort((a, b) => (b.puntaje ?? 0) - (a.puntaje ?? 0))
 
   if (graph.isError) {
-    return <p role="alert" className="pointer-events-auto m-auto text-sm text-muted">{errorMessage(graph.error)}</p>
+    if (graph.error instanceof ApiError && graph.error.status === 404) {
+      return (
+        <div className="pointer-events-auto m-auto max-w-sm">
+          <EmptyState kind="sin-perfil" title="Guarda tu perfil para ver tus habilidades.">
+            <Link to="/perfil" className="text-silver underline">Ir a Perfil</Link>
+          </EmptyState>
+        </div>
+      )
+    }
+    return (
+      <div role="alert" className="glass panel pointer-events-auto m-auto flex flex-col items-center gap-3 p-6 text-sm">
+        <p className="text-muted">{errorMessage(graph.error)}</p>
+        <button type="button" onClick={() => graph.refetch()} className="rounded-lg border border-line px-3 py-1.5 text-silver">
+          Reintentar
+        </button>
+      </div>
+    )
   }
   if (graph.isPending || !layout) return <p className="mono pointer-events-auto text-xs text-muted">Cargando habilidades…</p>
   const skillName = selected?.slice(2)
