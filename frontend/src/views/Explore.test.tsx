@@ -110,3 +110,14 @@ describe('Quitar la marca', () => {
     await waitFor(() => expect(calls).toEqual([{ valor: 'interesa' }, { valor: null }]))
   })
 })
+
+describe('Duplicados en Explorar', () => {
+  it('la tarjeta avisa de la publicación casi idéntica', async () => {
+    server.use(http.get('/api/jobs', () => HttpResponse.json({
+      items: [{ job: job(7, { titulo: 'Backend Intern' }), match: null, etiqueta: null,
+                duplicados: [{ job_id: 8, url: 'https://x/8' }] }], total: 1, page: 1,
+    })))
+    renderWithProviders(<Explore />)
+    expect(await screen.findByText(/\+1 publicación casi idéntica/)).toBeInTheDocument()
+  })
+})

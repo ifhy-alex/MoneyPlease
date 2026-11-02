@@ -57,6 +57,7 @@ export default function Universe() {
   }, [reduced])
 
   const setVista = (v: Vista) => setParams(v === 'ofertas' ? {} : { vista: v })
+  useEffect(() => setTooltip(null), [vista])
 
   return (
     <div className="fixed inset-0 z-[25] bg-bg">

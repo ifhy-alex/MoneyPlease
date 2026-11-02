@@ -17,3 +17,22 @@ export function ease(t: number): number {
 export function isTap(dx: number, dy: number, ms: number): boolean {
   return Math.hypot(dx, dy) < 6 && ms < 400
 }
+
+/**
+ * La estrella que se elige con el puntero: la más cercana al rayo entre las visibles. Las apagadas por un filtro
+ * o por un resaltado (opacidad < minAlpha) no se pueden tocar.
+ */
+export function pickVisible(hits: { index?: number; distanceToRay?: number }[], alphas: ArrayLike<number>,
+                            minAlpha = 0.3): number | null {
+  let best: number | null = null
+  let bestDist = Infinity
+  for (const h of hits) {
+    if (h.index === undefined || (alphas[h.index] ?? 0) < minAlpha) continue
+    const d = h.distanceToRay ?? 0
+    if (d < bestDist) {
+      best = h.index
+      bestDist = d
+    }
+  }
+  return best
+}

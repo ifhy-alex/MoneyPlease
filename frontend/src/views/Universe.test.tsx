@@ -211,3 +211,17 @@ describe('Universo en el celular', () => {
     expect(await screen.findByRole('button', { name: /mostrar panel/i })).toHaveAttribute('aria-expanded', 'false')
   })
 })
+
+describe('Tooltip del universo', () => {
+  it('al cambiar de pestaña desaparece el tooltip de la anterior', async () => {
+    withUniverse()
+    server.use(http.get('/api/skills-graph', () => HttpResponse.json(skillsGraph())))
+    renderWithProviders(<Universe />)
+    await waitFor(() => expect(fake.hover).toBeTruthy())
+    await waitFor(() => expect((last('setStars')?.[0] as unknown[])?.length).toBe(3))
+    act(() => fake.hover!('o:1', { x: 100, y: 80 }))
+    expect(screen.getByRole('tooltip')).toBeInTheDocument()
+    await userEvent.click(screen.getByRole('tab', { name: 'Habilidades' }))
+    expect(screen.queryByRole('tooltip')).toBeNull()
+  })
+})

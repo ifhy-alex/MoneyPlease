@@ -5,6 +5,9 @@ sobre lo que cada oferta tiene de distinto al perfil, así que las ofertas parec
 """
 import numpy as np
 
+# En 3D la oferta más parecida no va en el origen: ahí la taparía la estrella del perfil.
+MIN_RADIUS_3D = 0.08
+
 
 def _radius(sims: np.ndarray) -> np.ndarray:
     spread = sims.max() - sims.min()
@@ -46,7 +49,7 @@ def project3d(profile: np.ndarray, jobs: np.ndarray, ids: list[int]) -> list[tup
     if n == 0:
         return []
     sims = jobs @ profile
-    radius = _radius(sims)
+    radius = MIN_RADIUS_3D + (1 - MIN_RADIUS_3D) * _radius(sims)
     if n < 4:
         # Espiral de Fibonacci sobre la esfera, por orden de id: direcciones bien repartidas y estables.
         rank = {job_id: i for i, job_id in enumerate(sorted(ids))}

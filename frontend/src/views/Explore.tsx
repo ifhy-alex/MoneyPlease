@@ -55,7 +55,7 @@ export default function Explore() {
       )}
       <div className="grid gap-3 xl:grid-cols-2">
         {jobs.data?.items.map((item) => (
-          <JobCard key={item.job.id} job={item.job} match={item.match} onOpen={() => setOpen(item.job.id)}
+          <JobCard key={item.job.id} job={item.job} match={item.match} duplicados={item.duplicados} onOpen={() => setOpen(item.job.id)}
                    onSave={() => saveJob(item.job.id)} />
         ))}
       </div>

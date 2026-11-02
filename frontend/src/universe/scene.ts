@@ -1,7 +1,7 @@
 import * as THREE from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 import { mulberry32 } from '../art/random'
-import { ease, flyTarget, isTap } from './camera'
+import { ease, flyTarget, isTap, pickVisible } from './camera'
 import type { StarSpec, Vec3 } from './stars'
 
 export class NoWebGL extends Error {
@@ -36,7 +36,10 @@ export function webglAvailable(): boolean {
   try {
     const canvas = document.createElement('canvas')
     const ctx = canvas.getContext('webgl2') ?? canvas.getContext('webgl')
-    return !!ctx && typeof (ctx as WebGLRenderingContext).getParameter === 'function'
+    const ok = !!ctx && typeof (ctx as WebGLRenderingContext).getParameter === 'function'
+    // El navegador permite pocos contextos a la vez: el de prueba se libera enseguida.
+    if (ok) (ctx as WebGLRenderingContext).getExtension('WEBGL_lose_context')?.loseContext()
+    return ok
   } catch {
     return false
   }
@@ -82,11 +85,12 @@ const VERTEX = `
   varying float vAlpha;
   varying vec3 vTint;
   uniform float scale;
+  uniform float maxSize;
   void main() {
     vAlpha = alpha;
     vTint = tint;
     vec4 mv = modelViewMatrix * vec4(position, 1.0);
-    gl_PointSize = min(size * scale / -mv.z, 64.0);  // de cerca, el brillo no tapa la pantalla
+    gl_PointSize = min(size * scale / -mv.z, maxSize);  // de cerca, el brillo no tapa la pantalla
     gl_Position = projectionMatrix * mv;
   }`
 const FRAGMENT = `
@@ -98,9 +102,9 @@ const FRAGMENT = `
     gl_FragColor = vec4(vTint * t.rgb, t.a * vAlpha);
   }`
 
-function starMaterial(map: THREE.Texture, scale: number): THREE.ShaderMaterial {
+function starMaterial(map: THREE.Texture, scale: number, pixelRatio: number): THREE.ShaderMaterial {
   return new THREE.ShaderMaterial({
-    uniforms: { map: { value: map }, scale: { value: scale } },
+    uniforms: { map: { value: map }, scale: { value: scale }, maxSize: { value: 64 * pixelRatio } },
     vertexShader: VERTEX, fragmentShader: FRAGMENT,
     transparent: true, depthWrite: false, blending: THREE.AdditiveBlending,
   })
@@ -163,7 +167,8 @@ export function createScene(container: HTMLElement, opts: { reducedMotion: boole
 
   const glow = glowTexture()
   const ring = ringTexture()
-  const pxScale = () => height() * 0.9
+  // gl_PointSize va en píxeles del dispositivo: se multiplica por la densidad para verse igual en retina y celular.
+  const pxScale = () => height() * 0.9 * renderer.getPixelRatio()
   const disposables: { dispose(): void }[] = [glow, ring]
 
   // Fondo: estrellas lejanas, fijas.
@@ -180,8 +185,8 @@ export function createScene(container: HTMLElement, opts: { reducedMotion: boole
   scene.add(center)
   disposables.push(center.material)
 
-  const starMat = starMaterial(glow, pxScale())
-  const ringMat = starMaterial(ring, pxScale())
+  const starMat = starMaterial(glow, pxScale(), renderer.getPixelRatio())
+  const ringMat = starMaterial(ring, pxScale(), renderer.getPixelRatio())
   disposables.push(starMat, ringMat)
   let stars: THREE.Points | null = null
   let rings: THREE.Points | null = null
@@ -270,12 +275,14 @@ export function createScene(container: HTMLElement, opts: { reducedMotion: boole
       renderer.domElement.removeEventListener('pointerdown', onDown)
       renderer.domElement.removeEventListener('pointerup', onUp)
       renderer.domElement.removeEventListener('pointermove', onMove)
+      renderer.domElement.removeEventListener('pointerleave', onLeave)
       handle.setLabels([])
       for (const obj of [stars, rings, links]) obj?.geometry.dispose()
       ;(links?.material as THREE.Material | undefined)?.dispose()
       for (const d of disposables) d.dispose()
       controls.dispose()
       renderer.dispose()
+      renderer.forceContextLoss()
       renderer.domElement.remove()
     },
   }
@@ -292,8 +299,9 @@ export function createScene(container: HTMLElement, opts: { reducedMotion: boole
     const ndc = new THREE.Vector2(((e.clientX - rect.left) / rect.width) * 2 - 1, -((e.clientY - rect.top) / rect.height) * 2 + 1)
     raycaster.params.Points = { threshold: e.pointerType === 'touch' ? 0.5 : 0.25 }
     raycaster.setFromCamera(ndc, camera)
-    const found = raycaster.intersectObject(stars).sort((a, b) => a.distanceToRay! - b.distanceToRay!)[0]
-    return found?.index !== undefined ? specs[found.index] : null
+    const alphas = (stars.geometry.getAttribute('alpha') as THREE.BufferAttribute).array
+    const index = pickVisible(raycaster.intersectObject(stars), alphas)
+    return index === null ? null : specs[index]
   }
   const screenOf = (pos: Vec3) => {
     const v = new THREE.Vector3(...pos).project(camera)
@@ -307,6 +315,7 @@ export function createScene(container: HTMLElement, opts: { reducedMotion: boole
   let down: { x: number; y: number; t: number } | null = null
   const onDown = (e: PointerEvent) => { down = { x: e.clientX, y: e.clientY, t: performance.now() } }
   const onMove = (e: PointerEvent) => { if (e.pointerType === 'mouse' && !e.buttons) setHover(hit(e)) }
+  const onLeave = () => { if (hovered) setHover(null) }
   const onUp = (e: PointerEvent) => {
     if (!down || e.button !== 0) return
     const tap = isTap(e.clientX - down.x, e.clientY - down.y, performance.now() - down.t)
@@ -321,6 +330,7 @@ export function createScene(container: HTMLElement, opts: { reducedMotion: boole
   renderer.domElement.addEventListener('pointerdown', onDown)
   renderer.domElement.addEventListener('pointerup', onUp)
   renderer.domElement.addEventListener('pointermove', onMove)
+  renderer.domElement.addEventListener('pointerleave', onLeave)
 
   const ro = new ResizeObserver(() => {
     renderer.setSize(width(), height())

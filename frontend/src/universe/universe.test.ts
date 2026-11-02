@@ -93,3 +93,13 @@ describe('estrellas de habilidades', () => {
     expect([byId['o:1'].size, byId['o:1'].color, byId['o:2'].color]).toEqual([0.35, '#FFFFFF', '#2547B8'])
   })
 })
+
+describe('selección de estrellas', () => {
+  it('ignora las estrellas apagadas y elige la visible más cercana al rayo', async () => {
+    const { pickVisible } = await import('./camera')
+    const hits = [{ index: 0, distanceToRay: 0.05 }, { index: 1, distanceToRay: 0.1 }, { index: 2, distanceToRay: 0.2 }]
+    expect(pickVisible(hits, [0.12, 1, 1])).toBe(1)
+    expect(pickVisible(hits, [0.12, 0.1, 0.12])).toBeNull()
+    expect(pickVisible([], [1])).toBeNull()
+  })
+})
