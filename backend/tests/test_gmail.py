@@ -52,7 +52,7 @@ class FakeService:
         svc = self
 
         class Messages:
-            def list(self, userId, labelIds, q, pageToken=None):
+            def list(self, userId, labelIds, q=None, pageToken=None):
                 svc.list_calls.append({"labelIds": labelIds, "q": q})
                 return Call({"messages": [{"id": i} for i in svc.messages_by_id]} if svc.messages_by_id else {})
 
@@ -85,3 +85,21 @@ def test_gmail_connector_no_messages():
 def test_gmail_connector_missing_label():
     result = GmailAlertsConnector(FakeService([], labels=()), "Empleo/Alertas", {}).fetch()
     assert result.jobs == [] and result.config_updates == {}
+
+
+def test_gmail_connector_first_run_reads_everything():
+    # Gmail interpreta "after:0" como "nada": la primera corrida, sin cursor, no debe filtrar por fecha.
+    svc = FakeService([gmail_message("m1", "jobalerts-noreply@linkedin.com", html_of("linkedin_alert.eml"),
+                                     1700000500000)])
+    result = GmailAlertsConnector(svc, "Empleo/Alertas", {}).fetch()
+    assert svc.list_calls[0]["q"] is None
+    assert len(result.jobs) == 3
+    assert result.config_updates == {"last_internal_date_s": 1700000500}
+
+
+def test_gmail_alerts_are_assumed_costa_rica():
+    # Las alertas vienen de búsquedas de LinkedIn en Costa Rica: un lugar no reconocido ("Sabana Norte") es de CR.
+    svc = FakeService([gmail_message("m1", "jobalerts-noreply@linkedin.com", html_of("linkedin_alert.eml"),
+                                     1700000500000)])
+    jobs = GmailAlertsConnector(svc, "Empleo/Alertas", {}).fetch().jobs
+    assert {j.country_hint for j in jobs} == {"CR"}

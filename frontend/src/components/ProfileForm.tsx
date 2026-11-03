@@ -61,6 +61,7 @@ function toggle<T>(list: T[], item: T, on: boolean): T[] {
 export function ProfileForm({ value, onChange, errors }: { value: Perfil; onChange: (p: Perfil) => void; errors: Record<string, string> }) {
   const set = <K extends keyof Perfil>(k: K, v: Perfil[K]) => onChange({ ...value, [k]: v })
   const prefs = value.preferences
+  const desconocida = prefs.desconocida_en ?? []
   const setPref = <K extends keyof Perfil['preferences']>(k: K, v: Perfil['preferences'][K]) =>
     onChange({ ...value, preferences: { ...prefs, [k]: v } })
   const [newSkill, setNewSkill] = useState('')
@@ -156,6 +157,22 @@ export function ProfileForm({ value, onChange, errors }: { value: Perfil; onChan
             <label key={p} className="flex items-center gap-1">
               <input type="checkbox" checked={prefs.ubicaciones.includes(p)}
                      onChange={(e) => setPref('ubicaciones', toggle(prefs.ubicaciones, p, e.target.checked))} />
+              {p}
+            </label>
+          ))}
+        </div>
+      </Group>
+
+      <Group legend="Sin modalidad indicada" error={errors['preferences.desconocida_en']}>
+        <p className="text-xs text-muted">
+          Muchas ofertas (sobre todo las alertas de correo) no dicen si son presenciales, híbridas o remotas.
+          Se evalúan igual si están en estas provincias o en Costa Rica sin un lugar reconocido.
+        </p>
+        <div className="grid grid-cols-2 gap-1 text-sm sm:grid-cols-4">
+          {PROVINCIAS.map((p) => (
+            <label key={p} className="flex items-center gap-1">
+              <input type="checkbox" checked={desconocida.includes(p)}
+                     onChange={(e) => setPref('desconocida_en', toggle(desconocida, p, e.target.checked))} />
               {p}
             </label>
           ))}

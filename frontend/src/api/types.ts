@@ -66,6 +66,8 @@ export interface Preferences {
   remoto_abierto: boolean
   excluir_titulo: string[]
   excluir_palabras: string[]
+  /** Provincias donde se evalúan las ofertas de CR que no dicen su modalidad; los perfiles viejos no lo traen. */
+  desconocida_en?: string[]
 }
 
 export interface Perfil {

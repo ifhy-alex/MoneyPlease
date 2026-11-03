@@ -22,8 +22,11 @@ class Preferences(BaseModel):
     remoto_abierto: bool = True
     excluir_titulo: list[str]
     excluir_palabras: list[str]
+    # Provincias donde se evalúan las ofertas de CR que no dicen su modalidad (las alertas de correo casi nunca
+    # la traen). Si hay alguna, también entran las de CR sin provincia reconocida. Vacía: se descartan.
+    desconocida_en: list[str] = []
 
-    @field_validator("ubicaciones")
+    @field_validator("ubicaciones", "desconocida_en")
     @classmethod
     def _provincias(cls, value: list[str]) -> list[str]:
         unknown = [v for v in value if v not in PROVINCIAS]

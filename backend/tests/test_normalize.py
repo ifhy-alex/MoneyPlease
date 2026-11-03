@@ -80,3 +80,13 @@ def test_ambiguous_places_outside_cr(text):
 def test_ambiguous_place_with_cr_context():
     assert detect_ubicacion("San Pedro, Costa Rica") == ("San José", "CR")
     assert detect_ubicacion("Santo Domingo, Heredia") == ("Heredia", "CR")
+
+
+def test_country_hint_fills_unrecognized_place():
+    row = normalize(raw(location="Sabana Norte", country_hint="CR"))
+    assert (row["pais"], row["provincia"]) == ("CR", None)
+
+
+def test_country_hint_does_not_override_detected_place():
+    assert normalize(raw(location="Heredia, Costa Rica", country_hint="CR"))["provincia"] == "Heredia"
+    assert normalize(raw(location="Sabana Norte"))["pais"] is None

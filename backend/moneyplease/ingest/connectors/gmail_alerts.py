@@ -44,7 +44,9 @@ class GmailAlertsConnector:
         if label_id is None:
             log.warning("No existe la etiqueta de Gmail %r", self.label)
             return ConnectorResult([])
-        query = f"after:{self.config.get('last_internal_date_s', 0)}"
+        # Gmail interpreta "after:0" como "nada"; sin cursor (primera corrida) se lee toda la etiqueta.
+        last = self.config.get("last_internal_date_s")
+        query = f"after:{last}" if last else None
         ids, token = [], None
         while True:
             page = users.messages().list(userId="me", labelIds=[label_id], q=query, pageToken=token).execute()
@@ -60,6 +62,7 @@ class GmailAlertsConnector:
             payload = msg["payload"]
             for job in parse_alert(_header(payload, "From"), _html_part(payload)):
                 job.published_at = datetime.fromtimestamp(internal_ms / 1000, UTC)
+                job.country_hint = "CR"
                 job.raw["gmail_message_id"] = mid
                 jobs.append(job)
         updates = {"last_internal_date_s": newest // 1000} if newest else {}

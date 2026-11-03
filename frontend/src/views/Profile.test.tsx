@@ -49,6 +49,16 @@ describe('Perfil', () => {
     expect(puts[0].skills[0]).toMatchObject({ name: 'Java', level: 'avanzado' })
   })
 
+  it('elegir provincias para ofertas sin modalidad las envía en el PUT', async () => {
+    const puts = withProfile()  // el perfil guardado es anterior al campo: no trae desconocida_en
+    renderWithProviders(<Profile />)
+    const group = await screen.findByRole('group', { name: /sin modalidad/i }, { timeout: 4000 })
+    await userEvent.click(within(group).getByRole('checkbox', { name: 'San José' }))
+    await userEvent.click(screen.getByRole('button', { name: /guardar versión/i }))
+    await waitFor(() => expect(puts).toHaveLength(1))
+    expect(puts[0].preferences.desconocida_en).toEqual(['San José'])
+  })
+
   it('doble clic en guardar envía un solo PUT', async () => {
     const puts = withProfile()
     renderWithProviders(<Profile />)
@@ -65,7 +75,7 @@ describe('Perfil', () => {
       { status: 422 })))
     renderWithProviders(<Profile />)
     await userEvent.click(await screen.findByRole('button', { name: /guardar versión/i }))
-    const group = screen.getByRole('group', { name: /modalidad/i })
+    const group = screen.getByRole('group', { name: /^modalidad$/i })
     expect(await within(group).findByText(/presencial, hibrido or remoto/)).toBeInTheDocument()
   })
 

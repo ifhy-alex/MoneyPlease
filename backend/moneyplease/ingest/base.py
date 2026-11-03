@@ -15,6 +15,8 @@ class RawJob:
     raw: dict
     remote_hint: bool | None = None
     workplace_hint: str | None = None
+    # País supuesto cuando el lugar no se reconoce (las alertas de correo vienen de búsquedas en CR).
+    country_hint: str | None = None
 
 
 @dataclass

@@ -35,6 +35,8 @@ def _open_remote(ubicacion: str) -> bool:
 def location_ok(pais: str | None, provincia: str | None, modalidad: str, ubicacion: str,
                 prefs: Preferences) -> bool:
     if pais == "CR":
+        if modalidad == "desconocida":
+            return bool(prefs.desconocida_en) and (provincia is None or provincia in prefs.desconocida_en)
         if modalidad not in prefs.modalidad:
             return False
         return modalidad == "remoto" or provincia is None or provincia in prefs.ubicaciones

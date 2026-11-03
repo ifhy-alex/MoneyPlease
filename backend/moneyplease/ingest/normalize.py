@@ -79,6 +79,7 @@ def detect_ubicacion(text: str) -> tuple[str | None, str | None]:
 def normalize(job: RawJob) -> dict:
     ubicacion = job.location or ""
     provincia, pais = detect_ubicacion(ubicacion)
+    pais = pais or job.country_hint
     published = job.published_at
     if published is not None and published.tzinfo is None:
         published = published.replace(tzinfo=UTC)

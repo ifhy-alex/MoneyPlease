@@ -14,7 +14,7 @@ const SkillGraph = lazy(() => import('../art/SkillGraph'))
 const EMPTY: Perfil = {
   skills: [], languages: [], experience_months: 0, seniority_target: ['practica', 'junior'], roles_target: [], summary: '',
   preferences: { modalidad: ['presencial', 'hibrido', 'remoto'], ubicaciones: ['Cartago', 'San José', 'Heredia', 'Alajuela'],
-    remoto_abierto: true, excluir_titulo: [], excluir_palabras: [] },
+    remoto_abierto: true, excluir_titulo: [], excluir_palabras: [], desconocida_en: [] },
 }
 
 export default function Profile() {

@@ -59,3 +59,30 @@ def test_passes_combines_all():
     assert passes(job, PREFS)
     job.titulo = "Senior Backend Engineer"
     assert not passes(job, PREFS)
+
+
+UNKNOWN_OK = PREFS.model_copy(update={"desconocida_en": ["Cartago", "San José"]})
+
+
+@pytest.mark.parametrize("provincia,ok", [
+    ("San José", True),
+    ("Cartago", True),
+    ("Heredia", False),  # está en ubicaciones, pero no en las aceptadas sin modalidad
+    (None, True),        # CR sin provincia reconocida (p. ej. "Sabana Norte" en una alerta)
+])
+def test_unknown_modality_in_chosen_provinces(provincia, ok):
+    assert location_ok("CR", provincia, "desconocida", "x", UNKNOWN_OK) is ok
+
+
+def test_unknown_modality_rejected_by_default():
+    assert PREFS.desconocida_en == []
+    assert location_ok("CR", "San José", "desconocida", "San José", PREFS) is False
+
+
+def test_unknown_modality_still_needs_cr():
+    assert location_ok(None, None, "desconocida", "London", UNKNOWN_OK) is False
+
+
+def test_desconocida_en_validates_provinces():
+    with pytest.raises(ValueError):
+        type(PREFS).model_validate({**PREFS.model_dump(), "desconocida_en": ["Narnia"]})
