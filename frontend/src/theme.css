@@ -17,6 +17,14 @@
   color-scheme: dark;
 }
 
+/* La lista desplegable de un <select> la pinta el sistema: hereda el texto claro de la página pero no el fondo
+   (el del campo es translúcido), así que en Windows quedaba texto claro sobre blanco. */
+option,
+optgroup {
+  background-color: #0b1020;
+  color: var(--text);
+}
+
 @theme {
   --color-bg: var(--bg);
   --color-surface: var(--glass);
