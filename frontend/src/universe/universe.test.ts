@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { skillsGraph, universePoint } from '../test/handlers'
-import { ease, flyTarget, isTap } from './camera'
+import { ease, flyTarget, isTap, leaveClearsHover, tapAction } from './camera'
 import { layoutGraph3d } from './graph3d'
 import { search } from './search'
 import { offerStars, SCALE, topLinks3d, type Filters } from './stars'
@@ -101,5 +101,21 @@ describe('selección de estrellas', () => {
     expect(pickVisible(hits, [0.12, 1, 1])).toBe(1)
     expect(pickVisible(hits, [0.12, 0.1, 0.12])).toBeNull()
     expect(pickVisible([], [1])).toBeNull()
+  })
+})
+
+describe('toques sobre las estrellas', () => {
+  it('en el teléfono un solo toque muestra la estrella y la abre', () => {
+    expect(tapAction('o:1')).toEqual({ hover: 'o:1', pick: 'o:1' })
+  })
+
+  it('tocar el vacío quita el tooltip y no abre nada', () => {
+    expect(tapAction(null)).toEqual({ hover: null, pick: null })
+  })
+
+  it('al levantar el dedo el navegador dispara pointerleave: solo el mouse quita el tooltip al salir', () => {
+    expect(leaveClearsHover('mouse')).toBe(true)
+    expect(leaveClearsHover('touch')).toBe(false)
+    expect(leaveClearsHover('pen')).toBe(false)
   })
 })

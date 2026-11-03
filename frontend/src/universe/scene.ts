@@ -1,7 +1,7 @@
 import * as THREE from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 import { mulberry32 } from '../art/random'
-import { ease, flyTarget, isTap, pickVisible } from './camera'
+import { ease, flyTarget, isTap, leaveClearsHover, pickVisible, tapAction } from './camera'
 import type { StarSpec, Vec3 } from './stars'
 
 export class NoWebGL extends Error {
@@ -322,17 +322,16 @@ export function createScene(container: HTMLElement, opts: { reducedMotion: boole
   let down: { x: number; y: number; t: number } | null = null
   const onDown = (e: PointerEvent) => { down = { x: e.clientX, y: e.clientY, t: performance.now() } }
   const onMove = (e: PointerEvent) => { if (e.pointerType === 'mouse' && !e.buttons) setHover(hit(e)) }
-  const onLeave = () => { if (hovered) setHover(null) }
+  const onLeave = (e: PointerEvent) => { if (hovered && leaveClearsHover(e.pointerType)) setHover(null) }
   const onUp = (e: PointerEvent) => {
     if (!down || e.button !== 0) return
     const tap = isTap(e.clientX - down.x, e.clientY - down.y, performance.now() - down.t)
     down = null
     if (!tap) return  // fue un arrastre para rotar
     const s = hit(e)
-    if (!s) { setHover(null); return }
-    // Táctil: el primer toque muestra la estrella, el segundo sobre la misma la abre.
-    if (e.pointerType !== 'mouse' && hovered !== s.id) setHover(s)
-    else pickCb(s.id)
+    const { pick } = tapAction(s?.id ?? null)
+    setHover(s)
+    if (pick) pickCb(pick)
   }
   renderer.domElement.addEventListener('pointerdown', onDown)
   renderer.domElement.addEventListener('pointerup', onUp)

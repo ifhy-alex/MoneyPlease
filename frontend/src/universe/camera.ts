@@ -36,3 +36,16 @@ export function pickVisible(hits: { index?: number; distanceToRay?: number }[], 
   }
   return best
 }
+
+/**
+ * Qué hace un toque o clic (sin arrastre) sobre el lienzo: muestra la estrella tocada y la abre de una vez.
+ * Antes en el teléfono hacía falta un segundo toque, y el tooltip del primero se borraba enseguida.
+ */
+export function tapAction(hitId: string | null): { hover: string | null; pick: string | null } {
+  return { hover: hitId, pick: hitId }
+}
+
+/** Al levantar el dedo el navegador dispara pointerleave: solo un mouse que sale del lienzo quita el tooltip. */
+export function leaveClearsHover(pointerType: string): boolean {
+  return pointerType === 'mouse'
+}
