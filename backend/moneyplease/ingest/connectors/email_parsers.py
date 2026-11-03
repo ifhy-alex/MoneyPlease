@@ -32,12 +32,17 @@ def parse_linkedin(html: str) -> list[RawJob]:
     jobs, seen = [], set()
     for a in soup.find_all("a", href=True):
         m = LINKEDIN_ID.search(a["href"])
-        title = a.get_text(" ", strip=True)
+        # Las alertas actuales meten la tarjeta entera en el enlace: el título va en el elemento "font-bold"
+        # (un <div> o un <a> anidado) y "Empresa · Lugar" en un <p> de la misma tarjeta.
+        # Si no, el enlace es solo el título.
+        heading = a.find(class_="font-bold")
+        title = (heading or a).get_text(" ", strip=True)
         if not m or not title or m.group(1) in seen:
             continue
         seen.add(m.group(1))
         company, location = "", None
-        for s in _next_strings(a, 4):
+        inside = [s.strip() for s in a.find_all(string=True) if s.strip()] if heading else []
+        for s in inside or _next_strings(a, 4):
             if "·" in s:
                 company, _, location = (p.strip() for p in s.partition("·"))
                 break

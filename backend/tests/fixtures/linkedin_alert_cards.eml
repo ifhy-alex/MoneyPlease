@@ -1,0 +1,45 @@
+From: Alertas de empleo de LinkedIn <jobalerts-noreply@linkedin.com>
+To: alertas@example.com
+Subject: Empresa Uno busca personal para un puesto de Analista Programador
+Date: Mon, 02 Nov 2026 07:00:00 -0600
+MIME-Version: 1.0
+Content-Type: text/html; charset="utf-8"
+
+<html><body>
+<!-- Estructura real de las alertas de 2026: la tarjeta entera va dentro del enlace -->
+<table><tr><td>
+<a href="https://www.linkedin.com/comm/jobs/view/4200000001/?trackingId=abc%3D%3D&amp;refId=xyz" target="_blank">
+ <table><tbody><tr><td><table><tbody><tr>
+  <td class="pr-1 w-6"><img class="inline-block" alt="Empresa Uno"/></td>
+  <td><table><tbody>
+   <tr><td class="pb-0"><div class="font-bold text-md leading-regular text-system-blue-50"> Analista Programador - Seguros </div></td></tr>
+   <tr><td class="pb-0"><p class="text-system-gray-100 text-xs leading-regular mt-0.5 line-clamp-1 text-ellipsis"> Empresa Uno · San Pedro (Presencial) </p></td></tr>
+   <tr><td><table class="inline-block"><tr><td class="job-card-flavor"><p> Solicitud sencilla </p></td></tr></table></td></tr>
+  </tbody></table></td>
+ </tr></tbody></table></td></tr></tbody></table>
+</a>
+</td></tr><tr><td>
+<a href="https://www.linkedin.com/comm/jobs/view/4200000002/?trackingId=def%3D%3D" target="_blank">
+ <table><tbody><tr><td><table><tbody><tr>
+  <td class="pr-1 w-6"><img class="inline-block" alt="Empresa Dos"/></td>
+  <td><table><tbody>
+   <tr><td class="pb-0"><div class="font-bold text-md leading-regular text-system-blue-50"> Economics Research Intern </div></td></tr>
+   <tr><td class="pb-0"><p class="text-system-gray-100 text-xs leading-regular mt-0.5 line-clamp-1 text-ellipsis"> Empresa Dos &amp; Asociados · San José, Costa Rica </p></td></tr>
+   <tr><td><table class="inline-block"><tr><td class="job-card-flavor"><p> En busca de personal </p></td></tr></table></td></tr>
+  </tbody></table></td>
+ </tr></tbody></table></td></tr></tbody></table>
+</a>
+</td></tr><tr><td>
+<!-- Variante de jobalerts-noreply: el título va en un <a> anidado sin href, sin <div> -->
+<a href="https://www.linkedin.com/comm/jobs/view/4200000003/?trackingId=jkl" target="_blank">
+ <table><tbody>
+  <tr><td class="pb-0"><a class="font-bold text-md leading-regular text-system-blue-50"> Associate Data Analyst </a></td></tr>
+  <tr><td class="pb-0"><p class="text-system-gray-100 text-xs leading-regular mt-0.5 line-clamp-1 text-ellipsis"> Empresa Tres · Heredia </p></td></tr>
+  <tr><td><table class="inline-block"><tr><td><p class="job-card-flavor__detail"> En busca de personal </p></td></tr></table></td></tr>
+ </tbody></table>
+</a>
+</td></tr><tr><td>
+<a href="https://www.linkedin.com/comm/jobs/view/4200000002/?trackingId=ghi">Ver empleo</a>
+<a href="https://www.linkedin.com/comm/jobs/search/?keywords=intern">Ver todos los empleos</a>
+</td></tr></table>
+</body></html>

@@ -1,5 +1,5 @@
-# TODO(usuario): reemplazar los .eml por alertas reales anonimizadas cuando lleguen las primeras;
-# estos parsers son la parte que más probablemente se rompa.
+# linkedin_alert_cards.eml copia la estructura de alertas reales de LinkedIn (nov. 2026), anonimizada.
+# TODO(usuario): falta una alerta real de Indeed; indeed_alert.eml sigue siendo una suposición.
 import email
 from email import policy
 from pathlib import Path
@@ -22,6 +22,22 @@ def test_parse_linkedin_fixture():
     assert jobs[0].external_id == "4100000001"
     assert jobs[0].url == "https://www.linkedin.com/jobs/view/4100000001/"
     assert all("trackingId" not in j.url for j in jobs)
+
+
+def test_parse_linkedin_card_inside_link():
+    # Formato real: título, empresa · lugar y la etiqueta de estado van todos dentro del mismo <a>.
+    jobs = parse_linkedin(html_of("linkedin_alert_cards.eml"))
+    assert [(j.title, j.company, j.location) for j in jobs] == [
+        ("Analista Programador - Seguros", "Empresa Uno", "San Pedro (Presencial)"),
+        ("Economics Research Intern", "Empresa Dos & Asociados", "San José, Costa Rica"),
+        ("Associate Data Analyst", "Empresa Tres", "Heredia"),
+    ]
+    assert [j.external_id for j in jobs] == ["4200000001", "4200000002", "4200000003"]
+
+
+def test_parse_alert_accepts_jobs_noreply_sender():
+    jobs = parse_alert("LinkedIn <jobs-noreply@linkedin.com>", html_of("linkedin_alert_cards.eml"))
+    assert len(jobs) == 3
 
 
 def test_parse_indeed_fixture():
