@@ -16,6 +16,19 @@ describe('JobCard', () => {
     expect(screen.getByText(/\+2 publicaciones casi idénticas/)).toBeInTheDocument()
   })
 
+  it('muestra la antigüedad de la oferta con la fecha exacta', () => {
+    render(<JobCard job={job(1, { fuente: 'workday:hpe', publicado_en: '2026-10-28T12:00:00-06:00' })} match={null} />)
+    const age = screen.getByText(/^Publicada (hoy|ayer|hace .+)$/)
+    expect(age.tagName).toBe('TIME')
+    expect(age).toHaveAttribute('dateTime', '2026-10-28T12:00:00-06:00')
+    expect(age).toHaveAttribute('title', expect.stringContaining('2026'))
+  })
+
+  it('una oferta de hace meses se marca como antigua', () => {
+    render(<JobCard job={job(1, { fuente: 'workday:hpe', publicado_en: '2025-01-01T12:00:00-06:00' })} match={null} />)
+    expect(screen.getByText(/más de un año/)).toHaveAttribute('title', expect.stringMatching(/puede que ya esté cerrada/))
+  })
+
   it('sin duplicados no muestra el aviso', () => {
     render(<JobCard job={job(1)} match={null} />)
     expect(screen.queryByText(/casi idéntica/)).toBeNull()

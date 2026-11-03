@@ -3,6 +3,7 @@ import type { DuplicateRef, MatchInfo, Job } from '../api/types'
 import { usePrefersReducedMotion } from '../lib/motion'
 import { CompanySeal } from './CompanySeal'
 import { DuplicatesNote } from './DuplicatesNote'
+import { JobAge } from './JobAge'
 import { ScoreRing } from './ScoreRing'
 
 const FIT_LABEL = { practica: 'Práctica', junior: 'Junior', no_aplica: 'No aplica' } as const
@@ -41,6 +42,7 @@ export function JobCard({ job, match, saved, index = 0, onInterest, onDismiss, o
           <p className="text-sm text-muted">
             {job.empresa} · {job.ubicacion || 'Sin ubicación'} ({job.modalidad})
           </p>
+          <JobAge job={job} />
         </div>
         {match && (
           <div className="flex flex-col items-center">

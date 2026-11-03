@@ -2,6 +2,7 @@ import { useJob, type FeedbackValue } from '../api/hooks'
 import { CompanySeal } from './CompanySeal'
 import { Dialog } from './Dialog'
 import { DuplicatesNote } from './DuplicatesNote'
+import { JobAge } from './JobAge'
 import { ScoreRing } from './ScoreRing'
 
 interface Props {
@@ -28,6 +29,7 @@ export function JobDetail({ id, onClose, onFeedback, onSave }: Props) {
             <div className="flex-1">
               <h2 className="text-2xl leading-tight">{d.job.titulo}</h2>
               <p className="text-sm text-muted">{d.job.empresa} · {d.job.ubicacion} ({d.job.modalidad})</p>
+              <JobAge job={d.job} />
             </div>
             {d.match && <ScoreRing score={d.match.score} fit={d.match.fit} size={56} />}
           </header>
