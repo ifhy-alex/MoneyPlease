@@ -4,6 +4,7 @@ MoneyPlease es el buscador personal de prácticas y empleo junior de su dueño, 
 
 ## Mapa del proyecto
 
+- `README.md` está en inglés (portafolio); la documentación operativa, en español, está en `docs/INSTALACION.md` y `docs/USO.md`.
 - `backend/` — Python 3.12 con [uv](https://docs.astral.sh/uv/): FastAPI, SQLAlchemy 2, PostgreSQL 16 + pgvector, Gemini.
   - `moneyplease/ingest/` — conectores (Greenhouse, Lever, Workday, JSearch, alertas de Gmail) y normalización.
   - `moneyplease/matching/` — filtros del perfil, embeddings y evaluación con Gemini.
@@ -41,7 +42,7 @@ Si `docker compose exec` falla porque el contenedor no existe, usa la ruta con u
 ## Tests
 
 ```bash
-cd backend && uv run pytest -q          # requiere Postgres de pruebas (ver README)
+cd backend && uv run pytest -q          # levanta Postgres con testcontainers (ver docs/INSTALACION.md)
 cd frontend && npx vitest run && npm run build
 ```
 
