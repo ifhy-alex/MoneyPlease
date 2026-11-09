@@ -1,4 +1,5 @@
 from dataclasses import dataclass, field
+from datetime import datetime
 
 from sqlalchemy import or_, select
 from sqlalchemy.orm import Session
@@ -33,6 +34,21 @@ def render_top(rows: list[tuple[Match, Job]]) -> str:
         lines += [f"    {match.resumen}", f"    {job.url}"]
         blocks.append("\n".join(lines))
     return "\n\n".join(blocks)
+
+
+def recent_matches(session: Session, profile_id: int, since: datetime) -> list[tuple[Match, Job]]:
+    """Todo lo que se evaluó desde `since` (incluidas las "no aplica"): el resumen de una corrida."""
+    return list(session.execute(
+        select(Match, Job).join(Job, Job.id == Match.job_id)
+        .where(Match.profile_id == profile_id, Match.evaluado_en >= since)
+        .order_by(Match.score.desc(), Match.evaluado_en.desc())).all())
+
+
+def render_recent(rows: list[tuple[Match, Job]]) -> str:
+    if not rows:
+        return "No hay evaluaciones nuevas en ese periodo."
+    return "\n".join(f"{m.score} · {m.fit} · {j.titulo} — {j.empresa} | {j.ubicacion or 'sin ubicación'} | {j.url}"
+                     for m, j in rows)
 
 
 def label(session: Session, job_id: int, etiqueta: str) -> None:

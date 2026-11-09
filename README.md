@@ -4,6 +4,8 @@ Buscador personal de prácticas y empleo. Recolecta ofertas de fuentes legales (
 
 Incluye la **Fase 1** (ingesta y base de datos) y la **Fase 2** (perfil desde el CV y matching con Gemini). El dashboard y el correo diario llegan en la Fase 3. El diseño está en [docs/superpowers/specs](docs/superpowers/specs).
 
+**Uso diario** (traer y evaluar ofertas a mano, revisar resultados, problemas comunes): [docs/USO.md](docs/USO.md). Instrucciones para agentes de IA: [AGENTS.md](AGENTS.md).
+
 ## Requisitos
 
 - Docker con Docker Compose

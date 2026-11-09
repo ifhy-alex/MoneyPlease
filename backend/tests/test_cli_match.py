@@ -170,3 +170,21 @@ def test_from_cv_friendly_errors(monkeypatch, capsys, error, text):
     assert info.value.code == 1
     out = capsys.readouterr().out.lower()
     assert text in out and "traceback" not in out
+
+
+def test_recent_matches_only_within_window_all_fits(session, setup):
+    prof, add = setup
+    add("Nueva buena", 90, "practica", age_min=30)
+    add("Nueva no aplica", 10, "no_aplica", age_min=60)
+    add("Vieja", 95, "practica", age_min=60 * 30)
+    rows = ev.recent_matches(session, prof.id, since=NOW - timedelta(hours=24))
+    assert [j.titulo for _, j in rows] == ["Nueva buena", "Nueva no aplica"]
+
+
+def test_render_recent_one_line_per_offer(session, setup):
+    prof, add = setup
+    add("Backend Intern", 88, "practica")
+    out = ev.render_recent(ev.recent_matches(session, prof.id, since=NOW - timedelta(hours=1)))
+    assert out.splitlines()[0].startswith("88 · practica · Backend Intern — ACME")
+    assert "https://x/Backend Intern" in out
+    assert ev.render_recent([]) == "No hay evaluaciones nuevas en ese periodo."

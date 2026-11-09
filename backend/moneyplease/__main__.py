@@ -1,7 +1,7 @@
 import argparse
 import logging
 import sys
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 
 from moneyplease.config import get_settings
 from moneyplease.db.session import make_session
@@ -28,6 +28,8 @@ def main(argv: list[str] | None = None) -> None:
     top.add_argument("--n", type=int, default=10)
     top.add_argument("--fit", choices=["practica", "junior", "no_aplica"])
     top.add_argument("--min-score", type=int)
+    rec = sub.add_parser("recientes", help="lo evaluado en las últimas horas, incluidas las que no aplican")
+    rec.add_argument("--horas", type=float, default=24)
     lab = sub.add_parser("label", help="etiqueta una oferta a mano")
     lab.add_argument("job_id", type=int)
     lab.add_argument("etiqueta", choices=["buena", "regular", "mala"])
@@ -161,6 +163,9 @@ def _matching_command(args, settings) -> None:
                   + yaml.safe_dump(active.perfil_json, allow_unicode=True, sort_keys=False))
         elif args.cmd == "top":
             print(ev.render_top(ev.top_matches(session, active.id, args.n, args.fit, args.min_score)))
+        elif args.cmd == "recientes":
+            since = datetime.now(UTC) - timedelta(hours=args.horas)
+            print(ev.render_recent(ev.recent_matches(session, active.id, since)))
         elif args.cmd == "label":
             try:
                 ev.label(session, args.job_id, args.etiqueta)
