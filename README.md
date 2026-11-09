@@ -22,8 +22,9 @@
 ## How it works
 
 ```mermaid
-flowchart LR
+flowchart TB
     subgraph Sources
+        direction LR
         A[Greenhouse / Lever / Workday<br/>21 companies]
         B[JSearch API]
         C[Gmail API<br/>LinkedIn & Indeed alerts]
