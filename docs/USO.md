@@ -6,7 +6,7 @@ Guía para traer ofertas, evaluarlas y revisar los resultados sin ayuda. Los com
 
 Mientras la computadora esté encendida y Docker abierto:
 
-- **6:00 y 18:00:** trae ofertas de las 21 empresas y de las alertas de Gmail, y evalúa con Gemini las nuevas.
+- **6:00 y 18:00:** trae ofertas de las 21 empresas, de las alertas de Gmail y las pasantías remotas internacionales de Himalayas, y evalúa con Gemini las nuevas.
 - **6:05:** consulta JSearch (una vez al día); esas ofertas se evalúan en la corrida de las 18:00.
 
 Si la computadora estuvo apagada a esa hora, esa corrida se pierde: haz una a mano (abajo).

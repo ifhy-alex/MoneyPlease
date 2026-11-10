@@ -6,7 +6,7 @@ MoneyPlease es el buscador personal de prácticas y empleo junior de su dueño, 
 
 - `README.md` está en inglés (portafolio); la documentación operativa, en español, está en `docs/INSTALACION.md` y `docs/USO.md`.
 - `backend/` — Python 3.12 con [uv](https://docs.astral.sh/uv/): FastAPI, SQLAlchemy 2, PostgreSQL 16 + pgvector, Gemini.
-  - `moneyplease/ingest/` — conectores (Greenhouse, Lever, Workday, JSearch, alertas de Gmail) y normalización.
+  - `moneyplease/ingest/` — conectores (Greenhouse, Lever, Workday, JSearch, alertas de Gmail, Himalayas) y normalización.
   - `moneyplease/matching/` — filtros del perfil, embeddings y evaluación con Gemini.
   - `moneyplease/__main__.py` — la CLI (`python -m moneyplease --help`).
 - `frontend/` — React 19 + TypeScript + Vite + Tailwind; el build lo sirve el backend.

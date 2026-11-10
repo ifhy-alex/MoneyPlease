@@ -1,0 +1,53 @@
+{
+  "comments": "Search results come 20 to a page. Pass ?page=2, ?page=3 and so on for more.",
+  "updatedAt": 1793538865,
+  "offset": 0,
+  "limit": 20,
+  "totalCount": 3,
+  "jobs": [
+    {
+      "title": "Application Developer Intern",
+      "excerpt": "This is a remote position.",
+      "companyName": "Orion Labs",
+      "companySlug": "orion-labs",
+      "employmentType": "Intern",
+      "seniority": ["Entry-level"],
+      "timezoneRestrictions": [-6, -5],
+      "categories": ["Software-Development", "Software-Development-Intern"],
+      "description": "<h3>This is a remote position.</h3><p>Build web apps with Python and React.</p>",
+      "pubDate": 1793538716,
+      "expiryDate": 1795140880,
+      "applicationLink": "https://himalayas.app/companies/orion-labs/jobs/application-developer-intern?utm_source=api",
+      "guid": "https://himalayas.app/companies/orion-labs/jobs/application-developer-intern",
+      "locationRestrictions": ["Argentina", "Costa Rica", "Mexico"]
+    },
+    {
+      "title": "Trainee Flutter Developer",
+      "excerpt": "Remote trainee program.",
+      "companyName": "Café Byte",
+      "companySlug": "cafe-byte",
+      "employmentType": "Full Time",
+      "seniority": ["Entry-level"],
+      "categories": ["Mobile-Development"],
+      "description": "<p>Learn Flutter with a mentor.</p>",
+      "pubDate": 1793400000,
+      "applicationLink": "https://himalayas.app/companies/cafe-byte/jobs/trainee-flutter-developer?utm_source=api",
+      "guid": "https://himalayas.app/companies/cafe-byte/jobs/trainee-flutter-developer",
+      "locationRestrictions": []
+    },
+    {
+      "title": "Junior Project Manager",
+      "excerpt": "Entry-level PM role.",
+      "companyName": "Volcán Systems",
+      "companySlug": "volcan-systems",
+      "employmentType": "Full Time",
+      "seniority": ["Entry-level"],
+      "categories": ["Project-Management"],
+      "description": "<p>Coordinate projects.</p>",
+      "pubDate": 1793300000,
+      "applicationLink": "https://himalayas.app/companies/volcan-systems/jobs/junior-project-manager?utm_source=api",
+      "guid": "https://himalayas.app/companies/volcan-systems/jobs/junior-project-manager",
+      "locationRestrictions": ["Costa Rica"]
+    }
+  ]
+}

@@ -5,6 +5,7 @@ from moneyplease.db.models import Source
 from moneyplease.ingest.base import Connector
 from moneyplease.ingest.connectors.gmail_alerts import GmailAlertsConnector, build_service
 from moneyplease.ingest.connectors.greenhouse import GreenhouseConnector
+from moneyplease.ingest.connectors.himalayas import HimalayasConnector
 from moneyplease.ingest.connectors.jsearch import JSearchConnector
 from moneyplease.ingest.connectors.lever import LeverConnector
 from moneyplease.ingest.connectors.workday import WorkdayConnector
@@ -26,6 +27,8 @@ def build_connector(source: Source, settings: Settings, client: PoliteClient, to
         return ATS[ats](config["slug"], source.nombre, client)
     if source.key == "jsearch":
         return JSearchConnector(settings.jsearch_api_key, config, client, today) if settings.jsearch_api_key else None
+    if source.key == "himalayas":
+        return HimalayasConnector(client)
     if source.key == "gmail":
         service = build_service(settings)
         return GmailAlertsConnector(service, settings.gmail_label, config) if service else None

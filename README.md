@@ -1,6 +1,6 @@
 # MoneyPlease
 
-**A personal job-matching platform for internships and junior roles in Costa Rica.** Twice a day it collects postings from 23 sources, filters them by location and seniority, and ranks each one against a CV-based profile using vector embeddings and an LLM, so the best matches show up first in a dashboard.
+**A personal job-matching platform for internships and junior roles in Costa Rica, plus international remote internships.** Twice a day it collects postings from 24 sources, filters them by location and seniority, and ranks each one against a CV-based profile using vector embeddings and an LLM, so the best matches show up first in a dashboard.
 
 ![Dashboard with the semantic map and the ranked offers](docs/img/dashboard.jpg)
 
@@ -8,7 +8,7 @@
 
 ## What it does
 
-- **Ingests ~2,500 active postings** from 21 company career sites (Greenhouse, Lever and Workday public APIs), the JSearch API, and LinkedIn/Indeed alert emails read through the Gmail API.
+- **Ingests ~2,500 active postings** from 21 company career sites (Greenhouse, Lever and Workday public APIs), the JSearch API, LinkedIn/Indeed alert emails read through the Gmail API, and remote internships open to Costa Rica from the Himalayas API.
 - **Normalizes and deduplicates** them: location and work mode detection (on-site / hybrid / remote) in English and Spanish, near-duplicate grouping by embedding similarity, and automatic expiry when a posting disappears from its source.
 - **Matches** each new posting against the profile in two stages: a cheap vector search with pgvector preselects the most similar ones, and Gemini scores those (0–100) with strengths, gaps and a summary. Thumbs up/down feedback is fed back as few-shot examples.
 - **Shows it all in a dashboard**: ranked offers, a semantic map, an application pipeline with a kanban board, a skill-gap graph, and an explorable 3D "universe" of offers and skills.
@@ -26,7 +26,7 @@ flowchart TB
     subgraph Sources
         direction LR
         A[Greenhouse / Lever / Workday<br/>21 companies]
-        B[JSearch API]
+        B[JSearch API<br/>Himalayas API]
         C[Gmail API<br/>LinkedIn & Indeed alerts]
     end
     A & B & C --> D[Ingestion<br/>normalize · dedupe · expire]

@@ -43,6 +43,10 @@ Una empresa que da 404 se desactiva sola. Para reactivarla, poner `activa: false
 2. Poner la key en `.env` como `JSEARCH_API_KEY=...`.
 3. `docker compose up -d` para que el worker la tome.
 
+## Pasantías remotas internacionales (Himalayas)
+
+La fuente `himalayas` usa la API pública de búsqueda de [Himalayas](https://himalayas.app), un portal de empleo 100% remoto, sin key. En cada corrida busca `intern`, `internship` y `trainee` con el filtro `country=CR`, que deja solo las ofertas que aceptan candidatos en Costa Rica, y guarda únicamente las pasantías (título con intern, internship, trainee, apprentice, práctica o pasantía, o tipo de empleo "Intern"). Aparecen como "Remoto · abierto a Costa Rica" y enlazan a la oferta en Himalayas, como piden sus términos de uso. Como trae la lista completa cada vez, las que salen de Himalayas expiran solas.
+
 ## Activar las alertas de Gmail
 
 1. En el correo dedicado, crear un filtro que ponga la etiqueta `Empleo/Alertas` a las alertas de LinkedIn e Indeed. Si las alertas llegan a otro correo, reenviarlas con un filtro (el reenvío automático conserva el remitente original, que es como la app reconoce cada alerta). Los detalles están en [USO.md](USO.md#alertas-de-linkedin-por-correo).

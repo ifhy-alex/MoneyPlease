@@ -32,7 +32,7 @@ def by_key(session):
 def test_sync_creates_sources(session, tmp_path):
     sync(session, settings(tmp_path))
     src = by_key(session)
-    assert set(src) == {"greenhouse:uno", "lever:dos", "jsearch", "gmail"}
+    assert set(src) == {"greenhouse:uno", "lever:dos", "jsearch", "gmail", "himalayas"}
     assert src["greenhouse:uno"].tipo == "ats"
     assert src["greenhouse:uno"].nombre == "Uno"
     assert src["greenhouse:uno"].config_json == {"slug": "uno", "careers_url": "https://uno.example"}

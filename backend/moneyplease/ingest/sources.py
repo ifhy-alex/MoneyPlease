@@ -46,6 +46,8 @@ def sync(session: Session, settings: Settings) -> None:
     if "jsearch" not in existing:
         session.add(Source(key="jsearch", nombre="JSearch", tipo="api", activa=True,
                            config_json={"queries": DEFAULT_QUERIES}))
+    if "himalayas" not in existing:  # pasantías remotas internacionales abiertas a Costa Rica
+        session.add(Source(key="himalayas", nombre="Himalayas (remotas)", tipo="api", activa=True, config_json={}))
     if "gmail" not in existing:
         session.add(Source(key="gmail", nombre="Alertas de Gmail", tipo="email", activa=True, config_json={}))
     session.commit()
