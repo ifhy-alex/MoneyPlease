@@ -1,6 +1,8 @@
 export type Fit = 'practica' | 'junior' | 'no_aplica'
 export type Estado = 'guardada' | 'aplicada' | 'entrevista' | 'oferta' | 'rechazada'
 export type Etiqueta = 'buena' | 'mala' | 'regular'
+/** Dónde queda la oferta: en Costa Rica o remota desde el extranjero (regla en backend/moneyplease/scope.py). */
+export type Ambito = 'cr' | 'internacional'
 export type Area = 'backend' | 'frontend' | 'datos' | 'cloud' | 'testing' | 'idiomas'
 
 export interface Job {
@@ -12,6 +14,7 @@ export interface Job {
   pais: string | null
   url: string
   fuente: string
+  ambito: Ambito
   publicado_en: string | null
   primera_vez_visto: string
 }
@@ -143,7 +146,7 @@ export interface ExploreFilters {
   q?: string
   source?: string
   modalidad?: string
-  solo_cr?: boolean
+  ambito?: Ambito
   min_score?: number
   fit?: string
   desde?: string

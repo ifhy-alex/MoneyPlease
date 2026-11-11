@@ -14,6 +14,7 @@ from moneyplease.duplicates import duplicates_of
 from moneyplease.ingest.normalize import html_to_text
 from moneyplease.insights import CR
 from moneyplease.profile import store
+from moneyplease.scope import Ambito, where_scope
 
 router = APIRouter()
 LABELS = {"interesa": "buena", "no_interesa": "mala"}
@@ -65,7 +66,7 @@ def _like(q: str) -> str:
 
 @router.get("/jobs", response_model=ExplorePage)
 def explore(q: str | None = None, source: str | None = None, modalidad: str | None = None,
-            solo_cr: bool = False, min_score: int | None = None, fit: str | None = None,
+            solo_cr: bool = False, ambito: Ambito | None = None, min_score: int | None = None, fit: str | None = None,
             desde: date | None = None, page: int = Query(1, ge=1), sort: Literal["score", "fecha"] = "score",
             session: Session = Depends(get_session)) -> ExplorePage:
     active = store.active(session)
@@ -83,8 +84,10 @@ def explore(q: str | None = None, source: str | None = None, modalidad: str | No
         query = query.where(Source.key.startswith(f"{source}:") | (Source.key == source))
     if modalidad:
         query = query.where(Job.modalidad == modalidad)
-    if solo_cr:
-        query = query.where(Job.pais == "CR")
+    # solo_cr es el filtro anterior (enlaces viejos): equivale a ambito=cr.
+    scope = where_scope(ambito or ("cr" if solo_cr else None))
+    if scope is not None:
+        query = query.where(scope)
     if min_score is not None:
         query = query.where(Match.score >= min_score)
     if fit:

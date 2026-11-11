@@ -42,7 +42,12 @@ export function JobCard({ job, match, saved, index = 0, onInterest, onDismiss, o
           <p className="text-sm text-muted">
             {job.empresa} · {job.ubicacion || 'Sin ubicación'} ({job.modalidad})
           </p>
-          <JobAge job={job} />
+          <div className="flex flex-wrap items-center gap-2">
+            <JobAge job={job} />
+            {job.ambito === 'internacional' && (
+              <span className="mono rounded-md border border-glow/60 px-1.5 text-[11px] text-silver">🌎 Internacional</span>
+            )}
+          </div>
         </div>
         {match && (
           <div className="flex flex-col items-center">

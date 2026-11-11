@@ -45,6 +45,8 @@ docker compose exec worker python -m moneyplease top
 - `recientes` lista todo lo evaluado en las últimas 24 horas, de mayor a menor puntaje, con el enlace. Para otro periodo: `recientes --horas 6`.
 - `top` muestra tus 10 mejores ofertas activas con fortalezas, brechas y resumen. Variantes: `top --n 20`, `top --fit practica`, `top --min-score 80`.
 
+En el dashboard, Inicio y Explorar separan las ofertas con **Todas · Costa Rica · Internacionales** (internacionales son las remotas desde el extranjero, como las pasantías de Himalayas, y llevan la insignia 🌎). **Mejores (80+)** en el menú, o el botón **80+** de Explorar, muestra solo las de 80 o más.
+
 O abre el dashboard: **http://localhost:8000** en la computadora, o **https://acid.tailad3a63.ts.net** en el teléfono (con Tailscale conectado).
 
 ## Problemas comunes

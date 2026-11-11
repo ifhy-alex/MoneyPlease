@@ -4,6 +4,7 @@ from pydantic import BaseModel
 
 from moneyplease.db.models import Job, Match
 from moneyplease.matching.score import drop_empty_gaps
+from moneyplease.scope import Ambito, scope_of
 
 
 class JobOut(BaseModel):
@@ -15,13 +16,14 @@ class JobOut(BaseModel):
     pais: str | None
     url: str
     fuente: str
+    ambito: Ambito
     publicado_en: datetime | None
     primera_vez_visto: datetime
 
     @classmethod
     def of(cls, job: Job, fuente: str) -> "JobOut":
         return cls(id=job.id, titulo=job.titulo, empresa=job.empresa, ubicacion=job.ubicacion,
-                   modalidad=job.modalidad, pais=job.pais, url=job.url, fuente=fuente,
+                   modalidad=job.modalidad, pais=job.pais, url=job.url, fuente=fuente, ambito=scope_of(fuente, job.pais),
                    publicado_en=job.publicado_en, primera_vez_visto=job.primera_vez_visto)
 
 

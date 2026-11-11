@@ -14,6 +14,12 @@ describe('Layout', () => {
     expect(screen.getByText('contenido')).toBeInTheDocument()
   })
 
+  it('tiene un acceso directo a las ofertas de 80 o más', () => {
+    renderWithProviders(<Layout><p /></Layout>)
+    const links = screen.getAllByRole('link', { name: /mejores \(80\+\)/i })
+    expect(links[0]).toHaveAttribute('href', '/explorar?min_score=80')
+  })
+
   it('no hay selector de tema: la app es solo oscura', () => {
     renderWithProviders(<Layout><p /></Layout>)
     expect(screen.queryByRole('button', { name: /tema/i })).toBeNull()

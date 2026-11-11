@@ -3,17 +3,21 @@ import { lazy, Suspense, useCallback, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { ApiError, errorMessage } from '../api/client'
 import { useCreateApplication, useFeedback, useInsights, useTop, useUpdateApplication, type FeedbackValue } from '../api/hooks'
+import type { Ambito } from '../api/types'
 import { JobCard } from '../components/JobCard'
 import { JobDetail } from '../components/JobDetail'
 import { StatusStrip } from '../components/StatusStrip'
 import { Toast, type ToastState } from '../components/Toast'
+import { ScopeSwitch } from '../components/ScopeSwitch'
 import { EmptyState } from '../decor/EmptyState'
+import { TOP_SCORE } from '../lib/top'
 
 const DAY = 24 * 3600 * 1000
 const SemanticMap = lazy(() => import('../art/SemanticMap'))
 
 export default function Home() {
-  const top = useTop()
+  const [ambito, setAmbito] = useState<Ambito | undefined>()
+  const top = useTop(ambito)
   const insights = useInsights()
   const feedback = useFeedback()
   const save = useCreateApplication()
@@ -56,6 +60,11 @@ export default function Home() {
 
       <div className="grid gap-6 lg:grid-cols-[1fr_18rem]">
         <section aria-label="Top del día" className="flex flex-col gap-3">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <ScopeSwitch value={ambito} onChange={setAmbito} />
+            <Link to={`/explorar?min_score=${TOP_SCORE}${ambito ? `&ambito=${ambito}` : ''}`}
+                  className="mono text-xs text-muted hover:text-text">Ver todas las de {TOP_SCORE}+ ↗</Link>
+          </div>
           {top.isLoading && <p className="text-muted">Cargando ofertas…</p>}
           {top.isError && (
             <p role="alert" className="text-danger">

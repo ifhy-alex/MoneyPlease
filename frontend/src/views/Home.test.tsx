@@ -26,6 +26,29 @@ describe('Inicio', () => {
     expect(screen.getByText(/2\/10/)).toBeInTheDocument()
   })
 
+  it('el selector de ámbito pide el top de cada ámbito', async () => {
+    const asked: (string | null)[] = []
+    server.use(http.get('/api/top', ({ request }) => {
+      const ambito = new URL(request.url).searchParams.get('ambito')
+      asked.push(ambito)
+      const item = (id: number, titulo: string, a: 'cr' | 'internacional') =>
+        ({ job: job(id, { titulo, ambito: a }), match: { score: 90, fit: 'practica', fortalezas: [], brechas: [], resumen: '' },
+           etiqueta: null, postulacion_id: null })
+      return HttpResponse.json(ambito === 'internacional' ? [item(5, 'Remote Intern', 'internacional')]
+        : ambito === 'cr' ? [item(1, 'Heredia Intern', 'cr')]
+        : [item(1, 'Heredia Intern', 'cr'), item(5, 'Remote Intern', 'internacional')])
+    }))
+    renderWithProviders(<Home />)
+    expect(await screen.findByText('Remote Intern')).toBeInTheDocument()
+    await userEvent.click(screen.getByRole('radio', { name: 'Costa Rica' }))
+    await waitFor(() => expect(screen.queryByText('Remote Intern')).not.toBeInTheDocument())
+    expect(screen.getByText('Heredia Intern')).toBeInTheDocument()
+    await userEvent.click(screen.getByRole('radio', { name: 'Internacionales' }))
+    expect(await screen.findByText('Remote Intern')).toBeInTheDocument()
+    expect(asked).toEqual([null, 'cr', 'internacional'])
+    expect(screen.getByRole('link', { name: /ver todas las de 80+/i })).toHaveAttribute('href', '/explorar?min_score=80&ambito=internacional')
+  })
+
   it('no me interesa oculta la tarjeta y deshacer la devuelve', async () => {
     const calls = trackFeedback()
     renderWithProviders(<Home />)

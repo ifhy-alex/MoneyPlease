@@ -1,15 +1,20 @@
 import type { ReactNode } from 'react'
-import { NavLink } from 'react-router-dom'
+import { NavLink, useLocation } from 'react-router-dom'
 import { useInsights } from '../api/hooks'
+import { TOP_SCORE } from '../lib/top'
 
 const LINKS = [
   { to: '/', label: 'Inicio', icon: '◈' },
   { to: '/explorar', label: 'Explorar', icon: '⌕' },
+  { to: `/explorar?min_score=${TOP_SCORE}`, label: `Mejores (${TOP_SCORE}+)`, icon: '★' },
   { to: '/postulaciones', label: 'Postulaciones', icon: '⋯' },
   { to: '/perfil', label: 'Perfil', icon: '◎' },
 ]
 
 function NavItems({ compact }: { compact?: boolean }) {
+  const { search } = useLocation()
+  // NavLink ignora la query: "Mejores" y "Explorar" comparten ruta y se distinguen por min_score.
+  const best = new URLSearchParams(search).get('min_score') === String(TOP_SCORE)
   return (
     <>
       {LINKS.map((l) => (
@@ -17,11 +22,12 @@ function NavItems({ compact }: { compact?: boolean }) {
           key={l.to}
           to={l.to}
           end={l.to === '/'}
-          className={({ isActive }) =>
-            `flex items-center gap-3 rounded-xl px-3 py-2 text-sm transition-colors ${
+          className={({ isActive }) => {
+            const active = isActive && (!l.to.startsWith('/explorar') || l.to.includes('min_score') === best)
+            return `flex items-center gap-3 rounded-xl px-3 py-2 text-sm transition-colors ${
               compact ? 'flex-col gap-0.5 text-xs' : ''
-            } ${isActive ? 'bg-surface text-accent' : 'text-muted hover:text-text'}`
-          }
+            } ${active ? 'bg-surface text-accent' : 'text-muted hover:text-text'}`
+          }}
         >
           <span aria-hidden="true" className="text-lg leading-none">{l.icon}</span>
           {l.label}

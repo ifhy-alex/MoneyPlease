@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
-import type { ExploreFilters } from '../api/types'
+import type { Ambito, ExploreFilters } from '../api/types'
+import { TOP_SCORE } from '../lib/top'
+import { ScopeSwitch } from './ScopeSwitch'
 
 export function filtersFromParams(p: URLSearchParams): ExploreFilters {
   const num = (k: string) => (p.get(k) ? Number(p.get(k)) : undefined)
@@ -8,7 +10,8 @@ export function filtersFromParams(p: URLSearchParams): ExploreFilters {
     q: p.get('q') ?? undefined,
     source: p.get('source') ?? undefined,
     modalidad: p.get('modalidad') ?? undefined,
-    solo_cr: p.get('solo_cr') === '1' || undefined,
+    // solo_cr=1 es el filtro anterior: los enlaces viejos siguen funcionando como ámbito Costa Rica.
+    ambito: (p.get('ambito') as Ambito | null) ?? (p.get('solo_cr') === '1' ? 'cr' : undefined),
     min_score: num('min_score'),
     fit: p.get('fit') ?? undefined,
     desde: p.get('desde') ?? undefined,
@@ -23,6 +26,7 @@ const field = 'rounded-lg border border-line bg-surface px-2 py-1.5 text-sm text
 export function Filters() {
   const [params, setParams] = useSearchParams()
   const [q, setQ] = useState(params.get('q') ?? '')
+  const top = params.get('min_score') === String(TOP_SCORE)
 
   const set = (key: string, value: string | null) =>
     setParams((prev) => {
@@ -81,10 +85,19 @@ export function Filters() {
         Desde
         <input type="date" value={params.get('desde') ?? ''} onChange={(e) => set('desde', e.target.value || null)} className={field} />
       </label>
-      <label className="flex items-center gap-2 pb-1.5 text-sm">
-        <input type="checkbox" checked={params.get('solo_cr') === '1'} onChange={(e) => set('solo_cr', e.target.checked ? '1' : null)} />
-        Solo Costa Rica
-      </label>
+      <ScopeSwitch value={filtersFromParams(params).ambito} onChange={(v) => setParams((prev) => {
+        const next = new URLSearchParams(prev)
+        next.delete('solo_cr')
+        next.delete('page')
+        if (v) next.set('ambito', v)
+        else next.delete('ambito')
+        return next
+      })} />
+      <button type="button" aria-pressed={top} onClick={() => set('min_score', top ? null : String(TOP_SCORE))}
+              className={`rounded-lg border px-3 py-1.5 text-sm transition-colors ${
+                top ? 'border-silver bg-surface-strong text-text' : 'border-line text-muted hover:text-text'}`}>
+        {TOP_SCORE}+
+      </button>
       <label className="flex flex-col text-xs text-muted">
         Orden
         <select value={params.get('sort') ?? 'score'} onChange={(e) => set('sort', e.target.value === 'score' ? null : e.target.value)} className={field}>

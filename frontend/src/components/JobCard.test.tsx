@@ -29,6 +29,13 @@ describe('JobCard', () => {
     expect(screen.getByText(/más de un año/)).toHaveAttribute('title', expect.stringMatching(/puede que ya esté cerrada/))
   })
 
+  it('las internacionales llevan su insignia y las de Costa Rica no', () => {
+    const { rerender } = render(<JobCard job={job(1, { ambito: 'internacional' })} match={null} />)
+    expect(screen.getByText(/internacional/i)).toBeInTheDocument()
+    rerender(<JobCard job={job(1)} match={null} />)
+    expect(screen.queryByText(/internacional/i)).toBeNull()
+  })
+
   it('sin duplicados no muestra el aviso', () => {
     render(<JobCard job={job(1)} match={null} />)
     expect(screen.queryByText(/casi idéntica/)).toBeNull()

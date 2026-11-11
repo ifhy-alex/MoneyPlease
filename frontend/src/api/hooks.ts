@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { api } from './client'
 import type {
-  ApplicationItem, DailyPoint, Draft, Estado, Etiqueta, ExploreFilters, ExplorePage, FlowPoint, Insights, JobDetail,
+  Ambito, ApplicationItem, DailyPoint, Draft, Estado, Etiqueta, ExploreFilters, ExplorePage, FlowPoint, Insights, JobDetail,
   MapData, Perfil, ProfileVersion, SkillPoint, SkillsGraph, TopItem, UniverseData,
 } from './types'
 
@@ -9,7 +9,8 @@ export type FeedbackValue = 'interesa' | 'no_interesa' | null
 const LABEL: Record<'interesa' | 'no_interesa', Etiqueta> = { interesa: 'buena', no_interesa: 'mala' }
 
 export const useInsights = () => useQuery({ queryKey: ['insights'], queryFn: () => api.get<Insights>('/insights') })
-export const useTop = () => useQuery({ queryKey: ['top'], queryFn: () => api.get<TopItem[]>('/top') })
+export const useTop = (ambito?: Ambito) =>
+  useQuery({ queryKey: ['top', ambito ?? 'todas'], queryFn: () => api.get<TopItem[]>('/top', ambito ? { ambito } : undefined) })
 export const useJobs = (f: ExploreFilters) =>
   useQuery({ queryKey: ['jobs', f], queryFn: () => api.get<ExplorePage>('/jobs', { ...f }) })
 export const useJob = (id: number | null) =>
@@ -32,12 +33,12 @@ export function useFeedback() {
     onMutate: async ({ jobId, valor }) => {
       await Promise.all([['top'], ['job', jobId], ['jobs']].map((queryKey) => qc.cancelQueries({ queryKey })))
       const previous = {
-        top: qc.getQueryData<TopItem[]>(['top']),
+        top: qc.getQueriesData<TopItem[]>({ queryKey: ['top'] }),
         job: qc.getQueryData<JobDetail>(['job', jobId]),
         jobs: qc.getQueriesData<ExplorePage>({ queryKey: ['jobs'] }),
       }
       const etiqueta = valor ? LABEL[valor] : null
-      qc.setQueryData<TopItem[]>(['top'], (items) =>
+      qc.setQueriesData<TopItem[]>({ queryKey: ['top'] }, (items) =>
         items?.map((i) => (i.job.id === jobId ? { ...i, etiqueta } : i)))
       qc.setQueryData<JobDetail>(['job', jobId], (d) => (d ? { ...d, etiqueta } : d))
       qc.setQueriesData<ExplorePage>({ queryKey: ['jobs'] }, (page) =>
@@ -46,7 +47,7 @@ export function useFeedback() {
     },
     onError: (_e, _v, ctx) => {
       if (!ctx) return
-      qc.setQueryData(['top'], ctx.previous.top)
+      for (const [key, data] of ctx.previous.top) qc.setQueryData(key, data)
       qc.setQueryData(['job', ctx.jobId], ctx.previous.job)
       for (const [key, data] of ctx.previous.jobs) qc.setQueryData(key, data)
     },

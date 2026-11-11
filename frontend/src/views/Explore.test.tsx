@@ -36,8 +36,35 @@ describe('Explorar', () => {
     await waitFor(() => expect(requests.length).toBeGreaterThan(0))
     expect(requests[0].get('modalidad')).toBe('hibrido')
     expect(requests[0].get('page')).toBe('2')
-    expect(requests[0].get('solo_cr')).toBe('true')
+    expect(requests[0].get('ambito')).toBe('cr')  // enlaces viejos con solo_cr=1
+    expect(requests[0].get('solo_cr')).toBeNull()
+    expect(screen.getByRole('radio', { name: 'Costa Rica' })).toBeChecked()
     expect(screen.getByLabelText(/modalidad/i)).toHaveValue('hibrido')
+  })
+
+  it('el selector de ámbito filtra internacionales', async () => {
+    const requests = trackJobs()
+    renderWithProviders(<Explore />)
+    await screen.findByText('Backend Intern')
+    expect(screen.getByRole('radio', { name: 'Todas' })).toBeChecked()
+    await userEvent.click(screen.getByRole('radio', { name: 'Internacionales' }))
+    await waitFor(() => expect(requests.at(-1)?.get('ambito')).toBe('internacional'))
+    await userEvent.click(screen.getByRole('radio', { name: 'Todas' }))
+    await waitFor(() => expect(requests.at(-1)?.get('ambito')).toBeNull())
+  })
+
+  it('el botón 80+ pone y quita el puntaje mínimo', async () => {
+    const requests = trackJobs()
+    renderWithProviders(<Explore />)
+    await screen.findByText('Backend Intern')
+    const btn = screen.getByRole('button', { name: '80+' })
+    expect(btn).toHaveAttribute('aria-pressed', 'false')
+    await userEvent.click(btn)
+    await waitFor(() => expect(requests.at(-1)?.get('min_score')).toBe('80'))
+    expect(btn).toHaveAttribute('aria-pressed', 'true')
+    expect(screen.getByLabelText(/score mínimo/i)).toHaveValue(80)
+    await userEvent.click(btn)
+    await waitFor(() => expect(requests.at(-1)?.get('min_score')).toBeNull())
   })
 
   it('la búsqueda de texto espera a que termines de escribir', async () => {
