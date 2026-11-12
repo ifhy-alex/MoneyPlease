@@ -17,6 +17,13 @@ CIUDADES = {
 }
 INEQUIVOCOS = {"Alajuela", "Heredia", "Guanacaste", "Puntarenas", "Escazú", "Curridabat", "Tibás",
                "Montes de Oca", "Rohrmoser", "Ultrapark", "Coyol", "El Coyol", "Tres Ríos", "Belén", "Lagunilla"}
+# Señales de que el lugar está fuera de CR aunque el nombre exista aquí ("Belen, NM", "Heredia, Texas").
+US_STATES = ("AL AK AZ AR CA CO CT DE FL GA HI ID IL IN IA KS KY LA ME MD MA MI MN MS MO MT NE NV NH NJ NM NY NC ND "
+             "OH OK OR PA RI SC SD TN TX UT VT VA WA WV WI WY DC").split()
+US_STATE_CODE = re.compile(rf",\s*({'|'.join(US_STATES)})\b")
+FOREIGN = ["usa", "united states", "estados unidos", "new mexico", "nuevo mexico", "texas", "california", "florida",
+           "mexico", "canada", "united kingdom", "spain", "espana", "colombia", "brazil", "brasil", "india",
+           "philippines", "argentina", "chile", "peru", "guatemala", "panama", "nicaragua"]
 HIBRIDO =["hybrid", "hibrido"]
 REMOTO = ["remote", "remoto", "teletrabajo", "work from home"]
 PRESENCIAL = ["on site", "onsite", "presencial", "in office"]
@@ -65,6 +72,9 @@ def detect_modalidad(job: RawJob) -> str:
 
 def detect_ubicacion(text: str) -> tuple[str | None, str | None]:
     t = canonical(text)
+    # Con un país o estado de afuera, solo cuenta como CR si lo dice explícitamente ("Belen, NM" es Nuevo México).
+    if (US_STATE_CODE.search(text or "") or _has(t, FOREIGN)) and not _has(t, ["costa rica"]):
+        return None, None
     # Nombres como "San José", "Santa Ana" o "Grecia" existen fuera de CR: solo cuentan con contexto de CR.
     contexto_cr = _has(t, ["costa rica", "cr", *INEQUIVOCOS])
     for prov in PROVINCIAS:

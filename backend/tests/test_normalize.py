@@ -90,3 +90,20 @@ def test_country_hint_fills_unrecognized_place():
 def test_country_hint_does_not_override_detected_place():
     assert normalize(raw(location="Heredia, Costa Rica", country_hint="CR"))["provincia"] == "Heredia"
     assert normalize(raw(location="Sabana Norte"))["pais"] is None
+
+
+@pytest.mark.parametrize("text", [
+    "Belen, NM",                    # Belén, Nuevo México (Toast)
+    "Belen, NM, United States",
+    "Belén, New Mexico",
+    "Heredia, Texas",
+    "Alajuela, Mexico",
+])
+def test_unambiguous_cr_name_with_foreign_context_is_not_cr(text):
+    assert detect_ubicacion(text) == (None, None)
+
+
+def test_explicit_costa_rica_wins_over_foreign_context():
+    assert detect_ubicacion("Belén, Heredia, Costa Rica; Austin, TX") == ("Heredia", "CR")
+    assert detect_ubicacion("Lagunilla de Heredia, Costa Rica") == ("Heredia", "CR")
+    assert detect_ubicacion("Alajuela Coyol, Alajuela, Costa Rica") == ("Alajuela", "CR")
