@@ -36,6 +36,14 @@ describe('JobCard', () => {
     expect(screen.queryByText(/internacional/i)).toBeNull()
   })
 
+  it('avisa cuando la evaluación se hizo solo con el título', () => {
+    const { rerender } = render(<JobCard job={job(1, { solo_titulo: true })} match={null} />)
+    const badge = screen.getByText(/solo título/i)
+    expect(badge).toHaveAttribute('title', expect.stringMatching(/sin la descripción/i))
+    rerender(<JobCard job={job(1)} match={null} />)
+    expect(screen.queryByText(/solo título/i)).toBeNull()
+  })
+
   it('sin duplicados no muestra el aviso', () => {
     render(<JobCard job={job(1)} match={null} />)
     expect(screen.queryByText(/casi idéntica/)).toBeNull()

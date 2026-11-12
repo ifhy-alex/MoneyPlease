@@ -116,3 +116,11 @@ def test_feedback_aplica_al_grupo(client, world, session):
     assert client.post(f"/api/jobs/{b.id}/feedback", json={"valor": None}).status_code == 204
     session.expire_all()
     assert session.get(JobLabel, a.id) is None and session.get(JobLabel, b.id) is None
+
+
+def test_top_marca_las_evaluadas_solo_con_titulo(client, world):
+    prof = world.profile()
+    world.match(prof, world.job(titulo="Intern", descripcion=""), score=65)
+    world.match(prof, world.job(titulo="Backend", descripcion="Java y Spring"), score=60)
+    flags = {i["job"]["titulo"]: i["job"]["solo_titulo"] for i in client.get("/api/top").json()}
+    assert flags == {"Intern": True, "Backend": False}

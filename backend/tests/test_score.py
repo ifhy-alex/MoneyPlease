@@ -4,7 +4,7 @@ import pytest
 
 from moneyplease.db.models import Job
 from moneyplease.matching.llm import LLMError, QuotaExceeded
-from moneyplease.matching.score import MatchResult, build_user_prompt, evaluate, to_row
+from moneyplease.matching.score import TITLE_ONLY_CAP, MatchResult, build_user_prompt, evaluate, to_row
 from tests.fakes import FakeLLMProvider
 from tests.test_profile_store import profile
 
@@ -110,3 +110,17 @@ def test_brechas_vacias_se_descartan(vacia):
     r = MatchResult.model_validate({"score": 80, "fit": "junior", "fortalezas": [],
                                     "brechas": [vacia, "Kubernetes"], "resumen": "ok"})
     assert r.brechas == ["Kubernetes"]
+
+
+def test_without_description_score_is_capped():
+    # Las alertas de LinkedIn solo traen el título: Gemini adivina, así que el puntaje no pasa del tope.
+    result = evaluate(FakeLLMProvider([{**OK, "score": 85}]), profile(), job(descripcion=""))
+    assert result.score == TITLE_ONLY_CAP == 65
+
+
+def test_without_description_low_score_unchanged():
+    assert evaluate(FakeLLMProvider([{**OK, "score": 30}]), profile(), job(descripcion="  ")).score == 30
+
+
+def test_with_description_no_cap():
+    assert evaluate(FakeLLMProvider([{**OK, "score": 85}]), profile(), job()).score == 85

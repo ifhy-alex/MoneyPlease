@@ -3,7 +3,7 @@ from datetime import date, datetime
 from pydantic import BaseModel
 
 from moneyplease.db.models import Job, Match
-from moneyplease.matching.score import drop_empty_gaps
+from moneyplease.matching.score import drop_empty_gaps, title_only
 from moneyplease.scope import Ambito, scope_of
 
 
@@ -17,6 +17,7 @@ class JobOut(BaseModel):
     url: str
     fuente: str
     ambito: Ambito
+    solo_titulo: bool  # evaluada sin descripción (alertas de correo): el puntaje es una estimación con tope
     publicado_en: datetime | None
     primera_vez_visto: datetime
 
@@ -24,6 +25,7 @@ class JobOut(BaseModel):
     def of(cls, job: Job, fuente: str) -> "JobOut":
         return cls(id=job.id, titulo=job.titulo, empresa=job.empresa, ubicacion=job.ubicacion,
                    modalidad=job.modalidad, pais=job.pais, url=job.url, fuente=fuente, ambito=scope_of(fuente, job.pais),
+                   solo_titulo=title_only(job),
                    publicado_en=job.publicado_en, primera_vez_visto=job.primera_vez_visto)
 
 

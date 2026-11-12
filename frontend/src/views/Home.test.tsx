@@ -92,7 +92,8 @@ describe('Inicio', () => {
     const app = { ...application(1, 'aplicada'), seguimiento: true, dias_en_estado: 12 }
     server.use(http.get('/api/insights', () => HttpResponse.json(insights({ seguimiento: [app] }))))
     renderWithProviders(<Home />)
-    expect(await screen.findByText(/hace 12 días/i)).toBeInTheDocument()
+    // "Aplicaste…": la tarjeta también dice "hace N días" según la fecha de hoy.
+    expect(await screen.findByText(/aplicaste hace 12 días/i)).toBeInTheDocument()
   })
 })
 

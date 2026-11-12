@@ -15,6 +15,8 @@ export interface Job {
   url: string
   fuente: string
   ambito: Ambito
+  /** Evaluada sin descripción (alertas de correo): el puntaje es una estimación con tope de 65. */
+  solo_titulo: boolean
   publicado_en: string | null
   primera_vez_visto: string
 }

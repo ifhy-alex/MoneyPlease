@@ -44,6 +44,12 @@ export function JobCard({ job, match, saved, index = 0, onInterest, onDismiss, o
           </p>
           <div className="flex flex-wrap items-center gap-2">
             <JobAge job={job} />
+            {job.solo_titulo && (
+              <span className="mono rounded-md border border-dashed border-danger/50 px-1.5 text-[11px] text-muted"
+                    title="Evaluada solo con el título, sin la descripción: el puntaje es una estimación (máximo 65). Abre la oferta para ver de qué se trata.">
+                ⚠️ Solo título
+              </span>
+            )}
             {job.ambito === 'internacional' && (
               <span className="mono rounded-md border border-glow/60 px-1.5 text-[11px] text-silver">🌎 Internacional</span>
             )}

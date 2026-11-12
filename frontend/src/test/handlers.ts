@@ -4,7 +4,7 @@ import type { ApplicationItem, Insights, MapPoint, SkillsGraph, TopItem, Univers
 
 export const job = (id: number, extra: Partial<TopItem['job']> = {}): TopItem['job'] => ({
   id, titulo: `Oferta ${id}`, empresa: 'ACME', ubicacion: 'Heredia, Costa Rica', modalidad: 'hibrido', pais: 'CR',
-  url: `https://x/${id}`, fuente: 'greenhouse:x', ambito: 'cr', publicado_en: null, primera_vez_visto: '2026-10-30T12:00:00Z',
+  url: `https://x/${id}`, fuente: 'greenhouse:x', ambito: 'cr', solo_titulo: false, publicado_en: null, primera_vez_visto: '2026-10-30T12:00:00Z',
   ...extra,
 })
 

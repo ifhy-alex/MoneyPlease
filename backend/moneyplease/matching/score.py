@@ -110,12 +110,22 @@ def build_user_prompt(profile: Profile, job: Job, ejemplos: list[Ejemplo] | None
     )
 
 
+TITLE_ONLY_CAP = 65  # tope para las ofertas sin descripción (las alertas de LinkedIn solo traen el título)
+
+
+def title_only(job: Job) -> bool:
+    return not _clean(job.descripcion).strip()
+
+
 def evaluate(llm: LLMProvider, profile: Profile, job: Job, ejemplos: list[Ejemplo] | None = None) -> MatchResult:
     user = build_user_prompt(profile, job, ejemplos)
     error: Exception | None = None
     for _ in range(2):
         try:
-            return MatchResult.model_validate(llm.generate_json(SYSTEM_PROMPT, user, MATCH_SCHEMA))
+            result = MatchResult.model_validate(llm.generate_json(SYSTEM_PROMPT, user, MATCH_SCHEMA))
+            if title_only(job):  # sin descripción Gemini adivina por el título: el puntaje no pasa del tope
+                result.score = min(result.score, TITLE_ONLY_CAP)
+            return result
         except (LLMError, ValidationError) as exc:  # QuotaExceeded se propaga sin reintentar
             error = exc
     raise LLMError(f"respuesta inválida para la oferta {job.id}: {error}")
